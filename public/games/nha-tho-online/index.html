@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<!-- Google tag (gtag.js) -->
+
+<script src="js/analytics.js"></script>
+<title>Thánh Đường HiHi Online</title>
+<meta name="description" content="Thánh Đường HiHi Online – nhà thờ 3D để thắp nến, cầu nguyện, trò chuyện cùng mọi người và đấu Cờ Caro, Kéo Búa Bao online.">
+<meta name="theme-color" content="#120d09">
+<!-- Khi nhúng trang này ở domain khác, đặt địa chỉ máy chủ game: <meta name="hihi-server" content="https://thanh-duong-hihi.<subdomain>.workers.dev"> -->
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Cormorant+Garamond:wght@500;700&family=Be+Vietnam+Pro:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/church.css">
+<link rel="stylesheet" href="css/online.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="verse"></div>
+<div id="toast"></div>
+<div id="flash"></div>
+
+<div id="intro">
+  <img class="introArt" alt="Thánh Đường HiHi Online" src="assets/intro.jpg">
+  <div class="introCard">
+    <label class="lab">Tên của bạn</label>
+    <input id="nameIn" type="text" maxlength="18" placeholder="Ví dụ: Sang" value="">
+    <label class="lab">Màu áo</label>
+    <div class="sw" id="robeSw"></div>
+    <label class="chk"><input type="checkbox" id="veilIn"> Đội khăn voan</label>
+    <button id="enterBtn">Bước vào nhà thờ →</button>
+    <div class="hint" id="loadMsg">Đang tải nhà thờ…</div>
+    <div class="hint">🔊 Bật âm thanh để nghe organ và tiếng chuông</div>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="bar" id="topL">
+    <span id="logo">✝ Thánh Đường HiHi</span>
+    <button class="ib" id="bChurch" title="Chọn nhà thờ">⛪</button>
+    <button class="ib" id="bAbout" title="Giới thiệu">ⓘ</button>
+  </div>
+  <button id="honorChip" class="hidden" title="Người chiến thắng ngày hôm nay"><span class="hcCrown">👑</span><span id="honorName"></span></button>
+  <div class="bar" id="topR">
+    <button class="ib" id="bPeople" title="Người chơi đang online">👥 <span id="count">0</span></button>
+    <button class="ib" id="bMusic" title="Nhạc organ">🎵</button>
+    <button class="ib" id="bTime" title="Thời gian trong ngày">☀️</button>
+    <button class="ib" id="bSound" title="Âm thanh">🔊</button>
+    <button class="ib" id="bShot" title="Lưu khoảnh khắc">📷</button>
+  </div>
+  <div class="bar" id="toolbar">
+    <button class="tb game" data-a="caro"><b>⭕</b><small>Cờ Caro</small></button>
+    <button class="tb game" data-a="rps"><b>✊</b><small>Kéo Búa Bao</small></button>
+    <button class="tb game" data-a="rank"><b>🏆</b><small>Xếp hạng</small></button>
+    <span class="tbSep"></span>
+    <button class="tb" data-a="candle"><b>🕯️</b><small>Thắp nến</small></button>
+    <button class="tb" data-a="pray"><b>✝️</b><small>Làm dấu</small></button>
+    <button class="tb" data-a="rosary"><b>📿</b><small>Lần chuỗi</small></button>
+    <button class="tb" data-a="sit"><b>🪑</b><small>Ngồi ghế</small></button>
+    <button class="tb" data-a="kneel"><b>🙇</b><small>Quỳ gối</small></button>
+    <button class="tb" data-a="together"><b>🤝</b><small>Cùng cầu nguyện</small></button>
+    <button class="tb" data-a="veil"><b>🧕</b><small>Khăn voan</small></button>
+    <button class="tb" data-a="confide"><b>🕊️</b><small>Góc tâm sự</small></button>
+    <button class="tb" data-a="tree"><b>🎄</b><small>Cây thông</small></button>
+    <button class="tb" data-a="offer"><b>💛</b><small>Dâng lễ</small></button>
+  </div>
+  <div id="chat"><div id="chatHead">💬 Chat Online <span id="netState" class="net off" title="Trạng thái kết nối"><i></i><span id="chatOnline">offline</span></span> <span id="chatBadge"></span><button id="chatMin" type="button">–</button></div><div id="chatLog" aria-live="polite"></div><div id="typing"></div><form id="chatForm" autocomplete="off"><input id="chatIn" maxlength="160" placeholder="Nhắn gì đó…"><button type="submit">Gửi</button></form></div>
+  <div id="helpTip">Chạm sàn để đi • Kéo để xoay • Cuộn để zoom • WASD / phím mũi tên</div>
+  <div id="rosary" class="hidden">
+    <div class="bar" style="position:static;flex-direction:column;padding:10px 14px;border-radius:16px">
+      <div class="rtxt" id="rTxt">Hạt 0 / 10</div>
+      <div id="beads"></div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn" style="margin:0;padding:7px 16px" id="rNext">Hạt tiếp theo</button>
+        <button class="btn ghost" style="margin:0;padding:7px 16px" id="rEnd">Xong</button>
+      </div>
+    </div>
+  </div>
+  <div id="joy" aria-hidden="true"><span id="joyTip">Kéo để đi</span><div id="joyBase"><div id="joyKnob"></div></div></div>
+  <div id="invites"></div>
+  <div id="gp" class="hidden" role="dialog" aria-label="Trận đấu"></div>
+  <button id="gpChip" class="hidden"></button>
+  <div id="banner"></div>
+</div>
+
+<div id="modal" class="hidden"><div class="card" id="mCard"></div></div>
+
+<script src="js/church.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d2340">
+<title>Siêu Thị Bừa Bộn HiHi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#1d2340;font-family:'Baloo 2',system-ui,sans-serif;color:#2b2140;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hidden{display:none!important}
+#hud{position:fixed;inset:0;pointer-events:none}
+.pill{background:rgba(255,255,255,.92);border-radius:999px;padding:4px 14px;font-weight:800;font-size:18px;box-shadow:0 3px 0 rgba(0,0,0,.18);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#topRight{position:absolute;top:calc(10px + var(--st));right:calc(10px + var(--sr));display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#topRow{display:flex;gap:6px}
+#coinPill{color:#b26b00}
+#bagPill.full{background:#ff5a5a;color:#fff}
+#minimap{width:180px;height:146px;border-radius:14px;background:rgba(255,255,255,.88);box-shadow:0 3px 0 rgba(0,0,0,.18);pointer-events:auto;cursor:pointer}
+#zoneName{position:absolute;top:calc(10px + var(--st));left:50%;transform:translateX(-50%);font-size:17px}
+#quests{position:absolute;top:calc(10px + var(--st));left:calc(10px + var(--sl));width:280px;background:rgba(255,255,255,.9);border-radius:16px;padding:8px 12px;box-shadow:0 3px 0 rgba(0,0,0,.18);pointer-events:auto;cursor:pointer}
+#quests h4{margin:0 0 2px;font-size:15px;color:#7a3cff;display:flex;justify-content:space-between}
+#quests h4 i{font-style:normal;color:#999}
+#quests.collapsed .q:not(:first-of-type){display:none}
+.q{font-size:14px;line-height:1.25;padding:4px 0;border-top:1px dashed #ddd}
+.q:first-of-type{border-top:0}
+.q b{color:#b26b00}
+.qbar{height:6px;background:#eee;border-radius:4px;margin-top:3px;overflow:hidden}
+.qbar i{display:block;height:100%;background:linear-gradient(90deg,#33d17a,#1fb5ff)}
+#cross{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+#cross.on{background:#ffe23b;width:16px;height:16px;margin:-8px 0 0 -8px}
+#prompt{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);background:rgba(30,24,60,.85);color:#fff;border-radius:16px;padding:8px 16px;font-size:17px;text-align:center;max-width:92vw;white-space:nowrap;line-height:1.3}
+#prompt .k{display:inline-block;background:#ffe23b;color:#2b2140;border-radius:6px;padding:0 7px;margin:0 3px;font-weight:800}
+#prompt .bad{color:#ff8a8a}
+#prompt .good{color:#7dffa8}
+#keys{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);color:#fff;font-size:13px;opacity:.85;text-shadow:0 1px 2px #000;white-space:nowrap}
+#toasts{position:absolute;top:calc(64px + var(--st));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;width:max-content;max-width:94vw}
+.toast{background:#fff;border-radius:14px;padding:6px 16px;font-weight:700;font-size:16px;box-shadow:0 4px 0 rgba(0,0,0,.2);animation:tin .25s ease-out;text-align:center}
+.toast.bad{background:#ff5a5a;color:#fff}
+.toast.good{background:#33d17a;color:#fff}
+.toast.gold{background:#ffcf33;color:#5a3a00}
+@keyframes tin{from{transform:translateY(-10px) scale(.9);opacity:0}}
+.fly{position:absolute;font-weight:800;font-size:22px;color:#ffcf33;text-shadow:0 2px 0 #7a4b00,0 0 6px rgba(0,0,0,.4);animation:fup 1s ease-out forwards}
+@keyframes fup{to{transform:translateY(-70px);opacity:0}}
+#flash{position:absolute;inset:0;background:radial-gradient(transparent 55%,rgba(255,40,40,.45));opacity:0;transition:opacity .25s}
+#lockHint{position:absolute;left:50%;top:58%;transform:translateX(-50%);background:rgba(30,24,60,.8);color:#fff;padding:6px 14px;border-radius:12px;font-size:15px}
+.ov{position:fixed;inset:0;background:rgba(20,16,45,.62);display:flex;align-items:center;justify-content:center;z-index:20;padding:calc(10px + var(--st)) calc(10px + var(--sr)) calc(10px + var(--sb)) calc(10px + var(--sl))}
+.card{background:#fff8ef;border-radius:24px;padding:20px 22px;max-width:760px;width:100%;max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;box-shadow:0 8px 0 rgba(0,0,0,.25);position:relative}
+.card h2{margin:0 0 8px;font-size:28px;color:#7a3cff;line-height:1.1;padding-right:44px}
+.btn{pointer-events:auto;font-family:inherit;font-weight:800;font-size:18px;border:0;border-radius:14px;padding:10px 18px;cursor:pointer;background:#ffcf33;color:#3b2500;box-shadow:0 4px 0 #c99300;margin:4px;touch-action:manipulation}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #c99300}
+.btn.blue{background:#3fb6ff;color:#fff;box-shadow:0 4px 0 #1b7fc0}
+.btn.green{background:#33d17a;color:#fff;box-shadow:0 4px 0 #1d9150}
+.btn.red{background:#ff5a5a;color:#fff;box-shadow:0 4px 0 #c03030}
+.btn.gray{background:#ddd;color:#777;box-shadow:0 4px 0 #aaa;cursor:not-allowed}
+.close{position:absolute;top:10px;right:12px;width:40px;height:40px;padding:0;font-size:20px}
+#title{font-size:48px;line-height:1;margin:0;color:#ff5fa2;text-shadow:0 4px 0 #7a3cff}
+#title small{display:block;font-size:22px;color:#7a3cff;text-shadow:none;margin-top:6px}
+.ctrl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:15px;margin:12px 0;text-align:left}
+.ctrl b{background:#2b2140;color:#fff;border-radius:6px;padding:0 8px;text-align:center;white-space:nowrap}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border-radius:12px;padding:6px 10px;margin:4px;font-weight:700;font-size:16px}
+select{font-family:inherit;font-size:16px;font-weight:700;border-radius:10px;border:2px solid #7a3cff;padding:4px 8px;background:#fff;color:#2b2140}
+input[type=range]{width:140px;accent-color:#7a3cff}
+.langbar{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin:8px 0}
+.langbar button{font-family:inherit;font-weight:700;font-size:14px;border:2px solid #e0d6ff;background:#fff;border-radius:999px;padding:2px 10px;cursor:pointer}
+.langbar button.on{background:#7a3cff;color:#fff;border-color:#7a3cff}
+.upgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.up{background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.up .ic{font-size:28px}
+.up h3{margin:0;font-size:18px}
+.up p{margin:2px 0;font-size:14px;color:#555}
+.lv{display:flex;gap:3px;margin:4px 0}
+.lv i{flex:1;height:7px;border-radius:4px;background:#e5e5e5}
+.lv i.on{background:#7a3cff}
+#bigmap{width:100%;max-width:600px;aspect-ratio:60/48;background:#fff;border-radius:16px;display:block;margin:0 auto}
+.zl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:10px}
+.zrow{background:#fff;border-radius:12px;padding:6px 10px;font-size:15px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.zrow .btn{font-size:14px;padding:4px 10px}
+/* touch */
+#touchUI{position:fixed;inset:0;pointer-events:none;z-index:5}
+#joyBase{position:absolute;left:calc(36px + var(--sl));bottom:calc(36px + var(--sb));width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.45)}
+#joyKnob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:rgba(255,255,255,.85)}
+#joyBase.run{border-color:#ffcf33}
+#tbtns{position:absolute;right:calc(14px + var(--sr));bottom:calc(20px + var(--sb));display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;gap:10px;align-items:center;justify-items:center}
+.tb{pointer-events:auto;width:84px;height:84px;border-radius:50%;border:0;font-family:inherit;font-weight:800;font-size:16px;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.25);opacity:.5;transition:opacity .15s,transform .15s;touch-action:none}
+.tb.act{opacity:1;transform:scale(1.08)}
+#bPick{background:#33d17a;grid-column:2;grid-row:2;width:96px;height:96px;font-size:18px}
+#bPlace{background:#3fb6ff;grid-column:1;grid-row:2}
+#bDrop{background:#ff8a3d;width:62px;height:62px;font-size:13px;grid-column:2;grid-row:1}
+#ttop{position:absolute;right:calc(10px + var(--sr));top:calc(206px + var(--st));display:flex;gap:6px}
+.ts{pointer-events:auto;width:46px;height:46px;border-radius:14px;border:0;background:rgba(255,255,255,.9);font-size:22px;box-shadow:0 3px 0 rgba(0,0,0,.2);touch-action:none}
+body.touch #keys{display:none}
+body.touch #prompt{bottom:auto;top:calc(50% + 34px);font-size:15px;padding:6px 12px}
+@media (max-width:820px),(max-height:500px){
+ #quests{width:210px;padding:6px 9px}
+ .q{font-size:12px}
+ #quests h4{font-size:13px}
+ #minimap{width:120px;height:98px}
+ .pill{font-size:14px;padding:2px 9px}
+ #zoneName{top:auto;bottom:calc(6px + var(--sb));font-size:13px}
+ #ttop{top:calc(146px + var(--st))}
+ #title{font-size:34px}
+ .card{padding:14px 14px;border-radius:18px}
+ .card h2{font-size:22px}
+ .ctrl{font-size:13px}
+ .toast{font-size:13px;padding:4px 12px}
+ #toasts{top:calc(46px + var(--st))}
+ .btn{font-size:16px;padding:8px 14px}
+}
+@media (max-height:420px){
+ .tb{width:70px;height:70px;font-size:14px}
+ #bPick{width:82px;height:82px;font-size:15px}
+ #bDrop{width:54px;height:54px;font-size:12px}
+ #joyBase{width:112px;height:112px}
+ #title small{font-size:17px}
+ .ctrl{display:none}
+}
+@media (max-width:520px){
+ #topRow #dayPill{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud" class="hidden">
+  <div id="quests"><h4><span data-i="quests"></span><i id="qToggle">▾</i></h4><div id="qlist"></div></div>
+  <div id="zoneName" class="pill"></div>
+  <div id="topRight">
+    <div id="topRow"><span class="pill" id="dayPill"></span><span class="pill" id="bagPill"></span><span class="pill" id="coinPill"></span></div>
+    <canvas id="minimap" width="360" height="292"></canvas>
+  </div>
+  <div id="cross"></div>
+  <div id="prompt" class="hidden"></div>
+  <div id="lockHint" class="hidden" data-i="lockHint"></div>
+  <div id="toasts"></div>
+  <div id="keys" data-i="keys"></div>
+  <div id="flash"></div>
+</div>
+<div id="touchUI" class="hidden">
+  <div id="joyBase"><div id="joyKnob"></div></div>
+  <div id="tbtns">
+    <button class="tb" id="bDrop" data-i="bDrop"></button>
+    <button class="tb" id="bPlace" data-i="bPlace"></button>
+    <button class="tb" id="bPick" data-i="bPick"></button>
+  </div>
+  <div id="ttop"><button class="ts" id="bMap">🗺️</button><button class="ts" id="bUp">⬆️</button><button class="ts" id="bPause">⏸️</button></div>
+</div>
+
+<div class="ov" id="startOv"><div class="card" style="text-align:center;max-width:580px">
+  <h1 id="title"><span data-i="title"></span><small data-i="sub"></small></h1>
+  <div class="langbar" id="langBar"></div>
+  <p style="font-size:16px;margin:6px 0" data-i="intro"></p>
+  <div id="startBtns"></div>
+  <div class="ctrl" id="ctrlHelp"></div>
+  <p style="font-size:13px;color:#888;margin:0" data-i="saved"></p>
+</div></div>
+
+<div class="ov hidden" id="pauseOv"><div class="card" style="max-width:460px">
+  <h2 data-i="pause"></h2>
+  <div style="display:flex;flex-direction:column;align-items:stretch">
+    <button class="btn green" id="pResume" data-i="resume"></button>
+    <div style="display:flex"><button class="btn blue" style="flex:1" id="pUp" data-i="upgradesBtn"></button><button class="btn blue" style="flex:1" id="pMap" data-i="mapBtn"></button></div>
+    <div class="row"><span data-i="lang"></span><select id="langSel"></select></div>
+    <div class="row"><span data-i="quality"></span><select id="qualSel"></select></div>
+    <div class="row"><span data-i="sens"></span><input type="range" id="sensR" min="0.4" max="2.2" step="0.1"></div>
+    <div style="display:flex"><button class="btn" style="flex:1" id="pMusic"></button><button class="btn" style="flex:1" id="pSfx"></button></div>
+    <button class="btn" id="pFull" data-i="fullscreen"></button>
+    <button class="btn red" id="pReset" data-i="reset"></button>
+  </div>
+</div></div>
+
+<div class="ov hidden" id="upOv"><div class="card">
+  <button class="btn close red" data-close>✕</button>
+  <h2 data-i="upTitle"></h2>
+  <div style="margin-bottom:8px;font-weight:700" id="upCoins"></div>
+  <div class="upgrid" id="upGrid"></div>
+</div></div>
+
+<div class="ov hidden" id="mapOv"><div class="card">
+  <button class="btn close red" data-close>✕</button>
+  <h2 data-i="mapTitle"></h2>
+  <canvas id="bigmap" width="900" height="720"></canvas>
+  <div class="zl" id="zoneList"></div>
+</div></div>
+
+<div class="ov hidden" id="dayOv"><div class="card" style="text-align:center;max-width:480px">
+  <h2 data-i="dayDone" style="padding:0"></h2>
+  <p id="dayText" style="font-size:17px"></p>
+  <button class="btn green" id="dNext" data-i="nextDay"></button>
+</div></div>
+
+<div class="ov hidden" id="confOv"><div class="card" style="text-align:center;max-width:420px">
+  <h2 data-i="confT" style="padding:0"></h2>
+  <p data-i="confX"></p>
+  <button class="btn red" id="cYes" data-i="confY"></button>
+  <button class="btn" id="cNo" data-i="cancel"></button>
+</div></div>
+
+<script src="js/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+window.addEventListener('error',ev=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;background:#c00;color:#fff;padding:6px 10px;border-radius:8px;font:12px monospace;max-width:90vw';d.textContent='Error: '+ev.message+' @'+(ev.lineno||'');document.body.appendChild(d);});
+if(!window.THREE){document.body.innerHTML='<div style="color:#fff;padding:30px;font-size:20px">3D library failed to load. Please check your connection and reload.</div>';return;}
+const $=id=>document.getElementById(id);
+const rand=(a,b)=>a+Math.random()*(b-a);
+const randi=n=>Math.floor(Math.random()*n);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const SAVE_KEY='sieuthi_buabon_hihi_v2',PREF_KEY='sieuthi_buabon_prefs';
+let isTouch=matchMedia('(pointer: coarse)').matches||location.hash==='#touch';
+
+// ================= I18N =================
+const LANGS={vi:'Tiếng Việt',en:'English',pt:'Português (BR)',es:'Español',id:'Bahasa Indonesia'};
+const T={
+vi:{
+docTitle:'Siêu Thị Bừa Bộn HiHi',title:'Siêu Thị Bừa Bộn',sub:'🛒 HiHi Mart 🛒',
+intro:'Siêu thị vừa bị bão… khách hàng! Hàng trăm món đồ nằm la liệt dưới sàn. Nhặt hàng, mang tới đúng kệ, kiếm xu, nâng cấp và mở khóa toàn bộ siêu thị.',
+start:'▶ BẮT ĐẦU',cont:'▶ Chơi tiếp (Ngày {d} · {c} xu)',newGame:'Chơi mới',saved:'Tiến trình được lưu tự động trên trình duyệt này.',
+k_mouse:'Chuột',k_lclick:'Chuột trái / E',k_move:'Di chuyển (Shift: chạy nhanh)',k_look:'Xoay camera 360°',k_act:'Nhặt hàng · Xếp lên kệ · Mở khóa khu (giữ để làm liên tục)',k_drop:'Thả món đang cầm',k_mapup:'Bản đồ / Nâng cấp',k_pause:'Tạm dừng',
+t_joy:'Cần trái',t_joyD:'Di chuyển (đẩy hết cỡ để chạy)',t_swipe:'Vuốt phải',t_swipeD:'Xoay camera · chạm nhanh để nhặt/xếp',t_btns:'NHẶT / XẾP / THẢ',t_btnsD:'Nhặt hàng · Xếp lên kệ · Thả món đang cầm',t_topD:'Bản đồ · Nâng cấp · Tạm dừng',
+pause:'⏸️ Tạm dừng',resume:'▶ Tiếp tục',upgradesBtn:'⬆️ Nâng cấp',mapBtn:'🗺️ Bản đồ',music:'🎵 Nhạc',sound:'🔊 Âm thanh',on:'Bật',off:'Tắt',reset:'🗑️ Chơi lại từ đầu',lang:'🌐 Ngôn ngữ',quality:'⚙️ Đồ họa',q_auto:'Tự động',q_low:'Thấp',q_med:'Vừa',q_high:'Cao',sens:'🎯 Độ nhạy camera',fullscreen:'⛶ Toàn màn hình',
+upTitle:'⬆️ Nâng cấp nhân viên',youHave:'Bạn có {c} xu',current:'Hiện tại',upBtn:'Nâng cấp · {c}🪙',maxed:'Tối đa',
+mapTitle:'🗺️ Bản đồ siêu thị',clean:'✔ Sạch',unlockBtn:'Mở · {c}🪙',coins:'xu',
+dayDone:'🎉 Siêu thị sạch bong!',dayText:'Ngày <b>{d}</b> hoàn thành! Bạn đã xếp tổng cộng <b>{n}</b> món.<br>Thưởng cuối ngày: <b>+{b} xu</b><br>Ngày mới: khách đông hơn, thưởng mỗi món <b>x{m}</b>.',nextDay:'☀️ Bắt đầu ngày mới',
+confT:'Chơi lại từ đầu?',confX:'Toàn bộ xu, nâng cấp và khu đã mở sẽ bị xóa.',confY:'Xóa và chơi lại',cancel:'Hủy',
+quests:'📋 Nhiệm vụ',noQ:'Không còn nhiệm vụ. Mở khóa khu mới!',day:'Ngày {d}',
+lockHint:'🖱️ Bấm vào màn hình để điều khiển',keys:'WASD di chuyển · Chuột xoay · Chuột trái/E nhặt & xếp · Q thả · Shift chạy · M bản đồ · U nâng cấp · Esc tạm dừng',
+bPick:'NHẶT',bPlace:'XẾP',bDrop:'THẢ',bOpen:'MỞ',rotate:'📱 Xoay ngang màn hình để chơi thoải mái hơn',
+full1:'🎒 Đầy rồi! Mang hàng đi xếp trước, hoặc nâng cấp sức chứa',full2:'🎒 Đầy rồi! Mang hàng đi xếp trước',noHeld:'Bạn chưa cầm món nào. Nhặt hàng dưới sàn trước nhé!',wrong:'❌ Sai kệ! {i} thuộc khu {z}',shelfFull:'Kệ này đã đầy',zoneClean:'✨ Khu {z} sạch bong! Thưởng +{b} xu',goUnlock:'🔓 Đủ xu rồi! Tới hàng rào khu {z} để mở khóa',waitSpill:'Các khu đang mở đã sạch! Khách sắp làm rơi hàng… (cần {c} xu để mở khu {z})',spill:'😱 Ôi không! Khách vừa làm rơi {n} món!',unlockFirst:'Hãy mở khóa khu {z} trước',needCoins:'Cần {c} xu để mở khu {z} (còn thiếu {m})',unlocked:'🔓 Đã mở khóa khu {z}!',noDrop:'Không có món nào để thả',noRange:'Không có món nào trong tầm nhặt',standShelf:'Hãy đứng trước đúng kệ',qDone:'✅ Xong nhiệm vụ: {q} +{r} xu',tut0d:'👋 Nhìn vào món hàng dưới sàn, bấm E hoặc chuột trái để nhặt',tut0t:'👋 Tới gần món hàng dưới sàn và bấm NHẶT',tut1:'👉 Đi theo mũi tên xanh tới đúng kệ rồi xếp hàng lên',tut2:'🎉 Tuyệt! Kiếm xu để nâng cấp và mở khóa khu mới',drag:'🖱️ Giữ chuột trái và kéo để xoay camera, bấm nhanh để nhặt/xếp',newDay:'☀️ Ngày {d} bắt đầu! Siêu thị lại bừa bộn rồi…',missing:'Thiếu {m} xu',
+p_to:'→ khu {z}',p_pick:'Nhặt',p_bagFull:'🎒 Đã đầy – mang đi xếp trước',p_shelf:'Kệ <b>{c}</b> ({f}/{t})',p_shelfFull:'✔ Đã đầy',p_place:'Xếp hàng',p_hold:'(giữ để xếp liên tục)',p_notThis:'❌ Món đang cầm không thuộc kệ này',p_bring:'Mang món phù hợp đến đây',p_lock:'🔒 Khu <b>{z}</b> – {c} xu',p_unlockNow:'Mở khóa ngay',p_missing:'Còn thiếu {m} xu',
+q_place:'Xếp {n} {i} lên kệ',q_pick:'Nhặt {n} món bất kỳ',q_clear:'Dọn sạch khu {z}',q_unlock:'Mở khóa khu {z}',q_upgrade:'Mua 1 nâng cấp bất kỳ',
+s_store:'🛒 SIÊU THỊ BỪA BỘN HIHI',s_checkout:'💳 THU NGÂN',s_lane:'QUẦY {n}',s_promo:'🎉 KHAI TRƯƠNG',s_sale:'🏷️ GIẢM 50%',l_new:'⬆ HÀNG MỚI ⬆',l_rice:'GẠO',
+f_items:'{v} món',f_ms:'{v} m/s',f_m:'{v} m',f_mag:'Hút trong {v} m',f_none:'Chưa có',f_slots:'+{v} chỗ',f_on:'Đã bật',
+z_entrance:'Cửa chính & Thu ngân',z_candy:'Bánh Kẹo',z_drinks:'Đồ Uống',z_canned:'Đồ Hộp',z_produce:'Rau Củ',z_household:'Gia Dụng',z_fridge:'Tủ Lạnh',z_warehouse:'Kho Hàng',z_discount:'Hàng Giảm Giá',z_premium:'Cao Cấp',
+c_keo:'Kẹo Dẻo',c_banhquy:'Bánh Quy',c_nuocngot:'Nước Ngọt',c_nuocsuoi:'Nước Suối',c_cahop:'Cá Hộp',c_mi:'Mì Gói',c_tao:'Táo Đỏ',c_carot:'Cà Rốt',c_nuocgiat:'Nước Giặt',c_giay:'Giấy Cuộn',c_sua:'Sữa Tươi',c_kem:'Kem Lạnh',c_thung:'Thùng Hàng',c_gao:'Bao Gạo',c_sale:'Hộp Khuyến Mãi',c_bong:'Bóng Nảy',c_nuochoa:'Nước Hoa',c_socola:'Socola Vàng',
+u_cap:'Sức chứa',ud_cap:'Mang nhiều món hơn mỗi chuyến',u_speed:'Tốc độ',ud_speed:'Di chuyển nhanh hơn',u_range:'Tầm nhặt',ud_range:'Nhặt hàng từ xa hơn',u_magnet:'Nam châm',ud_magnet:'Tự hút món cùng loại với món đang cầm',u_cart:'Xe đẩy',ud_cart:'Đẩy xe, mang thêm nhiều hàng',u_hint:'Gợi ý thông minh',ud_hint:'Kệ đúng phát sáng, mũi tên chỉ cả món hàng gần nhất',u_auto:'Tự động xếp',ud_auto:'Đi ngang đúng kệ là hàng tự lên kệ'
+},
+en:{
+docTitle:'Messy Supermarket HiHi',title:'Messy Supermarket',sub:'🛒 HiHi Mart 🛒',
+intro:'A storm of shoppers just hit the store! Hundreds of products are scattered all over the floor. Pick them up, bring them to the right shelf, earn coins, upgrade and unlock the whole supermarket.',
+start:'▶ PLAY',cont:'▶ Continue (Day {d} · {c} coins)',newGame:'New game',saved:'Progress is saved automatically in this browser.',
+k_mouse:'Mouse',k_lclick:'Left click / E',k_move:'Move (Shift: sprint)',k_look:'Look around 360°',k_act:'Pick up · Stock shelf · Unlock area (hold to repeat)',k_drop:'Drop held item',k_mapup:'Map / Upgrades',k_pause:'Pause',
+t_joy:'Left stick',t_joyD:'Move (push all the way to run)',t_swipe:'Swipe right side',t_swipeD:'Look around · tap to pick up/stock',t_btns:'PICK / STOCK / DROP',t_btnsD:'Pick up · Stock shelf · Drop held item',t_topD:'Map · Upgrades · Pause',
+pause:'⏸️ Paused',resume:'▶ Resume',upgradesBtn:'⬆️ Upgrades',mapBtn:'🗺️ Map',music:'🎵 Music',sound:'🔊 Sound',on:'On',off:'Off',reset:'🗑️ Restart from scratch',lang:'🌐 Language',quality:'⚙️ Graphics',q_auto:'Auto',q_low:'Low',q_med:'Medium',q_high:'High',sens:'🎯 Camera sensitivity',fullscreen:'⛶ Fullscreen',
+upTitle:'⬆️ Staff upgrades',youHave:'You have {c} coins',current:'Now',upBtn:'Upgrade · {c}🪙',maxed:'Maxed',
+mapTitle:'🗺️ Store map',clean:'✔ Clean',unlockBtn:'Unlock · {c}🪙',coins:'coins',
+dayDone:'🎉 Spotless store!',dayText:'Day <b>{d}</b> complete! You have stocked <b>{n}</b> items in total.<br>End-of-day bonus: <b>+{b} coins</b><br>New day: more shoppers, each item pays <b>x{m}</b>.',nextDay:'☀️ Start a new day',
+confT:'Restart from scratch?',confX:'All coins, upgrades and unlocked areas will be erased.',confY:'Erase and restart',cancel:'Cancel',
+quests:'📋 Tasks',noQ:'No tasks left. Unlock a new area!',day:'Day {d}',
+lockHint:'🖱️ Click the screen to take control',keys:'WASD move · Mouse look · Left click/E pick & stock · Q drop · Shift sprint · M map · U upgrades · Esc pause',
+bPick:'PICK',bPlace:'STOCK',bDrop:'DROP',bOpen:'OPEN',rotate:'📱 Turn your phone sideways for a better view',
+full1:'🎒 Full! Stock what you carry first, or upgrade your capacity',full2:'🎒 Full! Stock what you carry first',noHeld:'You are not carrying anything. Pick something up first!',wrong:'❌ Wrong shelf! {i} goes to {z}',shelfFull:'This shelf is full',zoneClean:'✨ {z} is spotless! Bonus +{b} coins',goUnlock:'🔓 You have enough coins! Go to the {z} fence to unlock it',waitSpill:'All open areas are clean! Shoppers will knock things over soon… ({c} coins needed to unlock {z})',spill:'😱 Oh no! Shoppers just knocked over {n} items!',unlockFirst:'Unlock {z} first',needCoins:'You need {c} coins to unlock {z} ({m} more)',unlocked:'🔓 {z} unlocked!',noDrop:'Nothing to drop',noRange:'Nothing within reach',standShelf:'Stand in front of the right shelf',qDone:'✅ Task done: {q} +{r} coins',tut0d:'👋 Look at an item on the floor and press E or left click to pick it up',tut0t:'👋 Walk up to an item on the floor and tap PICK',tut1:'👉 Follow the green arrow to the right shelf and stock it',tut2:'🎉 Great! Earn coins to upgrade and unlock new areas',drag:'🖱️ Hold the left button and drag to look, click quickly to pick/stock',newDay:'☀️ Day {d} begins! The store is a mess again…',missing:'{m} coins short',
+p_to:'→ {z}',p_pick:'Pick up',p_bagFull:'🎒 Full – go stock first',p_shelf:'<b>{c}</b> shelf ({f}/{t})',p_shelfFull:'✔ Full',p_place:'Stock',p_hold:'(hold to keep stocking)',p_notThis:'❌ What you carry does not belong here',p_bring:'Bring matching items here',p_lock:'🔒 <b>{z}</b> – {c} coins',p_unlockNow:'Unlock now',p_missing:'{m} coins short',
+q_place:'Stock {n} {i}',q_pick:'Pick up {n} items',q_clear:'Clean up {z}',q_unlock:'Unlock {z}',q_upgrade:'Buy any upgrade',
+s_store:'🛒 MESSY SUPERMARKET HIHI',s_checkout:'💳 CHECKOUT',s_lane:'LANE {n}',s_promo:'🎉 GRAND OPENING',s_sale:'🏷️ 50% OFF',l_new:'⬆ NEW STOCK ⬆',l_rice:'RICE',
+f_items:'{v} items',f_ms:'{v} m/s',f_m:'{v} m',f_mag:'Pulls within {v} m',f_none:'Not owned',f_slots:'+{v} slots',f_on:'Active',
+z_entrance:'Entrance & Checkout',z_candy:'Sweets',z_drinks:'Drinks',z_canned:'Canned Food',z_produce:'Produce',z_household:'Household',z_fridge:'Fridges',z_warehouse:'Stockroom',z_discount:'Discounts',z_premium:'Premium',
+c_keo:'Gummies',c_banhquy:'Cookies',c_nuocngot:'Soda',c_nuocsuoi:'Water',c_cahop:'Canned Fish',c_mi:'Instant Noodles',c_tao:'Red Apples',c_carot:'Carrots',c_nuocgiat:'Detergent',c_giay:'Toilet Paper',c_sua:'Fresh Milk',c_kem:'Ice Cream',c_thung:'Boxes',c_gao:'Rice Sacks',c_sale:'Sale Boxes',c_bong:'Bouncy Balls',c_nuochoa:'Perfume',c_socola:'Gold Chocolate',
+u_cap:'Capacity',ud_cap:'Carry more items per trip',u_speed:'Speed',ud_speed:'Move faster',u_range:'Reach',ud_range:'Pick up items from further away',u_magnet:'Magnet',ud_magnet:'Pulls in items matching what you carry',u_cart:'Shopping cart',ud_cart:'Push a cart and carry much more',u_hint:'Smart hints',ud_hint:'The right shelf glows and the arrow also shows the nearest item',u_auto:'Auto-stock',ud_auto:'Items jump onto the right shelf as you walk by'
+},
+pt:{
+docTitle:'Supermercado Bagunçado HiHi',title:'Supermercado Bagunçado',sub:'🛒 HiHi Mart 🛒',
+intro:'Uma tempestade de clientes passou pela loja! Centenas de produtos estão espalhados pelo chão. Pegue tudo, leve até a prateleira certa, ganhe moedas, faça upgrades e libere o supermercado inteiro.',
+start:'▶ JOGAR',cont:'▶ Continuar (Dia {d} · {c} moedas)',newGame:'Novo jogo',saved:'O progresso é salvo automaticamente neste navegador.',
+k_mouse:'Mouse',k_lclick:'Clique esquerdo / E',k_move:'Andar (Shift: correr)',k_look:'Girar a câmera 360°',k_act:'Pegar · Repor na prateleira · Liberar área (segure para repetir)',k_drop:'Soltar item',k_mapup:'Mapa / Upgrades',k_pause:'Pausar',
+t_joy:'Analógico esquerdo',t_joyD:'Andar (empurre até o fim para correr)',t_swipe:'Deslize à direita',t_swipeD:'Girar a câmera · toque rápido para pegar/repor',t_btns:'PEGAR / REPOR / SOLTAR',t_btnsD:'Pegar item · Repor na prateleira · Soltar item',t_topD:'Mapa · Upgrades · Pausa',
+pause:'⏸️ Pausado',resume:'▶ Continuar',upgradesBtn:'⬆️ Upgrades',mapBtn:'🗺️ Mapa',music:'🎵 Música',sound:'🔊 Som',on:'Ligado',off:'Desligado',reset:'🗑️ Recomeçar do zero',lang:'🌐 Idioma',quality:'⚙️ Gráficos',q_auto:'Automático',q_low:'Baixo',q_med:'Médio',q_high:'Alto',sens:'🎯 Sensibilidade da câmera',fullscreen:'⛶ Tela cheia',
+upTitle:'⬆️ Upgrades do repositor',youHave:'Você tem {c} moedas',current:'Atual',upBtn:'Melhorar · {c}🪙',maxed:'Máximo',
+mapTitle:'🗺️ Mapa do mercado',clean:'✔ Limpo',unlockBtn:'Liberar · {c}🪙',coins:'moedas',
+dayDone:'🎉 Mercado brilhando!',dayText:'Dia <b>{d}</b> concluído! Você repôs <b>{n}</b> itens no total.<br>Bônus do dia: <b>+{b} moedas</b><br>Novo dia: mais clientes, cada item vale <b>x{m}</b>.',nextDay:'☀️ Começar novo dia',
+confT:'Recomeçar do zero?',confX:'Todas as moedas, upgrades e áreas liberadas serão apagados.',confY:'Apagar e recomeçar',cancel:'Cancelar',
+quests:'📋 Missões',noQ:'Sem missões. Libere uma nova área!',day:'Dia {d}',
+lockHint:'🖱️ Clique na tela para controlar',keys:'WASD andar · Mouse olhar · Clique/E pegar e repor · Q soltar · Shift correr · M mapa · U upgrades · Esc pausa',
+bPick:'PEGAR',bPlace:'REPOR',bDrop:'SOLTAR',bOpen:'ABRIR',rotate:'📱 Gire o celular na horizontal para jogar melhor',
+full1:'🎒 Cheio! Reponha o que está carregando ou melhore a capacidade',full2:'🎒 Cheio! Reponha o que está carregando primeiro',noHeld:'Você não está carregando nada. Pegue algo do chão primeiro!',wrong:'❌ Prateleira errada! {i} vai em {z}',shelfFull:'Esta prateleira está cheia',zoneClean:'✨ {z} está brilhando! Bônus +{b} moedas',goUnlock:'🔓 Moedas suficientes! Vá até a cerca de {z} para liberar',waitSpill:'As áreas abertas estão limpas! Os clientes vão derrubar coisas logo… ({c} moedas para liberar {z})',spill:'😱 Ah não! Os clientes derrubaram {n} itens!',unlockFirst:'Libere {z} primeiro',needCoins:'Você precisa de {c} moedas para liberar {z} (faltam {m})',unlocked:'🔓 {z} liberado!',noDrop:'Nada para soltar',noRange:'Nenhum item ao alcance',standShelf:'Fique na frente da prateleira certa',qDone:'✅ Missão cumprida: {q} +{r} moedas',tut0d:'👋 Mire num item no chão e aperte E ou clique para pegar',tut0t:'👋 Chegue perto de um item no chão e toque em PEGAR',tut1:'👉 Siga a seta verde até a prateleira certa e reponha',tut2:'🎉 Boa! Ganhe moedas para fazer upgrades e liberar novas áreas',drag:'🖱️ Segure o botão esquerdo e arraste para olhar, clique rápido para pegar/repor',newDay:'☀️ Começa o dia {d}! O mercado está bagunçado de novo…',missing:'Faltam {m} moedas',
+p_to:'→ {z}',p_pick:'Pegar',p_bagFull:'🎒 Cheio – vá repor primeiro',p_shelf:'Prateleira <b>{c}</b> ({f}/{t})',p_shelfFull:'✔ Cheia',p_place:'Repor',p_hold:'(segure para repor sem parar)',p_notThis:'❌ O que você carrega não é desta prateleira',p_bring:'Traga os itens certos para cá',p_lock:'🔒 <b>{z}</b> – {c} moedas',p_unlockNow:'Liberar agora',p_missing:'Faltam {m} moedas',
+q_place:'Repor {n} {i}',q_pick:'Pegar {n} itens',q_clear:'Limpar {z}',q_unlock:'Liberar {z}',q_upgrade:'Comprar um upgrade',
+s_store:'🛒 SUPERMERCADO BAGUNÇADO HIHI',s_checkout:'💳 CAIXAS',s_lane:'CAIXA {n}',s_promo:'🎉 INAUGURAÇÃO',s_sale:'🏷️ 50% OFF',l_new:'⬆ NOVIDADE ⬆',l_rice:'ARROZ',
+f_items:'{v} itens',f_ms:'{v} m/s',f_m:'{v} m',f_mag:'Puxa até {v} m',f_none:'Não tem',f_slots:'+{v} espaços',f_on:'Ativo',
+z_entrance:'Entrada & Caixas',z_candy:'Doces',z_drinks:'Bebidas',z_canned:'Enlatados',z_produce:'Hortifrúti',z_household:'Limpeza & Casa',z_fridge:'Geladeiras',z_warehouse:'Estoque',z_discount:'Promoções',z_premium:'Premium',
+c_keo:'Balas de Goma',c_banhquy:'Biscoitos',c_nuocngot:'Refrigerante',c_nuocsuoi:'Água Mineral',c_cahop:'Peixe Enlatado',c_mi:'Miojo',c_tao:'Maçãs',c_carot:'Cenouras',c_nuocgiat:'Sabão Líquido',c_giay:'Papel Higiênico',c_sua:'Leite',c_kem:'Sorvete',c_thung:'Caixas',c_gao:'Sacos de Arroz',c_sale:'Caixas Promo',c_bong:'Bolas Pula-Pula',c_nuochoa:'Perfume',c_socola:'Chocolate Dourado',
+u_cap:'Capacidade',ud_cap:'Carregue mais itens por viagem',u_speed:'Velocidade',ud_speed:'Ande mais rápido',u_range:'Alcance',ud_range:'Pegue itens de mais longe',u_magnet:'Ímã',ud_magnet:'Puxa itens iguais aos que você carrega',u_cart:'Carrinho',ud_cart:'Empurre um carrinho e leve muito mais',u_hint:'Dica inteligente',ud_hint:'A prateleira certa brilha e a seta mostra o item mais próximo',u_auto:'Reposição automática',ud_auto:'Os itens vão sozinhos para a prateleira certa quando você passa'
+},
+es:{
+docTitle:'Súper Desordenado HiHi',title:'Súper Desordenado',sub:'🛒 HiHi Mart 🛒',
+intro:'¡Una tormenta de clientes arrasó la tienda! Cientos de productos están tirados por el suelo. Recógelos, llévalos al estante correcto, gana monedas, mejora y desbloquea todo el supermercado.',
+start:'▶ JUGAR',cont:'▶ Continuar (Día {d} · {c} monedas)',newGame:'Partida nueva',saved:'El progreso se guarda automáticamente en este navegador.',
+k_mouse:'Ratón',k_lclick:'Clic izquierdo / E',k_move:'Moverse (Shift: correr)',k_look:'Girar la cámara 360°',k_act:'Recoger · Reponer estante · Desbloquear zona (mantén para repetir)',k_drop:'Soltar objeto',k_mapup:'Mapa / Mejoras',k_pause:'Pausa',
+t_joy:'Stick izquierdo',t_joyD:'Moverse (empuja al máximo para correr)',t_swipe:'Desliza a la derecha',t_swipeD:'Girar la cámara · toque rápido para recoger/reponer',t_btns:'COGER / PONER / SOLTAR',t_btnsD:'Recoger · Reponer estante · Soltar objeto',t_topD:'Mapa · Mejoras · Pausa',
+pause:'⏸️ Pausa',resume:'▶ Continuar',upgradesBtn:'⬆️ Mejoras',mapBtn:'🗺️ Mapa',music:'🎵 Música',sound:'🔊 Sonido',on:'Sí',off:'No',reset:'🗑️ Empezar de cero',lang:'🌐 Idioma',quality:'⚙️ Gráficos',q_auto:'Automático',q_low:'Bajo',q_med:'Medio',q_high:'Alto',sens:'🎯 Sensibilidad de cámara',fullscreen:'⛶ Pantalla completa',
+upTitle:'⬆️ Mejoras del reponedor',youHave:'Tienes {c} monedas',current:'Ahora',upBtn:'Mejorar · {c}🪙',maxed:'Máximo',
+mapTitle:'🗺️ Mapa del súper',clean:'✔ Limpio',unlockBtn:'Abrir · {c}🪙',coins:'monedas',
+dayDone:'🎉 ¡Súper impecable!',dayText:'¡Día <b>{d}</b> completado! Has repuesto <b>{n}</b> productos en total.<br>Bono del día: <b>+{b} monedas</b><br>Nuevo día: más clientes, cada producto paga <b>x{m}</b>.',nextDay:'☀️ Empezar nuevo día',
+confT:'¿Empezar de cero?',confX:'Se borrarán todas las monedas, mejoras y zonas desbloqueadas.',confY:'Borrar y empezar',cancel:'Cancelar',
+quests:'📋 Misiones',noQ:'No quedan misiones. ¡Desbloquea una zona nueva!',day:'Día {d}',
+lockHint:'🖱️ Haz clic en la pantalla para controlar',keys:'WASD moverse · Ratón mirar · Clic/E coger y reponer · Q soltar · Shift correr · M mapa · U mejoras · Esc pausa',
+bPick:'COGER',bPlace:'PONER',bDrop:'SOLTAR',bOpen:'ABRIR',rotate:'📱 Gira el móvil en horizontal para jugar mejor',
+full1:'🎒 ¡Lleno! Repón lo que llevas o mejora la capacidad',full2:'🎒 ¡Lleno! Repón lo que llevas primero',noHeld:'No llevas nada. ¡Recoge algo del suelo primero!',wrong:'❌ ¡Estante equivocado! {i} va en {z}',shelfFull:'Este estante está lleno',zoneClean:'✨ ¡{z} está impecable! Bono +{b} monedas',goUnlock:'🔓 ¡Tienes monedas suficientes! Ve a la valla de {z} para abrirla',waitSpill:'¡Las zonas abiertas están limpias! Los clientes tirarán cosas pronto… ({c} monedas para abrir {z})',spill:'😱 ¡Oh no! Los clientes tiraron {n} productos!',unlockFirst:'Primero desbloquea {z}',needCoins:'Necesitas {c} monedas para abrir {z} (faltan {m})',unlocked:'🔓 ¡{z} desbloqueada!',noDrop:'No hay nada que soltar',noRange:'Nada a tu alcance',standShelf:'Ponte frente al estante correcto',qDone:'✅ Misión cumplida: {q} +{r} monedas',tut0d:'👋 Mira un producto del suelo y pulsa E o clic izquierdo para cogerlo',tut0t:'👋 Acércate a un producto del suelo y toca COGER',tut1:'👉 Sigue la flecha verde hasta el estante correcto y repón',tut2:'🎉 ¡Genial! Gana monedas para mejorar y abrir zonas nuevas',drag:'🖱️ Mantén el botón izquierdo y arrastra para mirar, clic rápido para coger/reponer',newDay:'☀️ ¡Empieza el día {d}! El súper vuelve a estar hecho un desastre…',missing:'Faltan {m} monedas',
+p_to:'→ {z}',p_pick:'Coger',p_bagFull:'🎒 Lleno – ve a reponer primero',p_shelf:'Estante <b>{c}</b> ({f}/{t})',p_shelfFull:'✔ Lleno',p_place:'Reponer',p_hold:'(mantén para reponer seguido)',p_notThis:'❌ Lo que llevas no va en este estante',p_bring:'Trae aquí los productos correctos',p_lock:'🔒 <b>{z}</b> – {c} monedas',p_unlockNow:'Desbloquear ya',p_missing:'Faltan {m} monedas',
+q_place:'Reponer {n} {i}',q_pick:'Recoger {n} productos',q_clear:'Limpiar {z}',q_unlock:'Desbloquear {z}',q_upgrade:'Comprar una mejora',
+s_store:'🛒 SÚPER DESORDENADO HIHI',s_checkout:'💳 CAJAS',s_lane:'CAJA {n}',s_promo:'🎉 INAUGURACIÓN',s_sale:'🏷️ 50% DTO.',l_new:'⬆ NOVEDAD ⬆',l_rice:'ARROZ',
+f_items:'{v} productos',f_ms:'{v} m/s',f_m:'{v} m',f_mag:'Atrae hasta {v} m',f_none:'No tienes',f_slots:'+{v} huecos',f_on:'Activo',
+z_entrance:'Entrada y Cajas',z_candy:'Dulces',z_drinks:'Bebidas',z_canned:'Conservas',z_produce:'Frutas y Verduras',z_household:'Hogar',z_fridge:'Refrigerados',z_warehouse:'Almacén',z_discount:'Ofertas',z_premium:'Premium',
+c_keo:'Gominolas',c_banhquy:'Galletas',c_nuocngot:'Refresco',c_nuocsuoi:'Agua',c_cahop:'Pescado en lata',c_mi:'Fideos instantáneos',c_tao:'Manzanas',c_carot:'Zanahorias',c_nuocgiat:'Detergente',c_giay:'Papel higiénico',c_sua:'Leche',c_kem:'Helado',c_thung:'Cajas',c_gao:'Sacos de arroz',c_sale:'Cajas de oferta',c_bong:'Pelotas saltarinas',c_nuochoa:'Perfume',c_socola:'Chocolate dorado',
+u_cap:'Capacidad',ud_cap:'Lleva más productos por viaje',u_speed:'Velocidad',ud_speed:'Muévete más rápido',u_range:'Alcance',ud_range:'Coge productos desde más lejos',u_magnet:'Imán',ud_magnet:'Atrae productos iguales a los que llevas',u_cart:'Carrito',ud_cart:'Empuja un carrito y lleva mucho más',u_hint:'Pista inteligente',ud_hint:'El estante correcto brilla y la flecha señala el producto más cercano',u_auto:'Reposición automática',ud_auto:'Los productos saltan al estante correcto al pasar'
+},
+id:{
+docTitle:'Supermarket Berantakan HiHi',title:'Supermarket Berantakan',sub:'🛒 HiHi Mart 🛒',
+intro:'Badai pembeli baru saja melanda toko! Ratusan barang berserakan di lantai. Ambil barangnya, bawa ke rak yang benar, kumpulkan koin, upgrade, dan buka seluruh supermarket.',
+start:'▶ MAIN',cont:'▶ Lanjutkan (Hari {d} · {c} koin)',newGame:'Main baru',saved:'Progres tersimpan otomatis di browser ini.',
+k_mouse:'Mouse',k_lclick:'Klik kiri / E',k_move:'Bergerak (Shift: lari)',k_look:'Putar kamera 360°',k_act:'Ambil · Tata di rak · Buka area (tahan untuk mengulang)',k_drop:'Jatuhkan barang',k_mapup:'Peta / Upgrade',k_pause:'Jeda',
+t_joy:'Stik kiri',t_joyD:'Bergerak (dorong penuh untuk lari)',t_swipe:'Geser sisi kanan',t_swipeD:'Putar kamera · ketuk cepat untuk ambil/tata',t_btns:'AMBIL / TATA / BUANG',t_btnsD:'Ambil barang · Tata di rak · Jatuhkan barang',t_topD:'Peta · Upgrade · Jeda',
+pause:'⏸️ Jeda',resume:'▶ Lanjut',upgradesBtn:'⬆️ Upgrade',mapBtn:'🗺️ Peta',music:'🎵 Musik',sound:'🔊 Suara',on:'Nyala',off:'Mati',reset:'🗑️ Mulai dari awal',lang:'🌐 Bahasa',quality:'⚙️ Grafis',q_auto:'Otomatis',q_low:'Rendah',q_med:'Sedang',q_high:'Tinggi',sens:'🎯 Sensitivitas kamera',fullscreen:'⛶ Layar penuh',
+upTitle:'⬆️ Upgrade pegawai',youHave:'Kamu punya {c} koin',current:'Sekarang',upBtn:'Upgrade · {c}🪙',maxed:'Maks',
+mapTitle:'🗺️ Peta supermarket',clean:'✔ Bersih',unlockBtn:'Buka · {c}🪙',coins:'koin',
+dayDone:'🎉 Supermarket kinclong!',dayText:'Hari <b>{d}</b> selesai! Total <b>{n}</b> barang sudah kamu tata.<br>Bonus akhir hari: <b>+{b} koin</b><br>Hari baru: pembeli makin ramai, tiap barang bernilai <b>x{m}</b>.',nextDay:'☀️ Mulai hari baru',
+confT:'Mulai dari awal?',confX:'Semua koin, upgrade, dan area yang terbuka akan dihapus.',confY:'Hapus dan mulai lagi',cancel:'Batal',
+quests:'📋 Misi',noQ:'Tidak ada misi. Buka area baru!',day:'Hari {d}',
+lockHint:'🖱️ Klik layar untuk mulai mengontrol',keys:'WASD gerak · Mouse lihat · Klik kiri/E ambil & tata · Q buang · Shift lari · M peta · U upgrade · Esc jeda',
+bPick:'AMBIL',bPlace:'TATA',bDrop:'BUANG',bOpen:'BUKA',rotate:'📱 Putar HP ke mode landscape agar lebih nyaman',
+full1:'🎒 Penuh! Tata barang dulu, atau upgrade kapasitas',full2:'🎒 Penuh! Tata barang dulu',noHeld:'Kamu belum membawa apa-apa. Ambil barang di lantai dulu!',wrong:'❌ Rak salah! {i} tempatnya di {z}',shelfFull:'Rak ini sudah penuh',zoneClean:'✨ {z} kinclong! Bonus +{b} koin',goUnlock:'🔓 Koin cukup! Pergi ke pagar {z} untuk membukanya',waitSpill:'Semua area terbuka sudah bersih! Pembeli akan segera menjatuhkan barang… (butuh {c} koin untuk membuka {z})',spill:'😱 Waduh! Pembeli menjatuhkan {n} barang!',unlockFirst:'Buka {z} dulu',needCoins:'Butuh {c} koin untuk membuka {z} (kurang {m})',unlocked:'🔓 {z} terbuka!',noDrop:'Tidak ada barang untuk dibuang',noRange:'Tidak ada barang dalam jangkauan',standShelf:'Berdiri di depan rak yang benar',qDone:'✅ Misi selesai: {q} +{r} koin',tut0d:'👋 Arahkan ke barang di lantai, tekan E atau klik kiri untuk mengambil',tut0t:'👋 Dekati barang di lantai lalu ketuk AMBIL',tut1:'👉 Ikuti panah hijau ke rak yang benar lalu tata barangnya',tut2:'🎉 Mantap! Kumpulkan koin untuk upgrade dan membuka area baru',drag:'🖱️ Tahan klik kiri dan geser untuk melihat, klik cepat untuk ambil/tata',newDay:'☀️ Hari {d} dimulai! Supermarket berantakan lagi…',missing:'Kurang {m} koin',
+p_to:'→ {z}',p_pick:'Ambil',p_bagFull:'🎒 Penuh – tata barang dulu',p_shelf:'Rak <b>{c}</b> ({f}/{t})',p_shelfFull:'✔ Penuh',p_place:'Tata',p_hold:'(tahan untuk terus menata)',p_notThis:'❌ Barang yang kamu bawa bukan untuk rak ini',p_bring:'Bawa barang yang cocok ke sini',p_lock:'🔒 <b>{z}</b> – {c} koin',p_unlockNow:'Buka sekarang',p_missing:'Kurang {m} koin',
+q_place:'Tata {n} {i}',q_pick:'Ambil {n} barang',q_clear:'Bersihkan {z}',q_unlock:'Buka {z}',q_upgrade:'Beli satu upgrade',
+s_store:'🛒 SUPERMARKET BERANTAKAN HIHI',s_checkout:'💳 KASIR',s_lane:'KASIR {n}',s_promo:'🎉 GRAND OPENING',s_sale:'🏷️ DISKON 50%',l_new:'⬆ BARANG BARU ⬆',l_rice:'BERAS',
+f_items:'{v} barang',f_ms:'{v} m/s',f_m:'{v} m',f_mag:'Menarik dalam {v} m',f_none:'Belum punya',f_slots:'+{v} slot',f_on:'Aktif',
+z_entrance:'Pintu Masuk & Kasir',z_candy:'Permen & Kue',z_drinks:'Minuman',z_canned:'Makanan Kaleng',z_produce:'Sayur & Buah',z_household:'Rumah Tangga',z_fridge:'Kulkas',z_warehouse:'Gudang',z_discount:'Diskon',z_premium:'Premium',
+c_keo:'Permen Jeli',c_banhquy:'Biskuit',c_nuocngot:'Soda',c_nuocsuoi:'Air Mineral',c_cahop:'Ikan Kaleng',c_mi:'Mi Instan',c_tao:'Apel Merah',c_carot:'Wortel',c_nuocgiat:'Deterjen',c_giay:'Tisu Gulung',c_sua:'Susu Segar',c_kem:'Es Krim',c_thung:'Kardus',c_gao:'Karung Beras',c_sale:'Kotak Promo',c_bong:'Bola Pantul',c_nuochoa:'Parfum',c_socola:'Cokelat Emas',
+u_cap:'Kapasitas',ud_cap:'Bawa lebih banyak barang sekali jalan',u_speed:'Kecepatan',ud_speed:'Bergerak lebih cepat',u_range:'Jangkauan',ud_range:'Ambil barang dari lebih jauh',u_magnet:'Magnet',ud_magnet:'Menarik barang yang sama dengan yang kamu bawa',u_cart:'Troli',ud_cart:'Dorong troli dan bawa jauh lebih banyak',u_hint:'Petunjuk pintar',ud_hint:'Rak yang benar menyala dan panah menunjuk barang terdekat',u_auto:'Tata otomatis',ud_auto:'Barang langsung naik ke rak yang benar saat kamu lewat'
+}
+};
+
+const PREFS=(()=>{try{return JSON.parse(localStorage.getItem(PREF_KEY))||{};}catch(e){return{};}})();
+function savePrefs(){try{localStorage.setItem(PREF_KEY,JSON.stringify(PREFS));}catch(e){}}
+function detectLang(){const h=(location.hash||'').slice(1).toLowerCase();if(LANGS[h])return h;if(PREFS.lang&&LANGS[PREFS.lang])return PREFS.lang;const n=(navigator.languages&&navigator.languages[0]||navigator.language||'en').toLowerCase();if(n.startsWith('vi'))return'vi';if(n.startsWith('pt'))return'pt';if(n.startsWith('es'))return'es';if(n.startsWith('id')||n.startsWith('ms'))return'id';return'en';}
+let LANG=detectLang();
+function t(k,v){let s=T[LANG][k];if(s==null)s=T.en[k];if(s==null)s=k;if(v)s=s.replace(/\{(\w+)\}/g,(m,n)=>v[n]!=null?v[n]:m);return s;}
+const zn=id=>t('z_'+id),cn=i=>t('c_'+CATS[i].id);
+
+// ================= DATA =================
+const ZONES=[
+ {id:'entrance',icon:'🚪',x0:-30,x1:30,z0:10,z1:22,color:0xf4efe4,cost:0,tier:-1,entrance:true},
+ {id:'candy',icon:'🍬',x0:-30,x1:-10,z0:-2,z1:10,color:0xffd9ea,cost:0,tier:0},
+ {id:'drinks',icon:'🥤',x0:-10,x1:10,z0:-2,z1:10,color:0xd6ecff,cost:0,tier:1},
+ {id:'canned',icon:'🥫',x0:10,x1:30,z0:-2,z1:10,color:0xffe4c6,cost:200,tier:2},
+ {id:'produce',icon:'🥕',x0:-30,x1:-10,z0:-14,z1:-2,color:0xdcf4cf,cost:400,tier:3},
+ {id:'household',icon:'🧺',x0:-10,x1:10,z0:-14,z1:-2,color:0xe7e0ff,cost:650,tier:4},
+ {id:'fridge',icon:'🧊',x0:10,x1:30,z0:-14,z1:-2,color:0xd3f4f4,cost:900,tier:5},
+ {id:'warehouse',icon:'📦',x0:-30,x1:-10,z0:-26,z1:-14,color:0xeadcc6,cost:1200,tier:6},
+ {id:'discount',icon:'🏷️',x0:-10,x1:10,z0:-26,z1:-14,color:0xfff1ad,cost:1600,tier:7},
+ {id:'premium',icon:'💎',x0:10,x1:30,z0:-26,z1:-14,color:0xeee0ff,cost:2100,tier:8},
+];
+const ZB={};ZONES.forEach(z=>ZB[z.id]=z);
+const SHELF_ZONES=ZONES.filter(z=>!z.entrance);
+const CATS=[
+ {id:'keo',brand:'HiHi',zone:'candy',shape:'bag',kind:'gondola',c1:'#ff5fa2',c2:'#ffffff'},
+ {id:'banhquy',brand:'Bơ Mơ',zone:'candy',shape:'box',kind:'gondola',c1:'#c97b2a',c2:'#ffe9b8'},
+ {id:'nuocngot',brand:'BÙM!',zone:'drinks',shape:'can',kind:'gondola',c1:'#e8322f',c2:'#ffffff'},
+ {id:'nuocsuoi',brand:'Suối Mát',zone:'drinks',shape:'bottle',kind:'gondola',c1:'#46b3ff',c2:'#ffffff'},
+ {id:'cahop',brand:'Biển Xanh',zone:'canned',shape:'tin',kind:'gondola',c1:'#1d6fb8',c2:'#ffd23f'},
+ {id:'mi',brand:'Mì Vui',zone:'canned',shape:'pack',kind:'gondola',c1:'#ff9a1f',c2:'#c0161c'},
+ {id:'tao',brand:'',zone:'produce',shape:'apple',kind:'stand',c1:'#e0262b',c2:'#5bbf3a'},
+ {id:'carot',brand:'',zone:'produce',shape:'carrot',kind:'stand',c1:'#ff8a1d',c2:'#3fae3a'},
+ {id:'nuocgiat',brand:'Thơm Tho',zone:'household',shape:'jug',kind:'gondola',c1:'#7b4dff',c2:'#ffffff'},
+ {id:'giay',brand:'Mây Mềm',zone:'household',shape:'roll',kind:'gondola',c1:'#ffffff',c2:'#5ab0ff'},
+ {id:'sua',brand:'Bò Vui',zone:'fridge',shape:'carton',kind:'cooler',c1:'#ffffff',c2:'#2a8cff'},
+ {id:'kem',brand:'Tê Tê',zone:'fridge',shape:'tub',kind:'freezer',c1:'#ff9ed1',c2:'#7a3cff'},
+ {id:'thung',brand:'',zone:'warehouse',shape:'crate',kind:'rack',c1:'#c8955a',c2:'#8a5a2b'},
+ {id:'gao',brand:'Đồng Thơm',zone:'warehouse',shape:'sack',kind:'rack',c1:'#f2e6c8',c2:'#2e8b3d'},
+ {id:'sale',brand:'SALE',zone:'discount',shape:'salebox',kind:'bin',c1:'#ffd400',c2:'#e8322f'},
+ {id:'bong',brand:'',zone:'discount',shape:'ball',kind:'bin',c1:'#25c2a0',c2:'#ffef5a'},
+ {id:'nuochoa',brand:'Lụa',zone:'premium',shape:'perfume',kind:'vitrine',c1:'#b06cff',c2:'#ffd77a'},
+ {id:'socola',brand:'Kim',zone:'premium',shape:'choco',kind:'vitrine',c1:'#3b1f12',c2:'#ffcc33'},
+];
+const KINDS={
+ gondola:{w:3.6,d:.62,h:2.0,mode:'levels',ys:[.12,.72,1.32],per:6},
+ stand:{w:3.6,d:1.0,h:.95,mode:'rows',y:.9,zs:[-.24,.22],per:6},
+ cooler:{w:3.6,d:.75,h:2.15,mode:'levels',ys:[.15,.75,1.35],per:6},
+ freezer:{w:3.6,d:1.05,h:.9,mode:'rows',y:.3,zs:[-.25,.25],per:6},
+ rack:{w:3.8,d:1.0,h:2.7,mode:'levels',ys:[.12,1.0,1.88],per:4},
+ bin:{w:3.6,d:1.2,h:.8,mode:'rows',y:.45,zs:[-.38,0,.38],per:5},
+ vitrine:{w:3.6,d:.7,h:1.7,mode:'levels',ys:[.32,.78,1.24],per:5},
+};
+const num=v=>(Math.round(v*10)/10).toLocaleString(LANG==='en'?'en':LANG);
+const UPG=[
+ {id:'cap',icon:'🎒',vals:[3,5,8,12,20],costs:[80,200,450,900],fmt:v=>t('f_items',{v})},
+ {id:'speed',icon:'👟',vals:[4.2,4.9,5.6,6.3,7.0],costs:[60,150,320,640],fmt:v=>t('f_ms',{v:num(v)})},
+ {id:'range',icon:'🤏',vals:[2.4,3.0,3.6,4.3,5.0],costs:[70,170,350,700],fmt:v=>t('f_m',{v:num(v)})},
+ {id:'magnet',icon:'🧲',vals:[0,2.5,4,6],costs:[250,600,1200],fmt:v=>v?t('f_mag',{v:num(v)}):t('f_none')},
+ {id:'cart',icon:'🛒',vals:[0,8,16],costs:[500,1400],fmt:v=>v?t('f_slots',{v}):t('f_none')},
+ {id:'hint',icon:'💡',vals:[0,1],costs:[150],fmt:v=>v?t('f_on'):t('f_none')},
+ {id:'auto',icon:'🤖',vals:[0,1],costs:[1000],fmt:v=>v?t('f_on'):t('f_none')},
+];
+const UB={};UPG.forEach(u=>UB[u.id]=u);
+
+// ================= STATE =================
+let S;
+function defaultState(){return{coins:0,up:{cap:0,speed:0,range:0,magnet:0,cart:0,hint:0,auto:0},unlocked:{entrance:1,candy:1,drinks:1},cleared:{},day:1,stats:{picked:0,placed:0},quests:[],tut:0,music:1,sfx:1,held:[]};}
+S=defaultState();
+const upv=id=>UB[id].vals[S.up[id]];
+const capacity=()=>upv('cap')+upv('cart');
+const dayMult=()=>1+0.25*(S.day-1);
+const nextLockedZone=()=>SHELF_ZONES.filter(z=>!S.unlocked[z.id]).sort((a,b)=>a.tier-b.tier)[0];
+
+// ================= RENDERER / QUALITY =================
+const canvas=$('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!isTouch,powerPreference:'high-performance'});
+const DPR=window.devicePixelRatio||1;
+const QUAL={low:{pr:Math.min(DPR,.85),sh:false},med:{pr:Math.min(DPR,1.25),sh:false},high:{pr:Math.min(DPR,2),sh:true}};
+if(!PREFS.quality)PREFS.quality='auto';
+if(!PREFS.sens)PREFS.sens=1;
+let curPR=isTouch?Math.min(DPR,1.25):Math.min(DPR,2);
+const SHADOWS_CAPABLE=true;
+let shadowsOn=!isTouch;
+renderer.setPixelRatio(curPR);
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=shadowsOn;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xfdf6ea);
+scene.fog=new THREE.Fog(0xfdf6ea,isTouch?24:30,isTouch?55:70);
+const camera=new THREE.PerspectiveCamera(isTouch?78:72,innerWidth/innerHeight,.05,isTouch?62:120);
+camera.rotation.order='YXZ';
+scene.add(camera);
+scene.add(new THREE.HemisphereLight(0xffffff,0xb8a68e,.5));
+scene.add(new THREE.AmbientLight(0xffffff,.12));
+const sun=new THREE.DirectionalLight(0xfff4e0,.48);
+sun.position.set(14,30,18);sun.target.position.set(0,0,-2);scene.add(sun);scene.add(sun.target);
+sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);{const sc=sun.shadow.camera;sc.left=-36;sc.right=36;sc.top=32;sc.bottom=-32;sc.near=1;sc.far=80;}sun.shadow.bias=-0.0008;
+sun.castShadow=shadowsOn;
+function onResize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.fov=(isTouch&&innerHeight>innerWidth)?88:(isTouch?78:72);camera.updateProjectionMatrix();}
+addEventListener('resize',onResize);addEventListener('orientationchange',()=>setTimeout(onResize,200));
+function setShadows(on){if(on===shadowsOn)return;shadowsOn=on;renderer.shadowMap.enabled=on;sun.castShadow=on;scene.traverse(o=>{if(o.material)[].concat(o.material).forEach(m=>m.needsUpdate=true);});}
+function applyQuality(){const q=PREFS.quality;if(q==='auto'){curPR=isTouch?Math.min(DPR,1.25):Math.min(DPR,2);setShadows(!isTouch);}else{curPR=QUAL[q].pr;setShadows(QUAL[q].sh);}renderer.setPixelRatio(curPR);renderer.setSize(innerWidth,innerHeight);}
+
+// ================= HELPERS =================
+const STATIC=new THREE.Group();scene.add(STATIC);
+const matCache={};
+function lam(color,extra){const k=color+'|'+JSON.stringify(extra||{});if(!matCache[k])matCache[k]=new THREE.MeshLambertMaterial(Object.assign({color},extra||{}));return matCache[k];}
+function box(w,h,d,mat,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(parent||STATIC).add(m);return m;}
+function cyl(rt,rb,h,mat,x,y,z,parent,seg=14){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),mat);m.position.set(x,y,z);(parent||STATIC).add(m);return m;}
+function canvasTex(w,h,draw){const cv=document.createElement('canvas');cv.width=w;cv.height=h;const g=cv.getContext('2d');draw(g,w,h);const tx=new THREE.CanvasTexture(cv);tx.anisotropy=isTouch?2:4;return tx;}
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+const FONT='"Baloo 2", Arial, sans-serif';
+function signTex(text,bg,fg,w=512,h=128,size=60){return canvasTex(w,h,(g)=>{g.fillStyle=bg;rr(g,4,4,w-8,h-8,28);g.fill();g.lineWidth=8;g.strokeStyle='rgba(255,255,255,.85)';rr(g,10,10,w-20,h-20,22);g.stroke();g.fillStyle=fg;g.font='bold '+size+'px '+FONT;g.textAlign='center';g.textBaseline='middle';let s=size;while(g.measureText(text).width>w-40&&s>16){s-=3;g.font='bold '+s+'px '+FONT;}g.fillText(text,w/2,h/2+4);});}
+const dynLabels=[];
+function labelMat(txt,bg,fg,pw,ph,size){const fn=typeof txt==='function'?txt:()=>txt;const mat=new THREE.MeshBasicMaterial({map:signTex(fn(),bg,fg,pw,ph,size),transparent:true});const rec={mat,fn,bg,fg,pw,ph,size};if(typeof txt==='function')dynLabels.push(rec);return rec;}
+function sign(txt,bg,fg,w,h,x,y,z,ry,parent,pw=512,ph=128,size=60){const rec=labelMat(txt,bg,fg,pw,ph,size);const g=new THREE.Group();const a=new THREE.Mesh(new THREE.PlaneGeometry(w,h),rec.mat);const b=a.clone();b.rotation.y=Math.PI;b.position.z=-.01;g.add(a,b);g.position.set(x,y,z);g.rotation.y=ry||0;(parent||STATIC).add(g);g.userData.rec=rec;return g;}
+function relabel(){dynLabels.forEach(d=>{const old=d.mat.map;d.mat.map=signTex(d.fn(),d.bg,d.fg,d.pw,d.ph,d.size);d.mat.needsUpdate=true;old.dispose();});CATLAB.forEach((m,i)=>{const old=m.map;m.map=labelTex(CATS[i]);m.needsUpdate=true;old.dispose();});}
+// merge static meshes by material => far fewer draw calls (important on phones)
+function mergeGroup(root){
+ root.updateMatrixWorld(true);
+ const buckets=new Map();const remove=[];
+ root.traverse(o=>{
+  if(!o.isMesh||o.userData.dyn||Array.isArray(o.material))return;
+  let p=o.parent,skip=false;while(p&&p!==root){if(p.userData.dyn)skip=true;p=p.parent;}if(skip)return;
+  const g0=o.geometry;if(!g0.attributes.position||!g0.attributes.normal)return;
+  const g=g0.index?g0.toNonIndexed():g0.clone();g.applyMatrix4(o.matrixWorld);
+  const key=o.material.uuid;if(!buckets.has(key))buckets.set(key,{mat:o.material,geos:[]});buckets.get(key).geos.push(g);remove.push(o);
+ });
+ remove.forEach(o=>{o.parent.remove(o);o.geometry.dispose();});
+ const inv=new THREE.Matrix4().copy(root.matrixWorld).invert();
+ buckets.forEach(({mat,geos})=>{
+  let n=0;geos.forEach(g=>n+=g.attributes.position.count);const hasUV=geos.every(g=>g.attributes.uv);
+  const pos=new Float32Array(n*3),nor=new Float32Array(n*3),uv=hasUV?new Float32Array(n*2):null;let o3=0,o2=0;
+  geos.forEach(g=>{pos.set(g.attributes.position.array,o3);nor.set(g.attributes.normal.array,o3);if(uv)uv.set(g.attributes.uv.array,o2);o3+=g.attributes.position.count*3;o2+=g.attributes.position.count*2;g.dispose();});
+  const mg=new THREE.BufferGeometry();mg.setAttribute('position',new THREE.BufferAttribute(pos,3));mg.setAttribute('normal',new THREE.BufferAttribute(nor,3));if(uv)mg.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+  mg.applyMatrix4(inv);mg.computeBoundingSphere();
+  const m=new THREE.Mesh(mg,mat);m.castShadow=!mat.transparent&&!(mat.isMeshBasicMaterial);m.receiveShadow=!mat.isMeshBasicMaterial;root.add(m);
+ });
+}
+
+// ================= PRODUCTS =================
+function labelTex(cat){
+ return canvasTex(256,256,(g,w,h)=>{
+  const s=cat.shape;const name=t('c_'+cat.id);
+  g.fillStyle=cat.c1;g.fillRect(0,0,w,h);
+  if(s==='ball'){g.fillStyle=cat.c2;for(let i=0;i<4;i++)g.fillRect(0,i*64+20,w,24);g.fillStyle='#ff5fa2';for(let i=0;i<8;i++){g.beginPath();g.arc(i*34+12,(i%2)*64+52,9,0,7);g.fill();}return;}
+  if(s==='apple'){const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#ff6b5e');gr.addColorStop(1,'#b5121b');g.fillStyle=gr;g.fillRect(0,0,w,h);g.fillStyle='rgba(255,255,255,.35)';g.beginPath();g.ellipse(70,70,24,14,-.6,0,7);g.fill();return;}
+  if(s==='carrot'){g.fillStyle='#e8740f';for(let i=0;i<8;i++)g.fillRect(0,i*32+14,w,4);return;}
+  if(s==='crate'){g.fillStyle='#b98448';g.fillRect(0,0,w,h);g.fillStyle='#e8d398';g.fillRect(0,104,w,48);g.fillStyle='#7a4f22';let fs=34;g.font='bold '+fs+'px Arial';g.textAlign='center';const tx=t('l_new');while(g.measureText(tx).width>w-16&&fs>14){fs-=2;g.font='bold '+fs+'px Arial';}g.fillText(tx,w/2,140);g.strokeStyle='#8a5a2b';g.lineWidth=6;g.strokeRect(6,6,w-12,h-12);return;}
+  if(s==='salebox'){g.fillStyle=cat.c2;g.beginPath();g.moveTo(w/2,18);for(let i=0;i<24;i++){const a=i/24*Math.PI*2,r=i%2?78:110;g.lineTo(w/2+Math.sin(a)*r,h/2-Math.cos(a)*r);}g.fill();g.fillStyle='#fff';g.font='bold 54px Arial';g.textAlign='center';g.fillText('SALE',w/2,h/2-2);g.font='bold 40px Arial';g.fillText('-50%',w/2,h/2+42);return;}
+  if(s==='sack'){g.fillStyle=cat.c2;g.fillRect(0,0,w,40);g.fillRect(0,h-40,w,40);g.fillStyle='#3d7a2a';g.font='bold 44px Arial';g.textAlign='center';g.fillText(t('l_rice'),w/2,110);g.font='bold 30px Arial';g.fillText(cat.brand,w/2,150);g.fillStyle='#e8b923';g.beginPath();g.ellipse(w/2,200,46,18,0,0,7);g.fill();return;}
+  g.fillStyle=cat.c2;rr(g,10,64,w-20,128,26);g.fill();
+  g.fillStyle=cat.c1;g.beginPath();g.arc(w/2,44,26,0,7);g.fill();
+  g.fillStyle=cat.c2;g.beginPath();g.arc(w/2,44,14,0,7);g.fill();
+  g.fillStyle=(cat.c1==='#ffffff')?cat.c2:cat.c1;g.textAlign='center';g.textBaseline='middle';
+  let fs=56;g.font='bold '+fs+'px Arial';while(g.measureText(cat.brand).width>w-40){fs-=4;g.font='bold '+fs+'px Arial';}
+  g.fillText(cat.brand,w/2,112);
+  fs=28;g.font='bold '+fs+'px Arial';while(g.measureText(name).width>w-30&&fs>14){fs-=2;g.font='bold '+fs+'px Arial';}g.fillText(name,w/2,160);
+  g.fillStyle=cat.c2;g.fillRect(0,h-34,w,10);
+ });
+}
+const SHAPES={};
+// reorder index so faces sharing a material are contiguous -> fewer draw calls per product type
+function consolidate(geo,map){const idx=geo.index.array,groups=geo.groups,nm=Math.max(...map)+1,out=[],ng=[];
+ for(let m=0;m<nm;m++){const st=out.length;groups.forEach((g,gi)=>{if(map[gi]===m)for(let i=g.start;i<g.start+g.count;i++)out.push(idx[i]);});ng.push([st,out.length-st,m]);}
+ geo.setIndex(out);geo.clearGroups();ng.forEach(g=>geo.addGroup(g[0],g[1],g[2]));}
+(function(){
+ const PI=Math.PI;const seg=isTouch?12:18;
+ const bottle=new THREE.LatheGeometry([[0,0],[.085,0],[.09,.02],[.09,.22],[.06,.29],[.035,.32],[.035,.36],[0,.36]].map(p=>new THREE.Vector2(p[0],p[1])),isTouch?10:16);bottle.translate(0,-.18,0);
+ const apple=new THREE.SphereGeometry(.12,isTouch?10:16,isTouch?8:12);apple.scale(1,.9,1);
+ const sack=new THREE.BoxGeometry(.55,.72,.26,4,4,2);{const p=sack.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);const k=1-Math.pow(Math.abs(y)/.36,4)*.25;p.setXYZ(i,x*k,y,z*(1+(1-Math.abs(x)/.275)*.35));}sack.computeVertexNormals();}
+ const def=(n,geo,type,h,shelfY,lieY,lieRot,shelfRot,canLie=true)=>SHAPES[n]={geo,type,h,shelfY,lieY,lieRot,shelfRot:shelfRot||[0,0,0],canLie};
+ def('bag',new THREE.BoxGeometry(.34,.42,.12),'boxF',.42,.21,.06,[-PI/2,0]);
+ def('box',new THREE.BoxGeometry(.32,.4,.1),'boxF',.4,.2,.05,[-PI/2,0]);
+ def('can',new THREE.CylinderGeometry(.1,.1,.24,seg),'cyl',.24,.12,.1,[0,PI/2]);
+ def('bottle',bottle,'lathe',.36,.18,.09,[0,PI/2]);
+ def('tin',new THREE.CylinderGeometry(.12,.12,.13,seg),'cyl',.13,.065,.12,[0,PI/2]);
+ def('pack',new THREE.BoxGeometry(.34,.09,.26),'boxT',.09,.13,.045,[0,0],[PI/2,0,0],false);
+ def('apple',apple,'sphere',.22,.11,.11,[0,0],null,false);
+ def('carrot',new THREE.ConeGeometry(.065,.32,isTouch?8:12),'cone',.32,.065,.065,[PI/2,0],[PI/2,0,0],true);
+ def('jug',new THREE.BoxGeometry(.24,.38,.15),'boxF',.38,.19,.075,[-PI/2,0]);
+ def('roll',new THREE.CylinderGeometry(.11,.11,.2,seg),'cyl',.2,.1,.11,[0,PI/2]);
+ def('carton',new THREE.BoxGeometry(.15,.32,.15),'boxF',.32,.16,.075,[-PI/2,0]);
+ def('tub',new THREE.CylinderGeometry(.14,.12,.15,seg),'cyl',.15,.075,.13,[0,PI/2]);
+ def('crate',new THREE.BoxGeometry(.7,.52,.6),'boxAll',.52,.26,.26,[0,0],null,false);
+ def('sack',sack,'boxF',.72,.36,.15,[-PI/2,0]);
+ def('salebox',new THREE.BoxGeometry(.36,.36,.36),'boxAll',.36,.18,.18,[0,0],null,false);
+ def('ball',new THREE.SphereGeometry(.17,isTouch?12:18,isTouch?10:14),'sphere',.34,.17,.17,[0,0],null,false);
+ def('perfume',new THREE.BoxGeometry(.13,.24,.13),'glass',.24,.12,.065,[-PI/2,0]);
+ def('choco',new THREE.BoxGeometry(.36,.07,.22),'boxT',.07,.11,.035,[0,0],[PI/2,0,0],false);
+ const MAPS={boxF:[0,0,1,0,2,2],boxT:[0,0,1,0,0,0],cyl:[0,1,1]};
+ for(const k in SHAPES){const sh=SHAPES[k];if(MAPS[sh.type])consolidate(sh.geo,MAPS[sh.type]);}
+})();
+const CATLAB=[];
+const CATMAT=CATS.map((cat,i)=>{
+ const sh=SHAPES[cat.shape];
+ const lab=new THREE.MeshLambertMaterial({map:labelTex(cat)});CATLAB[i]=lab;
+ const side=new THREE.MeshLambertMaterial({color:cat.c1});
+ const alt=new THREE.MeshLambertMaterial({color:cat.c2});
+ switch(sh.type){
+  case 'boxF':return[side,alt,lab];
+  case 'boxT':return[side,lab];
+  case 'cyl':return[lab,alt];
+  case 'glass':return new THREE.MeshPhongMaterial({color:cat.c1,transparent:true,opacity:.8,shininess:90,specular:0xffffff});
+  default:return lab;
+ }
+});
+const LEAF_GEO=new THREE.ConeGeometry(.05,.1,6);LEAF_GEO.rotateX(Math.PI);
+const STEM_GEO=new THREE.CylinderGeometry(.01,.01,.06,5);
+const CAP_GEO=new THREE.CylinderGeometry(.04,.04,.06,10);
+const CHILD_PARTS={carrot:{geo:LEAF_GEO,col:0x3fae3a,off:new THREE.Matrix4().makeTranslation(0,-.17,0)},perfume:{geo:CAP_GEO,col:0xffd77a,off:new THREE.Matrix4().makeTranslation(0,.15,0)}};
+const _q=new THREE.Quaternion(),_one=new THREE.Vector3(1,1,1),_M=new THREE.Matrix4(),_tmpM=new THREE.Matrix4(),_v=new THREE.Vector3(),_e=new THREE.Euler(0,0,0,'YXZ');
+function composeM(x,y,z,rx,ry,rz){_e.set(rx,ry,rz,'YXZ');_q.setFromEuler(_e);_v.set(x,y,z);return _M.compose(_v,_q,_one);}
+// instanced group: one draw call per product type instead of one per item (big win on phones)
+function makeIG(c,cap){
+ const s=CATS[c].shape;const main=new THREE.InstancedMesh(SHAPES[s].geo,CATMAT[c],cap);main.count=0;main.frustumCulled=false;main.castShadow=true;scene.add(main);
+ const cp=CHILD_PARTS[s];let child=null;if(cp){child=new THREE.InstancedMesh(cp.geo,lam(cp.col),cap);child.count=0;child.frustumCulled=false;scene.add(child);}
+ const ig={main,child,c,cap,items:[],
+  setMatrix(i,m){main.setMatrixAt(i,m);main.instanceMatrix.needsUpdate=true;if(child){_tmpM.multiplyMatrices(m,cp.off);child.setMatrixAt(i,_tmpM);child.instanceMatrix.needsUpdate=true;}},
+  setCount(n){main.count=n;main.visible=n>0;if(child){child.count=n;child.visible=n>0;}}};main.visible=false;if(child)child.visible=false;
+ main.userData={type:'itemIG',ig};return ig;
+}
+function makeItemMesh(c){
+ const sh=SHAPES[CATS[c].shape];
+ const m=new THREE.Mesh(sh.geo,CATMAT[c]);
+ m.rotation.order='YXZ';m.castShadow=true;
+ const s=CATS[c].shape;
+ if(s==='carrot'){const leaf=new THREE.Mesh(LEAF_GEO,lam(0x3fae3a));leaf.position.y=-.17;m.add(leaf);}
+ if(s==='apple'&&!isTouch){const st=new THREE.Mesh(STEM_GEO,lam(0x6b3d1c));st.position.y=.11;m.add(st);}
+ if(s==='perfume'){const cap=new THREE.Mesh(CAP_GEO,lam(0xffd77a));cap.position.y=.15;m.add(cap);}
+ return m;
+}
+
+// ================= WORLD =================
+const colliders=[];
+function addCol(x0,x1,z0,z1,tag){const c={x0,x1,z0,z1,tag};colliders.push(c);return c;}
+const floorTex=canvasTex(128,128,(g)=>{g.fillStyle='#d9d6cf';g.fillRect(0,0,128,128);g.fillStyle='#c4c0b8';g.fillRect(0,0,64,64);g.fillRect(64,64,64,64);g.strokeStyle='rgba(0,0,0,.06)';g.lineWidth=2;g.strokeRect(0,0,128,128);g.strokeRect(0,0,64,64);g.strokeRect(64,64,64,64);});
+floorTex.wrapS=floorTex.wrapT=THREE.RepeatWrapping;
+ZONES.forEach(z=>{
+ const w=z.x1-z.x0,d=z.z1-z.z0;const tx=floorTex.clone();tx.needsUpdate=true;tx.repeat.set(w/2,d/2);
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshLambertMaterial({map:tx,color:z.color}));
+ m.rotation.x=-Math.PI/2;m.position.set((z.x0+z.x1)/2,0,(z.z0+z.z1)/2);STATIC.add(m);
+ if(!z.entrance){const strip=new THREE.Mesh(new THREE.PlaneGeometry(w-.3,.12),lam(new THREE.Color(z.color).offsetHSL(0,.25,-.22).getHex()));strip.rotation.x=-Math.PI/2;strip.position.set((z.x0+z.x1)/2,.004,z.z1-.1);STATIC.add(strip);}
+});
+{const ceil=new THREE.Mesh(new THREE.PlaneGeometry(61,49),new THREE.MeshBasicMaterial({color:0xe9e6de}));ceil.rotation.x=Math.PI/2;ceil.position.set(0,5,-2);STATIC.add(ceil);
+ const lm=new THREE.MeshBasicMaterial({color:0xfffdf2});const lg=new THREE.BoxGeometry(3,.06,.7);
+ for(let x=-24;x<=24;x+=8)for(let z=-22;z<=18;z+=6){const l=new THREE.Mesh(lg,lm);l.position.set(x,4.96,z);STATIC.add(l);}}
+{const wm=lam(0xfbe7cc),band=lam(0xff7a59),band2=lam(0x7a3cff);
+ const wall=(x,z,w,d)=>{box(w,5,d,wm,x,2.5,z);box(w+.02,.45,d+.02,band,x,.6,z);box(w+.02,.12,d+.02,band2,x,3.6,z);addCol(x-w/2,x+w/2,z-d/2,z+d/2,'wall');};
+ wall(0,-26.25,61,.5);wall(-30.25,-2,.5,49);wall(30.25,-2,.5,49);
+ wall(-16.5,22.25,27,.5);wall(16.5,22.25,27,.5);
+ const glass=new THREE.MeshPhongMaterial({color:0x9fe3ff,transparent:true,opacity:.35,shininess:100});
+ box(2.9,3,.1,glass,-1.5,1.5,22.2);box(2.9,3,.1,glass,1.5,1.5,22.2);
+ box(6.2,.25,.3,lam(0x444b6e),0,3.1,22.2);box(6.2,1.9,.5,wm,0,4.05,22.25);
+ addCol(-3,3,22,22.5,'door');
+ sign(()=>t('s_store'),'#ff5fa2','#ffffff',8,1.6,0,4.1,21.95,Math.PI,null,1024,200);
+ const mat=new THREE.Mesh(new THREE.PlaneGeometry(4,2),lam(0x8b3a3a));mat.rotation.x=-Math.PI/2;mat.position.set(0,.006,20.8);STATIC.add(mat);
+}
+const ZONE_HEX={candy:'#ff5fa2',drinks:'#2a8cff',canned:'#ff8a1d',produce:'#3fae3a',household:'#7b4dff',fridge:'#1fb5c8',warehouse:'#a8692e',discount:'#e8322f',premium:'#9b4dff'};
+SHELF_ZONES.forEach(z=>{const cx=(z.x0+z.x1)/2;sign(()=>z.icon+' '+zn(z.id).toUpperCase(),ZONE_HEX[z.id],'#fff',5,1.25,cx,3.9,(z.z0+z.z1)/2+1,0);
+ const rope=lam(0x555555);box(.03,1,.03,rope,cx-2,4.5,(z.z0+z.z1)/2+1);box(.03,1,.03,rope,cx+2,4.5,(z.z0+z.z1)/2+1);});
+{const body=lam(0x7a3cff),top=lam(0x2d2d3a),reg=lam(0xdddddd),scr=new THREE.MeshBasicMaterial({color:0x33d17a});
+ for(let i=0;i<4;i++){const x=-24+i*5;const g=new THREE.Group();g.position.set(x,0,15);STATIC.add(g);
+  box(1.1,.9,3,body,0,.45,0,g);box(.85,.06,2.4,top,0,.93,.15,g);box(.5,.35,.4,reg,0,1.12,-1.1,g);const s=box(.4,.25,.04,scr,0,1.38,-1.0,g);s.rotation.x=-.3;
+  cyl(.04,.04,1.6,lam(0xcccccc),.5,1.7,-1.4,g);sign(()=>t('s_lane',{n:i+1}),'#ffcf33','#3b2500',.9,.35,.5,2.65,-1.4,0,g,256,100);
+  addCol(x-.6,x+.6,13.4,16.6,'counter');}
+ sign(()=>t('s_checkout'),'#7a3cff','#fff',4,1,-16.5,3.8,15,0);
+ for(let i=0;i<5;i++){const c=makeCartModel();c.position.set(16+i*.55,0,19.5);c.rotation.y=Math.PI/2;STATIC.add(c);}
+ addCol(15.4,18.9,18.9,20.1,'carts');
+ const pot=lam(0xd2691e),leaf=lam(0x3fae3a);const leafG=new THREE.SphereGeometry(.6,isTouch?8:10,isTouch?6:8);
+ [[-28.5,20.5],[28.5,20.5],[-5,20.8],[5,20.8],[-28.5,11],[28.5,11]].forEach(([x,z])=>{cyl(.35,.28,.6,pot,x,.3,z);const b=new THREE.Mesh(leafG,leaf);b.position.set(x,1.1,z);STATIC.add(b);addCol(x-.4,x+.4,z-.4,z+.4,'plant');});
+ const pr=new THREE.Group();pr.position.set(22,0,14);STATIC.add(pr);box(2.4,1,1.2,lam(0xff5fa2),0,.5,0,pr);sign(()=>t('s_promo'),'#ffcf33','#c0161c',2.6,.7,0,1.6,0,0,pr);addCol(20.7,23.3,13.3,14.7,'promo');
+}
+function makeCartModel(){
+ const g=new THREE.Group();const metal=lam(0xb9c2cf),red=lam(0xe8322f),dark=lam(0x333333);
+ const bw=.55,bl=.8,bh=.42,by=.62;
+ box(bw,.03,bl,metal,0,by-bh/2,0,g);
+ box(.03,bh,bl,metal,-bw/2,by,0,g);box(.03,bh,bl,metal,bw/2,by,0,g);
+ box(bw,bh,.03,metal,0,by,-bl/2,g);box(bw,bh,.03,metal,0,by,bl/2,g);
+ box(bw+.08,.05,.05,red,0,by+.32,bl/2+.12,g);
+ [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>{box(.03,.4,.03,metal,a*bw/2.2,.2,b*bl/2.4,g);cyl(.05,.05,.04,dark,a*bw/2.2,.05,b*bl/2.4,g,8).rotation.z=Math.PI/2;});
+ return g;
+}
+
+// ================= SHELVES =================
+const shelves=[];
+function buildShelf(cat,ci,kindName,x,zEdge){
+ const K=KINDS[kindName];const zone=ZB[cat.zone];
+ const g=new THREE.Group();g.position.set(x,0,zEdge+K.d/2+.2);STATIC.add(g);
+ const acc=lam(new THREE.Color(ZONE_HEX[zone.id]).getHex());
+ const white=lam(0xf3f3f3),wood=lam(0xd9a066);
+ const {w,d,h}=K;
+ if(kindName==='gondola'||kindName==='cooler'){
+  const bodyM=kindName==='cooler'?lam(0xffffff):white;
+  box(w,.12,d,bodyM,0,.06,0,g);box(w,h,.06,kindName==='cooler'?lam(0xbfefff,{emissive:0x2a6a80}):bodyM,0,h/2,-d/2+.03,g);
+  box(.06,h,d,acc,-w/2,h/2,0,g);box(.06,h,d,acc,w/2,h/2,0,g);
+  K.ys.slice(1).forEach(y=>{box(w-.08,.04,d-.06,bodyM,0,y-.02,0,g);box(w-.08,.07,.02,acc,0,y-.03,d/2-.02,g);});
+  box(w+.04,.3,d+.06,acc,0,h+.15,0,g);
+  if(kindName==='cooler'){box(w+.04,.12,d,lam(0xffffff),0,h+.36,0,g);box(w-.2,.04,.04,new THREE.MeshBasicMaterial({color:0xcff6ff}),0,h-.05,d/2-.05,g);}
+ }else if(kindName==='stand'){
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>box(.08,.85,.08,wood,a*(w/2-.06),.425,b*(d/2-.06),g));
+  box(w,.08,d,wood,0,.84,0,g);
+  box(w,.18,.05,wood,0,.97,d/2-.02,g);box(w,.3,.05,wood,0,1.03,-d/2+.02,g);box(.05,.2,d,wood,-w/2,.98,0,g);box(.05,.2,d,wood,w/2,.98,0,g);
+  box(w,.06,.04,acc,0,1.08,d/2,g);
+  const awn=box(w+.3,.06,1.1,acc,0,2.2,0,g);awn.rotation.x=.25;
+  box(.06,2.2,.06,wood,-w/2,1.1,-d/2,g);box(.06,2.2,.06,wood,w/2,1.1,-d/2,g);
+ }else if(kindName==='freezer'){
+  const fm=lam(0xffffff),inner=lam(0xcff3ff,{emissive:0x1f5566});
+  box(w,.28,d,fm,0,.14,0,g);box(w-.1,.02,d-.1,inner,0,.29,0,g);
+  box(w,.62,.06,fm,0,.59,-d/2+.03,g);box(w,.62,.06,fm,0,.59,d/2-.03,g);box(.06,.62,d,fm,-w/2+.03,.59,0,g);box(.06,.62,d,fm,w/2-.03,.59,0,g);
+  box(w+.02,.06,.1,acc,0,.9,d/2-.03,g);
+  box(w-.1,.02,d-.1,FREEZER_GLASS,0,.92,0,g);
+ }else if(kindName==='rack'){
+  const up=lam(0xff8a1d),beam=lam(0x2a6fd1);
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>box(.09,h,.09,up,a*(w/2-.05),h/2,b*(d/2-.05),g));
+  K.ys.forEach(y=>{box(w,.1,.08,beam,0,y-.06,d/2-.05,g);box(w,.1,.08,beam,0,y-.06,-d/2+.05,g);box(w-.1,.04,d-.1,wood,0,y-.02,0,g);});
+  box(w-.2,.12,d-.2,lam(0xb98a52),0,.06,0,g);
+ }else if(kindName==='bin'){
+  const red=lam(0xe8322f),yel=lam(0xffd400);
+  box(w,.4,d,red,0,.2,0,g);
+  box(w,.32,.06,yel,0,.56,d/2-.03,g);box(w,.32,.06,yel,0,.56,-d/2+.03,g);box(.06,.32,d,yel,-w/2+.03,.56,0,g);box(.06,.32,d,yel,w/2-.03,.56,0,g);
+  sign(()=>t('s_sale'),'#ffd400','#e8322f',1.8,.5,0,1.25,-d/2+.05,0,g,384,110);
+  cyl(.03,.03,.5,lam(0x666666),0,.95,-d/2+.05,g,6);
+ }else if(kindName==='vitrine'){
+  const darkw=lam(0x4a2a1a);
+  box(w,.3,d,darkw,0,.15,0,g);box(w,h-.3,.05,lam(0x2b1810),0,.15+(h-.3)/2,-d/2+.03,g);
+  K.ys.slice(1).forEach(y=>box(w-.1,.03,d-.08,VIT_GLASS,0,y-.015,0,g));
+  box(.03,h-.3,d,VIT_GLASS,-w/2,.15+(h-.3)/2,0,g);box(.03,h-.3,d,VIT_GLASS,w/2,.15+(h-.3)/2,0,g);
+  box(w+.06,.08,d+.06,GOLD,0,h,0,g);box(w+.06,.05,.05,GOLD,0,.31,d/2,g);
+  box(w-.2,.03,.05,new THREE.MeshBasicMaterial({color:0xfff2c4}),0,h-.06,d/2-.08,g);
+ }
+ const tagY=(kindName==='gondola'||kindName==='cooler'||kindName==='rack'||kindName==='vitrine')?h+.15:(kindName==='stand'?1.15:.75);
+ const rec=labelMat(()=>cn(ci),'#ffffff',ZONE_HEX[zone.id],384,96,48);
+ const tag=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.28),rec.mat);tag.position.set(0,tagY,d/2+.06);g.add(tag);
+ const hh=Math.max(h,1);
+ const hb=new THREE.Mesh(new THREE.BoxGeometry(w,hh,d),new THREE.MeshBasicMaterial());hb.position.y=hh/2;hb.visible=false;hb.userData.dyn=true;g.add(hb);
+ const glow=new THREE.Mesh(new THREE.BoxGeometry(w+.2,hh+.2,d+.2),new THREE.MeshBasicMaterial({color:0x33ff88,transparent:true,opacity:.18,depthWrite:false}));glow.position.y=hh/2;glow.visible=false;glow.userData.dyn=true;g.add(glow);
+ const slots=[];const per=K.per;const usable=w-.24;
+ const n=K.mode==='levels'?K.ys.length*per:K.zs.length*per;
+ const shp=SHAPES[cat.shape];
+ for(let i=0;i<n;i++){const col=i%per,row=Math.floor(i/per);
+  const lx=-usable/2+(col+.5)*usable/per;let ly,lz;
+  if(K.mode==='levels'){ly=K.ys[row];lz=.04;}else{ly=K.y;lz=K.zs[K.zs.length-1-row];}
+  slots.push(new THREE.Vector3(g.position.x+lx,ly+shp.shelfY,g.position.z+lz));}
+ const ig=makeIG(ci,n);const slotRot=[];
+ slots.forEach((v,i)=>{const r=[shp.shelfRot[0],shp.shelfRot[1]+(Math.random()-.5)*.12,shp.shelfRot[2]];slotRot.push(r);ig.setMatrix(i,composeM(v.x,v.y,v.z,r[0],r[1],r[2]));});
+ const sh={i:shelves.length,cat:ci,zone:cat.zone,kind:kindName,group:g,hitbox:hb,glow,slots,slotRot,ig,filled:0,shown:0,w,d,front:new THREE.Vector3(g.position.x,0,g.position.z+d/2+.7)};
+ hb.userData.type='shelf';hb.userData.ref=sh;
+ addCol(x-w/2-.05,x+w/2+.05,g.position.z-d/2-.05,g.position.z+d/2+.05,'shelf');
+ shelves.push(sh);return sh;
+}
+const FREEZER_GLASS=new THREE.MeshPhongMaterial({color:0xbfeaff,transparent:true,opacity:.18,shininess:100});
+const VIT_GLASS=new THREE.MeshPhongMaterial({color:0xdff6ff,transparent:true,opacity:.22,shininess:120,specular:0xffffff});
+const GOLD=new THREE.MeshPhongMaterial({color:0xffcc33,shininess:80,specular:0xffffff});
+SHELF_ZONES.forEach(z=>{const cx=(z.x0+z.x1)/2;const cs=CATS.map((c,i)=>i).filter(i=>CATS[i].zone===z.id);cs.forEach((ci,k)=>buildShelf(CATS[ci],ci,CATS[ci].kind,cx+(k?5:-5),z.z0));});
+const shelvesByZone={};shelves.forEach(s=>(shelvesByZone[s.zone]=shelvesByZone[s.zone]||[]).push(s));
+mergeGroup(STATIC);
+function setShown(sh,n){sh.shown=Math.max(0,Math.min(n,sh.filled));sh.ig.setCount(sh.shown);}
+
+// ================= FENCES =================
+const fences={};
+const fenceTex=canvasTex(128,64,(g)=>{g.fillStyle='#ffd400';g.fillRect(0,0,128,64);g.fillStyle='#2b2140';for(let i=-2;i<6;i++){g.beginPath();g.moveTo(i*32,64);g.lineTo(i*32+32,0);g.lineTo(i*32+48,0);g.lineTo(i*32+16,64);g.fill();}});
+fenceTex.wrapS=THREE.RepeatWrapping;
+const fenceMatCache={};
+function buildFence(z){
+ const grp=new THREE.Group();scene.add(grp);const cols=[];const ins=.28;const H=1.15;const recs=[];
+ const segs=[];
+ if(z.z1<22)segs.push([z.x0+ins,z.x1-ins,z.z1-ins,z.z1-ins,0]);
+ if(z.z0>-26)segs.push([z.x0+ins,z.x1-ins,z.z0+ins,z.z0+ins,Math.PI]);
+ if(z.x0>-30)segs.push([z.x0+ins,z.x0+ins,z.z0+ins,z.z1-ins,-Math.PI/2]);
+ if(z.x1<30)segs.push([z.x1-ins,z.x1-ins,z.z0+ins,z.z1-ins,Math.PI/2]);
+ const post=lam(0x2b2140);const pick=[];
+ segs.forEach(([ax,bx,az,bz,ry])=>{
+  const horiz=az===bz;const len=horiz?bx-ax:bz-az;const cx=(ax+bx)/2,cz=(az+bz)/2;
+  const key=len.toFixed(1);if(!fenceMatCache[key]){const tx=fenceTex.clone();tx.needsUpdate=true;tx.repeat.set(len/1.2,1);fenceMatCache[key]=new THREE.MeshLambertMaterial({map:tx,transparent:true,opacity:.9});}
+  const p=new THREE.Mesh(new THREE.BoxGeometry(horiz?len:.06,H*.55,horiz?.06:len),fenceMatCache[key]);p.position.set(cx,H*.62,cz);p.userData={type:'fence',zone:z.id,dyn:true};grp.add(p);pick.push(p);
+  for(let k=0;k<=Math.ceil(len/2.5);k++){const f=k/Math.ceil(len/2.5);const px=horiz?ax+(bx-ax)*f:ax,pz=horiz?az:az+(bz-az)*f;box(.1,H,.1,post,px,H/2,pz,grp);}
+  const s=sign(()=>`🔒 ${zn(z.id)} · ${z.cost} ${t('coins')}`,'#2b2140','#ffd400',3.4,.8,cx,H+.65,cz,ry,grp,640,150);recs.push(s.userData.rec);
+  cols.push(addCol(Math.min(ax,bx)-.08,Math.max(ax,bx)+.08,Math.min(az,bz)-.08,Math.max(az,bz)+.08,'fence:'+z.id));
+ });
+ const veil=new THREE.Mesh(new THREE.PlaneGeometry(z.x1-z.x0-.6,z.z1-z.z0-.6),VEIL_MAT);veil.rotation.x=-Math.PI/2;veil.position.set((z.x0+z.x1)/2,.02,(z.z0+z.z1)/2);grp.add(veil);
+ mergeGroup(grp);
+ fences[z.id]={grp,cols,pick,recs};
+}
+const VEIL_MAT=new THREE.MeshBasicMaterial({color:0x2b2140,transparent:true,opacity:.18,depthWrite:false});
+function removeFence(zid){const f=fences[zid];if(!f)return;scene.remove(f.grp);f.grp.traverse(o=>{if(o.isMesh&&!o.userData.type)o.geometry.dispose();});f.cols.forEach(c=>{const i=colliders.indexOf(c);if(i>=0)colliders.splice(i,1);});f.recs.forEach(r=>{const i=dynLabels.indexOf(r);if(i>=0)dynLabels.splice(i,1);r.mat.map.dispose();});delete fences[zid];}
+
+// ================= PLAYER =================
+const player={x:0,z:18.5};let yaw=0,pitch=-.08;
+function collide(p,r){
+ for(let it=0;it<3;it++)for(const b of colliders){
+  const cx=clamp(p.x,b.x0,b.x1),cz=clamp(p.z,b.z0,b.z1);const dx=p.x-cx,dz=p.z-cz;const d2=dx*dx+dz*dz;
+  if(d2<r*r){if(d2>1e-9){const d=Math.sqrt(d2);p.x=cx+dx/d*r;p.z=cz+dz/d*r;}else{const l=p.x-b.x0,ri=b.x1-p.x,tp=p.z-b.z0,bo=b.z1-p.z,m=Math.min(l,ri,tp,bo);if(m===l)p.x=b.x0-r;else if(m===ri)p.x=b.x1+r;else if(m===tp)p.z=b.z0-r;else p.z=b.z1+r;}}
+ }
+ p.x=clamp(p.x,-29.6,29.6);p.z=clamp(p.z,-25.6,21.6);
+}
+function hitsCollider(x,z,r){for(const b of colliders){if(x>b.x0-r&&x<b.x1+r&&z>b.z0-r&&z<b.z1+r)return true;}return false;}
+function zoneAt(x,z){for(const zz of ZONES){if(x>=zz.x0&&x<zz.x1&&z>=zz.z0&&z<zz.z1)return zz;}return ZONES[0];}
+const holdGroup=new THREE.Group();holdGroup.position.set(.42,-.46,-.9);camera.add(holdGroup);
+const cartView=makeCartModel();mergeGroup(cartView);cartView.position.set(.15,-1.32,-1.55);cartView.rotation.y=-.12;cartView.visible=false;camera.add(cartView);
+const cartItems=new THREE.Group();cartView.add(cartItems);
+function refreshHeld(){
+ while(holdGroup.children.length)holdGroup.remove(holdGroup.children[0]);
+ while(cartItems.children.length)cartItems.remove(cartItems.children[0]);
+ const hasCart=S.up.cart>0;
+ if(hasCart){
+  const n=Math.min(S.held.length,isTouch?12:24);
+  for(let i=0;i<n;i++){const c=S.held[S.held.length-1-i];const m=makeItemMesh(c);m.castShadow=false;const s=.55;m.scale.setScalar(s);const col=i%3,row=Math.floor(i/3)%4,lay=Math.floor(i/12);m.position.set((col-1)*.16,.5+lay*.18+SHAPES[CATS[c].shape].shelfY*s,(row-1.5)*.17);const r=SHAPES[CATS[c].shape].shelfRot;m.rotation.set(r[0],r[1]+i,r[2]);cartItems.add(m);}
+ }else{
+  let y=0;const n=Math.min(S.held.length,8);
+  for(let i=0;i<n;i++){const c=S.held[S.held.length-n+i];const sh=SHAPES[CATS[c].shape];const m=makeItemMesh(c);m.castShadow=false;const s=.5;m.scale.setScalar(s);
+   const hh=(sh.shelfRot[0]?(sh.type==='boxT'?.26:.12):sh.h)*s;m.position.set(0,y+hh/2,0);m.rotation.set(sh.shelfRot[0],.4+(i%2)*.15,sh.shelfRot[2]);y+=hh+.005;holdGroup.add(m);}
+ }
+ updateHUD(true);
+}
+
+// ================= FLOOR ITEMS =================
+let floorItems=[];const pulling=[];
+const FLOOR_IG=CATS.map((c,i)=>makeIG(i,shelves.filter(s=>s.cat===i).reduce((a,b)=>a+b.slots.length,0)+6));
+function itemMatrix(f){const shp=SHAPES[CATS[f.c].shape];return f.p?composeM(f.x,f.y,f.z,shp.lieRot[0],f.ry,shp.lieRot[1]):composeM(f.x,f.y,f.z,0,f.ry,0);}
+function updateFloorItem(f){FLOOR_IG[f.c].setMatrix(f.idx,itemMatrix(f));}
+function addFloorItem(c,x,z,ry,p){
+ const shp=SHAPES[CATS[c].shape];if(!shp.canLie)p=0;if(CATS[c].shape==='carrot')p=1;
+ const ig=FLOOR_IG[c];if(ig.items.length>=ig.cap)return null;
+ const f={c,x,z,ry,p,y:p?shp.lieY:shp.h/2};f.y0=f.y;f.idx=ig.items.length;ig.items.push(f);updateFloorItem(f);ig.setCount(ig.items.length);floorItems.push(f);return f;
+}
+function removeFloorItem(f){const i=floorItems.indexOf(f);if(i<0)return;floorItems.splice(i,1);const ig=FLOOR_IG[f.c];const last=ig.items.pop();if(last!==f){ig.items[f.idx]=last;last.idx=f.idx;updateFloorItem(last);}ig.setCount(ig.items.length);}
+function meshFromFloor(f){const m=makeItemMesh(f.c);const shp=SHAPES[CATS[f.c].shape];m.position.set(f.x,f.y,f.z);if(f.p)m.rotation.set(shp.lieRot[0],f.ry,shp.lieRot[1]);else m.rotation.set(0,f.ry,0);scene.add(m);return m;}
+function randomSpot(z){
+ for(let k=0;k<40;k++){const x=rand(z.x0+1.2,z.x1-1.2);const zz=rand(z.z0+(z.entrance?1.2:2.2),z.z1-1.2);if(!hitsCollider(x,zz,.35)&&Math.hypot(x-player.x,zz-player.z)>1.2)return[x,zz];}
+ return[(z.x0+z.x1)/2,(z.z0+z.z1)/2+1];
+}
+function spawnForShelf(sh,count,homeShare=.7){
+ const home=ZB[sh.zone];const others=ZONES.filter(z=>S.unlocked[z.id]&&z.id!==sh.zone);
+ for(let i=0;i<count;i++){const z=(Math.random()<homeShare||!others.length)?home:others[randi(others.length)];const[x,zz]=randomSpot(z);addFloorItem(sh.cat,x,zz,rand(0,6.28),Math.random()<.55?1:0);}
+}
+const countHeld=c=>S.held.filter(h=>h===c).length;
+const countFloor=c=>floorItems.filter(f=>f.c===c).length;
+function spawnZone(zid){(shelvesByZone[zid]||[]).forEach(sh=>spawnForShelf(sh,sh.slots.length-sh.filled-countHeld(sh.cat)-countFloor(sh.cat)));}
+
+// ================= FX =================
+const tweens=[];
+function tween(m,toFn,dur,arc,s0,s1,done){tweens.push({m,from:m.position.clone(),toFn,t:0,dur,arc,s0,s1,done});}
+function updateTweens(dt){for(let i=tweens.length-1;i>=0;i--){const tw=tweens[i];tw.t+=dt;const k=Math.min(1,tw.t/tw.dur);const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;const to=tw.toFn();tw.m.position.lerpVectors(tw.from,to,e);tw.m.position.y+=Math.sin(Math.PI*k)*tw.arc;tw.m.scale.setScalar(tw.s0+(tw.s1-tw.s0)*e);tw.m.rotation.y+=dt*6*(1-k);if(k>=1){tweens.splice(i,1);tw.done&&tw.done();}}}
+function handWorld(){camera.updateMatrixWorld();return new THREE.Vector3(.35,-.4,-.8).applyMatrix4(camera.matrixWorld);}
+function buzz(ms){if(!isTouch||!navigator.vibrate)return;try{navigator.vibrate(ms);}catch(e){}}
+const arrow=new THREE.Group();{const am=new THREE.MeshBasicMaterial({color:0x33e07f});const sh=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.45,10),am);sh.rotation.x=Math.PI/2;sh.position.z=-.05;const hd=new THREE.Mesh(new THREE.ConeGeometry(.12,.25,14),am);hd.rotation.x=Math.PI/2;hd.position.z=.3;arrow.add(sh,hd);arrow.userData.mat=am;}scene.add(arrow);arrow.visible=false;
+const beacon=new THREE.Group();{const bm=new THREE.MeshBasicMaterial({color:0x33e07f});const c=new THREE.Mesh(new THREE.ConeGeometry(.3,.55,16),bm);c.rotation.x=Math.PI;beacon.add(c);const ring=new THREE.Mesh(new THREE.RingGeometry(.55,.75,32),new THREE.MeshBasicMaterial({color:0x33e07f,transparent:true,opacity:.6,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;beacon.userData.ring=ring;scene.add(ring);ring.visible=false;beacon.userData.mat=bm;}scene.add(beacon);beacon.visible=false;
+const selRing=new THREE.Mesh(new THREE.RingGeometry(.22,.3,24),new THREE.MeshBasicMaterial({color:0xffe23b,side:THREE.DoubleSide,transparent:true,opacity:.95,depthWrite:false}));selRing.rotation.x=-Math.PI/2;selRing.visible=false;scene.add(selRing);
+
+// ================= AUDIO =================
+let AC=null,master=null,musicGain=null;
+function initAudio(){try{if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.55;master.connect(AC.destination);musicGain=AC.createGain();musicGain.gain.value=.5;musicGain.connect(master);}if(AC.state==='suspended')AC.resume();}catch(e){AC=null;}}
+function tone(f,d,type,vol,slide,delay,out){if(!AC)return;const t0=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(vol||.15,t0+.012);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(out||master);o.start(t0);o.stop(t0+d+.05);}
+function sfx(n){if(!AC||!S.sfx)return;switch(n){
+ case'pick':tone(520,.12,'triangle',.2,320);break;
+ case'place':tone(330,.07,'square',.06);tone(700,.12,'triangle',.16,0,.05);break;
+ case'coin':tone(988,.07,'square',.05);tone(1319,.16,'square',.05,0,.06);break;
+ case'err':tone(180,.22,'sawtooth',.09,-60);break;
+ case'unlock':[523,659,784,1047].forEach((f,i)=>tone(f,.28,'triangle',.18,0,i*.1));break;
+ case'quest':[784,988,1175,1568].forEach((f,i)=>tone(f,.2,'square',.06,0,i*.08));break;
+ case'step':tone(95,.05,'sine',.06,-30);break;
+ case'drop':tone(260,.16,'triangle',.15,-140);break;
+ case'click':tone(700,.05,'square',.04);break;
+ case'clear':[523,659,784,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',.16,0,i*.09));break;
+}}
+const MEL=[0,4,7,9,7,4,2,4,0,4,7,12,9,7,4,2,5,9,12,9,7,4,2,0,-1,2,5,7,4,2,0,-5];const BASS=[0,0,5,5,7,7,0,0];let mStep=0;
+setInterval(()=>{if(!AC||!S.music||state!=='play')return;const n=MEL[mStep%32];if(mStep%4!==3)tone(392*Math.pow(2,n/12),.2,'triangle',.05,0,0,musicGain);if(mStep%2===0)tone(98*Math.pow(2,BASS[(mStep>>2)%8]/12),.38,'sine',.08,0,0,musicGain);mStep++;},210);
+
+// ================= UI =================
+function toast(msg,cls,ms){const d=document.createElement('div');d.className='toast '+(cls||'');d.textContent=msg;$('toasts').appendChild(d);while($('toasts').children.length>(isSmall()?2:3))$('toasts').removeChild($('toasts').children[0]);setTimeout(()=>d.remove(),ms||2600);}
+function flyText(txt){const d=document.createElement('div');d.className='fly';d.textContent=txt;d.style.left=(innerWidth/2+rand(-30,30))+'px';d.style.top=(innerHeight/2-50)+'px';$('hud').appendChild(d);setTimeout(()=>d.remove(),1000);}
+function flashRed(){const f=$('flash');f.style.opacity=1;setTimeout(()=>f.style.opacity=0,220);}
+const isSmall=()=>innerWidth<820||innerHeight<500;
+let hudCache='';
+function updateHUD(force){
+ const key=S.coins+'|'+S.held.length+'|'+capacity()+'|'+S.day+'|'+LANG;
+ if(!force&&key===hudCache)return;hudCache=key;
+ $('coinPill').textContent='🪙 '+S.coins.toLocaleString();
+ $('bagPill').textContent=(S.up.cart?'🛒 ':'🎒 ')+S.held.length+'/'+capacity();
+ $('bagPill').classList.toggle('full',S.held.length>=capacity());
+ $('dayPill').textContent='☀️ '+t('day',{d:S.day});
+}
+function questText(q){switch(q.t){case'place':return t('q_place',{n:q.n,i:cn(q.k)});case'pick':return t('q_pick',{n:q.n});case'clear':return t('q_clear',{z:zn(q.k)});case'unlock':return t('q_unlock',{z:zn(q.k)});default:return t('q_upgrade');}}
+function renderQuests(){
+ const el=$('qlist');el.innerHTML='';
+ S.quests.forEach(q=>{const d=document.createElement('div');d.className='q';d.innerHTML=`${questText(q)} <b>+${q.reward}🪙</b><div class="qbar"><i style="width:${Math.min(100,q.p/q.n*100)}%"></i></div>`;el.appendChild(d);});
+ if(!S.quests.length)el.innerHTML=`<div class="q">${t('noQ')}</div>`;
+ $('qToggle').textContent=$('quests').classList.contains('collapsed')?'▸ '+S.quests.length:'▾';
+}
+$('quests').addEventListener('pointerdown',e=>{e.stopPropagation();$('quests').classList.toggle('collapsed');renderQuests();});
+if(isSmall())$('quests').classList.add('collapsed');
+function applyI18n(){
+ document.documentElement.lang=LANG==='pt'?'pt-BR':LANG;document.title=t('docTitle');
+ document.querySelectorAll('[data-i]').forEach(el=>{el.textContent=t(el.dataset.i);});
+ $('pMusic').textContent=t('music')+': '+(S.music?t('on'):t('off'));$('pSfx').textContent=t('sound')+': '+(S.sfx?t('on'):t('off'));
+ const lb=$('langBar');lb.innerHTML='';Object.keys(LANGS).forEach(k=>{const b=document.createElement('button');b.textContent=LANGS[k];b.className=k===LANG?'on':'';b.onclick=()=>setLang(k);lb.appendChild(b);});
+ const ls=$('langSel');ls.innerHTML=Object.keys(LANGS).map(k=>`<option value="${k}" ${k===LANG?'selected':''}>${LANGS[k]}</option>`).join('');
+ const qs=$('qualSel');qs.innerHTML=['auto','low','med','high'].map(k=>`<option value="${k}" ${k===PREFS.quality?'selected':''}>${t('q_'+k)}</option>`).join('');
+ $('sensR').value=PREFS.sens;
+ $('ctrlHelp').innerHTML=isTouch?`<b>🕹️ ${t('t_joy')}</b><span>${t('t_joyD')}</span><b>👆 ${t('t_swipe')}</b><span>${t('t_swipeD')}</span><b>${t('t_btns')}</b><span>${t('t_btnsD')}</span><b>🗺️ ⬆️ ⏸️</b><span>${t('t_topD')}</span>`
+  :`<b>WASD</b><span>${t('k_move')}</span><b>${t('k_mouse')}</b><span>${t('k_look')}</span><b>${t('k_lclick')}</b><span>${t('k_act')}</span><b>Q</b><span>${t('k_drop')}</span><b>M / U</b><span>${t('k_mapup')}</span><b>Esc</b><span>${t('k_pause')}</span>`;
+ if(state==='menu')buildStartButtons();
+ renderQuests();updateHUD(true);lastPrompt='~';{const z=zoneAt(player.x,player.z);$('zoneName')._z=z.icon+' '+zn(z.id);$('zoneName').textContent=$('zoneName')._z;}
+ if(!$('upOv').classList.contains('hidden'))renderUpgrades();if(!$('mapOv').classList.contains('hidden'))renderMap();
+}
+function setLang(l){if(!LANGS[l]||l===LANG)return;LANG=l;PREFS.lang=l;savePrefs();relabel();applyI18n();sfx('click');}
+
+// ================= QUESTS =================
+function makeQuest(){
+ const opts=[];const has=(tt,k)=>S.quests.some(q=>q.t===tt&&q.k===k);
+ CATS.forEach((c,i)=>{if(!S.unlocked[c.zone])return;const rem=countFloor(i)+countHeld(i);if(rem>=4&&!has('place',i)){const n=Math.min(rem,4+randi(5));opts.push({t:'place',k:i,n,reward:Math.round(n*6+ZB[c.zone].tier*8)});}});
+ if(floorItems.length>=10&&!has('pick','any')){const n=Math.min(floorItems.length,10+randi(3)*5);opts.push({t:'pick',k:'any',n,reward:n*3});}
+ SHELF_ZONES.forEach(z=>{if(S.unlocked[z.id]&&!S.cleared[z.id]&&!has('clear',z.id))opts.push({t:'clear',k:z.id,n:1,reward:60+z.tier*30});});
+ const nz=nextLockedZone();if(nz&&!has('unlock',nz.id))opts.push({t:'unlock',k:nz.id,n:1,reward:80+nz.tier*20});
+ if(UPG.some(u=>S.up[u.id]<u.costs.length)&&!has('upgrade','any'))opts.push({t:'upgrade',k:'any',n:1,reward:40});
+ if(!opts.length)return null;
+ const q=opts[randi(opts.length)];q.p=0;q.reward=Math.round(q.reward*dayMult());return q;
+}
+function fillQuests(){let guard=0;while(S.quests.length<3&&guard++<6){const q=makeQuest();if(!q)break;S.quests.push(q);}renderQuests();}
+function questEvent(tt,k,amt){
+ let changed=false;
+ S.quests.forEach(q=>{if(q.t===tt&&(q.k===k||q.k==='any')&&q.p<q.n){q.p=Math.min(q.n,q.p+(amt||1));changed=true;}});
+ if(!changed)return;
+ const done=S.quests.filter(q=>q.p>=q.n);
+ done.forEach(q=>{S.coins+=q.reward;toast(t('qDone',{q:questText(q),r:q.reward}),'gold',3200);sfx('quest');buzz([30,40,30]);});
+ if(done.length){S.quests=S.quests.filter(q=>q.p<q.n);setTimeout(()=>{fillQuests();save();},900);}
+ renderQuests();updateHUD();
+}
+function pruneQuests(){
+ S.quests=S.quests.filter(q=>{if(q.t==='place'){return countFloor(q.k)+countHeld(q.k)>=q.n-q.p;}if(q.t==='clear')return !S.cleared[q.k];if(q.t==='unlock')return !S.unlocked[q.k];return true;});
+ fillQuests();
+}
+
+// ================= ACTIONS =================
+let target=null;
+function pickItem(f,quiet){
+ if(S.held.length>=capacity()){if(!quiet){toast(S.up.cap<4?t('full1'):t('full2'),'bad');sfx('err');buzz(60);}return false;}
+ removeFloorItem(f);S.held.push(f.c);S.stats.picked++;
+ const m=meshFromFloor(f);tween(m,()=>handWorld(),.26,.35,1,.35,()=>scene.remove(m));
+ sfx('pick');buzz(15);refreshHeld();questEvent('pick','any');
+ if(S.tut===0){S.tut=1;toast(t('tut1'),'good',4500);}
+ return true;
+}
+function placeOn(sh,quiet){
+ if(!S.held.length){if(!quiet){toast(t('noHeld'),'bad');sfx('err');}return false;}
+ let idx=-1;for(let i=S.held.length-1;i>=0;i--)if(S.held[i]===sh.cat){idx=i;break;}
+ if(idx<0){if(!quiet){const c=S.held[S.held.length-1];toast(t('wrong',{i:cn(c),z:zn(CATS[c].zone)}),'bad');sfx('err');flashRed();buzz(80);}return false;}
+ if(sh.filled>=sh.slots.length){if(!quiet){toast(t('shelfFull'),'bad');sfx('err');}return false;}
+ S.held.splice(idx,1);const slot=sh.filled++;
+ const m=makeItemMesh(sh.cat);const final=sh.slots[slot].clone();const r=sh.slotRot[slot];m.rotation.set(r[0],r[1],r[2]);m.position.copy(handWorld());m.scale.setScalar(.5);scene.add(m);
+ tween(m,()=>final,.24,.25,.5,1,()=>{scene.remove(m);setShown(sh,sh.shown+1);});
+ const z=ZB[sh.zone];const reward=Math.round((4+2*z.tier)*dayMult());S.coins+=reward;S.stats.placed++;
+ flyText('+'+reward+' 🪙');sfx('place');buzz(20);setTimeout(()=>sfx('coin'),90);
+ refreshHeld();questEvent('place',sh.cat);
+ if(S.tut===1){S.tut=2;toast(t('tut2'),'good',4500);}
+ checkZoneClear(sh.zone);
+ return true;
+}
+function checkZoneClear(zid){
+ const list=shelvesByZone[zid];if(!list||S.cleared[zid])return;
+ if(list.every(s=>s.filled>=s.slots.length)){S.cleared[zid]=1;const z=ZB[zid];const b=Math.round(80*(z.tier+1)*dayMult());S.coins+=b;toast(t('zoneClean',{z:zn(zid),b}),'gold',4000);sfx('clear');buzz([40,60,40]);questEvent('clear',zid);save();}
+ checkAllClear();
+}
+let spillTimer=0;
+function checkAllClear(){
+ const open=SHELF_ZONES.filter(z=>S.unlocked[z.id]);
+ if(!open.every(z=>S.cleared[z.id])||floorItems.length||S.held.length)return;
+ if(open.length===SHELF_ZONES.length){setTimeout(showDayComplete,1200);}
+ else{const nz=nextLockedZone();toast(S.coins>=nz.cost?t('goUnlock',{z:zn(nz.id)}):t('waitSpill',{c:nz.cost,z:zn(nz.id)}),'good',5000);spillTimer=14;}
+}
+function spill(){
+ const open=SHELF_ZONES.filter(z=>S.unlocked[z.id]);let n=0;
+ open.forEach(z=>shelvesByZone[z.id].forEach(sh=>{const k=Math.ceil(sh.filled*.5);sh.filled-=k;setShown(sh,sh.shown);const others=ZONES.filter(o=>S.unlocked[o.id]);for(let i=0;i<k;i++){const zz=Math.random()<.75?z:others[randi(others.length)];const[x,y]=randomSpot(zz);addFloorItem(sh.cat,x,y,rand(0,6.28),Math.random()<.55?1:0);n++;}S.cleared[z.id]=0;}));
+ toast(t('spill',{n}),'bad',4000);sfx('drop');buzz(120);pruneQuests();save();
+}
+function tryUnlock(zid,fromMenu){
+ const z=ZB[zid];if(S.unlocked[zid])return;
+ const nz=nextLockedZone();
+ if(nz.id!==zid){toast(t('unlockFirst',{z:zn(nz.id)}),'bad');sfx('err');return;}
+ if(S.coins<z.cost){toast(t('needCoins',{c:z.cost,z:zn(zid),m:z.cost-S.coins}),'bad');sfx('err');return;}
+ S.coins-=z.cost;S.unlocked[zid]=1;S.cleared[zid]=0;removeFence(zid);spawnZone(zid);
+ toast(t('unlocked',{z:z.icon+' '+zn(zid)}),'gold',4000);sfx('unlock');buzz([30,50,30,50]);questEvent('unlock',zid);pruneQuests();spillTimer=0;save();updateHUD();
+ if(fromMenu)renderMap();
+}
+function dropItem(){
+ if(!S.held.length){toast(t('noDrop'),'bad');sfx('err');return;}
+ const c=S.held.pop();const fx=-Math.sin(yaw),fz=-Math.cos(yaw);let x=player.x+fx*1.1,z=player.z+fz*1.1;
+ if(hitsCollider(x,z,.15)){x=player.x;z=player.z;}
+ const f=addFloorItem(c,x,z,rand(0,6.28),1);if(f){const m=meshFromFloor(f);const fin=m.position.clone();m.position.copy(handWorld());m.scale.setScalar(.5);FLOOR_IG[c].main.setMatrixAt(f.idx,_M.makeScale(0,0,0));FLOOR_IG[c].main.instanceMatrix.needsUpdate=true;tween(m,()=>fin,.3,.2,.5,1,()=>{scene.remove(m);if(floorItems.includes(f))updateFloorItem(f);});}
+ sfx('drop');buzz(15);refreshHeld();
+}
+function nearShelfMatch(maxD){let best=null,bd=maxD||(isTouch?3:2.6);for(const sh of shelves){if(!S.unlocked[sh.zone]||sh.filled>=sh.slots.length)continue;if(!S.held.includes(sh.cat))continue;const d=Math.hypot(sh.front.x-player.x,sh.front.z-player.z);if(d<bd&&Math.abs(player.x-sh.front.x)<sh.w/2+.8){bd=d;best=sh;}}return best;}
+function doInteract(mode,quiet){
+ const tg=target;
+ if(tg&&tg.type==='item'&&mode!=='place')return pickItem(tg.ref,quiet);
+ if(tg&&tg.type==='fence'&&mode!=='place'){if(!quiet)tryUnlock(tg.zone);return false;}
+ if(tg&&tg.type==='shelf'&&mode!=='pick')return placeOn(tg.ref,quiet);
+ if(mode!=='pick'&&S.held.length){const sh=nearShelfMatch();if(sh)return placeOn(sh,quiet);}
+ if(mode==='pick'&&isTouch){const f=nearestFloorItem(null,upv('range'));if(f)return pickItem(f,quiet);}
+ if(!quiet&&mode!=='any'){sfx('err');toast(mode==='pick'?t('noRange'):t('standShelf'),'bad');}
+ return false;
+}
+
+// ================= TARGETING =================
+const ray=new THREE.Raycaster();const center=new THREE.Vector2(0,0);const cand=[];
+function computeTarget(){
+ const range=upv('range')+(isTouch?.3:0);target=null;cand.length=0;
+ for(const ig of FLOOR_IG)if(ig.items.length)cand.push(ig.main);
+ for(const sh of shelves){if(!S.unlocked[sh.zone])continue;const dx=sh.group.position.x-player.x,dz=sh.group.position.z-player.z;if(Math.abs(dx)<sh.w/2+4&&Math.abs(dz)<4)cand.push(sh.hitbox);}
+ for(const id in fences){const z=ZB[id];if(player.x>z.x0-5&&player.x<z.x1+5&&player.z>z.z0-5&&player.z<z.z1+5)fences[id].pick.forEach(p=>cand.push(p));}
+ camera.updateMatrixWorld();ray.setFromCamera(center,camera);ray.far=Math.max(range,4)+1.6;
+ const hits=ray.intersectObjects(cand,false);
+ for(const h of hits){const u=h.object.userData;const hd=Math.hypot(h.point.x-player.x,h.point.z-player.z);
+  if(u.type==='itemIG'){const f=u.ig.items[h.instanceId];if(f&&hd<=range){target={type:'item',ref:f};break;}continue;}
+  if(u.type==='shelf'){if(hd<=3.2)target={type:'shelf',ref:u.ref};break;}
+  if(u.type==='fence'){if(hd<=3.6)target={type:'fence',zone:u.zone};break;}
+ }
+ if(!target){
+  const fx=-Math.sin(yaw),fz=-Math.cos(yaw);let best=null,bs=-1;const minDot=isTouch?.7:.82;
+  for(const f of floorItems){const dx=f.x-player.x,dz=f.z-player.z;const d=Math.hypot(dx,dz);if(d>range||d<.05)continue;const dot=(dx*fx+dz*fz)/d;if(dot<minDot&&d>1)continue;const sc=dot-d*.08;if(sc>bs){bs=sc;best=f;}}
+  if(best)target={type:'item',ref:best};
+ }
+ if(!target&&S.held.length){const sh=nearShelfMatch(2.4);if(sh)target={type:'shelf',ref:sh,soft:true};}
+}
+let lastPrompt='';
+function updatePrompt(){
+ let html='';
+ const K=isTouch?'':'<span class="k">E</span>';
+ if(target&&target.type==='item'){const c=target.ref.c;const full=S.held.length>=capacity();html=`${CATS[c].brand?CATS[c].brand+' · ':''}<b>${cn(c)}</b> ${t('p_to',{z:ZB[CATS[c].zone].icon+' '+zn(CATS[c].zone)})}<br>`+(full?`<span class="bad">${t('p_bagFull')}</span>`:`${K} ${t('p_pick')}`);}
+ else if(target&&target.type==='shelf'){const sh=target.ref;const ok=S.held.includes(sh.cat);html=t('p_shelf',{c:cn(sh.cat),f:sh.filled,t:sh.slots.length})+'<br>'+(sh.filled>=sh.slots.length?`<span class="good">${t('p_shelfFull')}</span>`:ok?`${K} <span class="good">${t('p_place')}</span> ${isTouch?'':t('p_hold')}`:(S.held.length?`<span class="bad">${t('p_notThis')}</span>`:t('p_bring')));}
+ else if(target&&target.type==='fence'){const z=ZB[target.zone];const nz=nextLockedZone();html=t('p_lock',{z:zn(z.id),c:z.cost})+'<br>'+(nz.id!==z.id?`<span class="bad">${t('unlockFirst',{z:zn(nz.id)})}</span>`:S.coins>=z.cost?`${K} <span class="good">${t('p_unlockNow')}</span>`:`<span class="bad">${t('p_missing',{m:z.cost-S.coins})}</span>`);}
+ if(html!==lastPrompt){lastPrompt=html;$('prompt').innerHTML=html;$('prompt').classList.toggle('hidden',!html);}
+ $('cross').classList.toggle('on',!!target);
+ if(isTouch){
+  const canPick=!!target&&(target.type==='item'||target.type==='fence');
+  setCls('bPick','act',canPick);
+  const lbl=target&&target.type==='fence'?t('bOpen'):t('bPick');if($('bPick').textContent!==lbl)$('bPick').textContent=lbl;
+  setCls('bPlace','act',!!(S.held.length&&((target&&target.type==='shelf'&&S.held.includes(target.ref.cat))||nearShelfMatch())));
+  setCls('bDrop','act',S.held.length>0);
+ }
+}
+function setCls(id,c,on){const e=$(id);if(e.classList.contains(c)!==on)e.classList.toggle(c,on);}
+function nearestShelfFor(c){let best=null,bd=1e9;for(const sh of shelves){if(sh.cat!==c||sh.filled>=sh.slots.length)continue;const d=Math.hypot(sh.front.x-player.x,sh.front.z-player.z);if(d<bd){bd=d;best=sh;}}return best;}
+function nearestFloorItem(filter,maxD){let best=null,bd=maxD||1e9;for(const f of floorItems){if(filter&&!filter(f))continue;const d=Math.hypot(f.x-player.x,f.z-player.z);if(d<bd){bd=d;best=f;}}return best;}
+let guideShelf=null;
+function updateGuides(tm){
+ let tp=null,col=0x33e07f;guideShelf=null;
+ for(const s of shelves)if(s.glow.visible)s.glow.visible=false;
+ if(S.held.length){const sh=nearestShelfFor(S.held[S.held.length-1])||S.held.map(nearestShelfFor).find(Boolean);if(sh){tp=sh.front;guideShelf=sh;if(S.up.hint){sh.glow.visible=true;sh.glow.material.opacity=.12+.1*Math.sin(tm*6);}}}
+ else if(S.up.hint){const f=nearestFloorItem();if(f){tp=new THREE.Vector3(f.x,0,f.z);col=0xffcf33;}}
+ if(tp){const dx=tp.x-player.x,dz=tp.z-player.z,d=Math.hypot(dx,dz);
+  arrow.userData.mat.color.setHex(col);beacon.userData.mat.color.setHex(col);
+  arrow.visible=d>1.6;const fx=-Math.sin(yaw),fz=-Math.cos(yaw);arrow.position.set(player.x+fx*2.2,1.0+Math.sin(tm*5)*.04,player.z+fz*2.2);arrow.rotation.set(0,Math.atan2(dx,dz),0);
+  beacon.visible=true;beacon.position.set(tp.x,(guideShelf?Math.max(KINDS[guideShelf.kind].h,1)+.9:.9)+Math.sin(tm*4)*.15,guideShelf?tp.z-.7:tp.z);beacon.rotation.y=tm*2;
+  const ring=beacon.userData.ring;ring.visible=!!guideShelf;if(guideShelf){ring.position.set(tp.x,.02,tp.z);ring.scale.setScalar(1+.12*Math.sin(tm*5));}
+ }else{arrow.visible=false;beacon.visible=false;beacon.userData.ring.visible=false;}
+ if(target&&target.type==='item'){const f=target.ref;selRing.visible=true;selRing.position.set(f.x,.015,f.z);selRing.scale.setScalar(1+.15*Math.sin(tm*8));}else selRing.visible=false;
+}
+
+// ================= MAP =================
+function drawMap(cv,big){
+ const g=cv.getContext('2d');const W=cv.width,H=cv.height;const s=Math.min(W/60,H/48);const ox=(W-60*s)/2,oy=(H-48*s)/2;
+ const X=x=>ox+(x+30)*s,Y=z=>oy+(z+26)*s;
+ g.clearRect(0,0,W,H);
+ ZONES.forEach(z=>{const un=S.unlocked[z.id];g.fillStyle=un?'#'+new THREE.Color(z.color).getHexString():'#9a95ad';g.fillRect(X(z.x0)+1,Y(z.z0)+1,(z.x1-z.x0)*s-2,(z.z1-z.z0)*s-2);
+  g.fillStyle=un?'#2b2140':'#ffffff';g.font=`bold ${big?20:15}px ${FONT}`;g.textAlign='center';
+  if(big){g.fillText((un?z.icon:'🔒')+' '+zn(z.id),X((z.x0+z.x1)/2),Y((z.z0+z.z1)/2)+8);
+   if(!un){g.font='bold 16px Arial';g.fillText(z.cost+' '+t('coins'),X((z.x0+z.x1)/2),Y((z.z0+z.z1)/2)+30);}
+   else if(!z.entrance){const ss=shelvesByZone[z.id];const f=ss.reduce((a,b)=>a+b.filled,0),tot=ss.reduce((a,b)=>a+b.slots.length,0);g.font='bold 15px Arial';g.fillText(S.cleared[z.id]?t('clean'):`${f}/${tot}`,X((z.x0+z.x1)/2),Y((z.z0+z.z1)/2)+30);}
+  }else g.fillText(un?z.icon:'🔒',X((z.x0+z.x1)/2),Y((z.z0+z.z1)/2)+6);
+ });
+ shelves.forEach(sh=>{g.fillStyle=sh===guideShelf?'#16c060':'#5b5470';const x=sh.group.position.x,z=sh.group.position.z;g.fillRect(X(x-sh.w/2),Y(z-sh.d/2),sh.w*s,Math.max(2,sh.d*s));});
+ const hl=S.up.hint&&S.held.length?new Set(S.held):null;
+ floorItems.forEach(f=>{g.fillStyle=hl&&hl.has(f.c)?'#16c060':CATS[f.c].c1==='#ffffff'?'#8ab':CATS[f.c].c1;const r=(hl&&hl.has(f.c)?2.2:1.4)*(big?1.6:1.3);g.fillRect(X(f.x)-r,Y(f.z)-r,r*2,r*2);});
+ const px=X(player.x),py=Y(player.z);g.save();g.translate(px,py);g.rotate(-yaw);g.fillStyle='#ff3b6b';g.strokeStyle='#fff';g.lineWidth=2;const k=big?12:11;g.beginPath();g.moveTo(0,-k);g.lineTo(k*.7,k*.7);g.lineTo(0,k*.35);g.lineTo(-k*.7,k*.7);g.closePath();g.fill();g.stroke();g.restore();
+}
+function renderMap(){drawMap($('bigmap'),true);const zl=$('zoneList');zl.innerHTML='';const nz=nextLockedZone();
+ SHELF_ZONES.forEach(z=>{const d=document.createElement('div');d.className='zrow';let right='';
+  if(S.unlocked[z.id]){const ss=shelvesByZone[z.id];const f=ss.reduce((a,b)=>a+b.filled,0),tot=ss.reduce((a,b)=>a+b.slots.length,0);right=S.cleared[z.id]?t('clean'):`${f}/${tot}`;}
+  else if(nz&&nz.id===z.id){right=`<button class="btn ${S.coins>=z.cost?'green':'gray'}" data-unlock="${z.id}">${t('unlockBtn',{c:z.cost})}</button>`;}
+  else right=`🔒 ${z.cost} ${t('coins')}`;
+  d.innerHTML=`<span>${z.icon} ${zn(z.id)}</span><span>${right}</span>`;zl.appendChild(d);});
+ zl.querySelectorAll('[data-unlock]').forEach(b=>b.onclick=()=>{initAudio();tryUnlock(b.dataset.unlock,true);});
+}
+
+// ================= UPGRADES =================
+function renderUpgrades(){
+ $('upCoins').textContent=t('youHave',{c:S.coins.toLocaleString()});const gEl=$('upGrid');gEl.innerHTML='';
+ UPG.forEach(u=>{const lv=S.up[u.id];const max=u.costs.length;const d=document.createElement('div');d.className='up';
+  const cost=u.costs[lv];const can=lv<max&&S.coins>=cost;
+  d.innerHTML=`<div class="ic">${u.icon}</div><h3>${t('u_'+u.id)}</h3><p>${t('ud_'+u.id)}</p><div class="lv">${Array.from({length:max+1},(_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div><p><b>${t('current')}:</b> ${u.fmt(u.vals[lv])}${lv<max?` → <b style="color:#7a3cff">${u.fmt(u.vals[lv+1])}</b>`:''}</p>`+
+   (lv<max?`<button class="btn ${can?'green':'gray'}" data-up="${u.id}">${t('upBtn',{c:cost})}</button>`:`<button class="btn gray">${t('maxed')}</button>`);
+  gEl.appendChild(d);});
+ gEl.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>buyUpgrade(b.dataset.up));
+}
+function buyUpgrade(id){initAudio();const u=UB[id];const lv=S.up[id];if(lv>=u.costs.length)return;const c=u.costs[lv];if(S.coins<c){sfx('err');toast(t('missing',{m:c-S.coins}),'bad');return;}
+ S.coins-=c;S.up[id]++;sfx('unlock');buzz(30);toast(`${u.icon} ${t('u_'+id)} → ${u.fmt(u.vals[S.up[id]])}`,'good');questEvent('upgrade','any');refreshHeld();renderUpgrades();save();}
+
+// ================= SAVE / LOAD =================
+let noSave=false;
+function save(){if(noSave)return;try{const d={v:1,coins:S.coins,up:S.up,unlocked:S.unlocked,cleared:S.cleared,day:S.day,stats:S.stats,quests:S.quests,tut:S.tut,music:S.music,sfx:S.sfx,held:S.held,shelves:shelves.map(s=>s.filled),floor:floorItems.map(f=>[f.c,+f.x.toFixed(2),+f.z.toFixed(2),+f.ry.toFixed(2),f.p]),pos:[+player.x.toFixed(2),+player.z.toFixed(2)],yaw:+yaw.toFixed(3)};localStorage.setItem(SAVE_KEY,JSON.stringify(d));}catch(e){}}
+function loadSave(){try{const r=localStorage.getItem(SAVE_KEY);if(!r)return null;const d=JSON.parse(r);if(!d||d.v!==1)return null;return d;}catch(e){return null;}}
+function clearWorld(){floorItems=[];FLOOR_IG.forEach(ig=>{ig.items=[];ig.setCount(0);});pulling.length=0;shelves.forEach(sh=>{sh.filled=0;setShown(sh,0);});Object.keys(fences).forEach(removeFence);}
+function applyState(d){
+ clearWorld();S=defaultState();
+ if(d){Object.assign(S,{coins:d.coins|0,up:Object.assign(S.up,d.up||{}),unlocked:Object.assign({entrance:1,candy:1,drinks:1},d.unlocked||{}),cleared:d.cleared||{},day:d.day||1,stats:d.stats||S.stats,quests:(d.quests||[]).filter(q=>q&&q.t&&q.n),tut:d.tut||0,music:d.music??1,sfx:d.sfx??1,held:(d.held||[]).filter(c=>CATS[c])});
+  UPG.forEach(u=>S.up[u.id]=clamp(S.up[u.id]|0,0,u.costs.length));
+  (d.shelves||[]).forEach((n,i)=>{const sh=shelves[i];if(!sh)return;n=clamp(n|0,0,sh.slots.length);sh.filled=n;setShown(sh,n);});
+  (d.floor||[]).forEach(a=>{if(CATS[a[0]])addFloorItem(a[0],a[1],a[2],a[3],a[4]);});
+  if(d.pos){player.x=d.pos[0];player.z=d.pos[1];}yaw=d.yaw||0;
+ }else{player.x=0;player.z=18.5;yaw=0;}
+ pitch=-.08;
+ SHELF_ZONES.forEach(z=>{if(!S.unlocked[z.id])buildFence(z);});
+ if(!d){spawnZone('candy');spawnZone('drinks');}
+ collide(player,.35);
+ pruneQuests();refreshHeld();updateHUD(true);applyI18n();
+}
+function showDayComplete(){
+ if(!SHELF_ZONES.every(z=>S.unlocked[z.id]&&S.cleared[z.id])||floorItems.length)return;
+ const bonus=Math.round(500*dayMult());S.coins+=bonus;save();
+ $('dayText').innerHTML=t('dayText',{d:S.day,n:S.stats.placed,b:bonus,m:num(1+.25*S.day)});
+ openOverlay('dayOv');
+}
+function startNewDay(){S.day++;shelves.forEach(sh=>{sh.filled=0;setShown(sh,0);});S.cleared={};SHELF_ZONES.forEach(z=>spawnZone(z.id));S.quests=[];pruneQuests();updateHUD(true);save();toast(t('newDay',{d:S.day}),'gold',4000);}
+
+// ================= STATE MACHINE / INPUT =================
+let state='menu';let locked=false,lockWorked=false,noLock=isTouch;
+const keys={};let interactHeld=false,interactTimer=0;
+const overlays=['startOv','pauseOv','upOv','mapOv','dayOv','confOv'];
+function openOverlay(id){overlays.forEach(o=>$(o).classList.toggle('hidden',o!==id));state=id==='startOv'?'menu':'modal';interactHeld=false;for(const k in keys)keys[k]=false;resetJoy();if(document.pointerLockElement)try{document.exitPointerLock();}catch(e){}
+ if(id==='upOv')renderUpgrades();if(id==='mapOv')renderMap();}
+function closeOverlays(){overlays.forEach(o=>$(o).classList.add('hidden'));}
+function resume(){closeOverlays();state='play';$('hud').classList.remove('hidden');if(isTouch)$('touchUI').classList.remove('hidden');tryLock();}
+function tryLock(){if(noLock||isTouch)return;try{const p=canvas.requestPointerLock();if(p&&p.catch)p.catch(onLockErr);}catch(e){onLockErr();}}
+function onLockErr(){if(!lockWorked){if(noLock)return;noLock=true;toast(t('drag'),'good',5000);}}
+document.addEventListener('pointerlockerror',onLockErr);
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===canvas;if(locked)lockWorked=true;else if(state==='play'&&!noLock)openOverlay('pauseOv');});
+let rotateShown=false;
+function startGame(fresh){initAudio();if(fresh){try{localStorage.removeItem(SAVE_KEY);}catch(e){}applyState(null);S.quests=[];fillQuests();save();setTimeout(()=>toast(isTouch?t('tut0t'):t('tut0d'),'good',5000),400);}resume();
+ if(isTouch&&innerHeight>innerWidth&&!rotateShown){rotateShown=true;setTimeout(()=>toast(t('rotate'),'',4000),1500);}}
+function buildStartButtons(){const d=loadSave();const b=$('startBtns');b.innerHTML='';
+ if(d){const c=document.createElement('button');c.className='btn green';c.textContent=t('cont',{d:d.day||1,c:(d.coins|0).toLocaleString()});c.onclick=()=>startGame(false);b.appendChild(c);const n=document.createElement('button');n.className='btn';n.textContent=t('newGame');n.onclick=()=>openOverlay('confOv');b.appendChild(n);}
+ else{const c=document.createElement('button');c.className='btn green';c.style.fontSize='24px';c.textContent=t('start');c.onclick=()=>startGame(true);b.appendChild(c);}
+}
+function buildStart(){const d=loadSave();applyState(d);if(!d){S.quests=[];fillQuests();}buildStartButtons();}
+function goFullscreen(){const el=document.documentElement;try{const p=(el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el);const lockO=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{});}catch(e){}};if(p&&p.then)p.then(lockO).catch(()=>{});else lockO();}catch(e){}}
+$('pResume').onclick=()=>{sfx('click');resume();};
+$('pUp').onclick=()=>openOverlay('upOv');
+$('pMap').onclick=()=>openOverlay('mapOv');
+$('pMusic').onclick=()=>{S.music=S.music?0:1;applyI18n();save();};
+$('pSfx').onclick=()=>{S.sfx=S.sfx?0:1;applyI18n();save();};
+$('pFull').onclick=()=>goFullscreen();
+$('langSel').onchange=e=>setLang(e.target.value);
+$('qualSel').onchange=e=>{PREFS.quality=e.target.value;savePrefs();applyQuality();};
+$('sensR').oninput=e=>{PREFS.sens=+e.target.value;savePrefs();};
+$('pReset').onclick=()=>openOverlay('confOv');
+$('cYes').onclick=()=>startGame(true);
+$('cNo').onclick=()=>{if($('hud').classList.contains('hidden'))openOverlay('startOv');else openOverlay('pauseOv');};
+$('dNext').onclick=()=>{startNewDay();resume();};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{sfx('click');resume();});
+$('minimap').addEventListener('click',()=>{if(state==='play')openOverlay('mapOv');});
+
+addEventListener('keydown',e=>{
+ if(e.repeat&&e.code!=='KeyE')return;
+ if(state==='modal'){if(e.code==='Escape'||(e.code==='KeyU'&&!$('upOv').classList.contains('hidden'))||(e.code==='KeyM'&&!$('mapOv').classList.contains('hidden'))){if(!$('dayOv').classList.contains('hidden')||!$('confOv').classList.contains('hidden'))return;resume();}return;}
+ if(state!=='play')return;
+ keys[e.code]=true;
+ if(e.code==='KeyE'&&!e.repeat){interactHeld=true;doInteract('any');interactTimer=.3;}
+ else if(e.code==='KeyQ')dropItem();
+ else if(e.code==='KeyM')openOverlay('mapOv');
+ else if(e.code==='KeyU')openOverlay('upOv');
+ else if(e.code==='Escape'&&noLock)openOverlay('pauseOv');
+ if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+});
+addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyE')interactHeld=false;});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;interactHeld=false;resetJoy();});
+const SENS=.0022;let dragging=false,dragMoved=0;
+canvas.addEventListener('mousedown',e=>{
+ if(state!=='play'||isTouch)return;initAudio();
+ if(!noLock&&!locked){tryLock();return;}
+ if(e.button!==0)return;
+ if(noLock){dragging=true;dragMoved=0;}else{interactHeld=true;doInteract('any');interactTimer=.3;}
+});
+addEventListener('mouseup',e=>{if(e.button!==0)return;if(noLock&&dragging){dragging=false;if(dragMoved<6&&state==='play')doInteract('any');}interactHeld=false;});
+addEventListener('mousemove',e=>{
+ if(state!=='play'||isTouch)return;
+ if(locked||(noLock&&dragging)){const s=SENS*PREFS.sens;yaw-=e.movementX*s;pitch=clamp(pitch-e.movementY*s,-1.35,1.25);if(dragging)dragMoved+=Math.abs(e.movementX)+Math.abs(e.movementY);}
+});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault());
+
+// touch
+const joy={id:null,x:0,y:0,ox:0,oy:0},look={id:null,x:0,y:0,moved:0};
+function resetJoy(){joy.id=null;joy.x=joy.y=0;look.id=null;$('joyKnob').style.transform='';const b=$('joyBase');b.style.left='';b.style.top='';b.style.bottom='';b.classList.remove('run');}
+function enableTouch(){if(document.body.classList.contains('touch'))return;isTouch=true;noLock=true;document.body.classList.add('touch');if(state==='play')$('touchUI').classList.remove('hidden');lastPrompt='~';applyI18n();}
+if(isTouch)document.body.classList.add('touch');
+addEventListener('touchstart',()=>enableTouch(),{passive:true,capture:true});
+canvas.addEventListener('touchstart',e=>{e.preventDefault();initAudio();if(state!=='play')return;
+ for(const tc of e.changedTouches){if(tc.clientX<innerWidth*.42&&joy.id===null){joy.id=tc.identifier;joy.ox=tc.clientX;joy.oy=tc.clientY;joy.x=joy.y=0;const b=$('joyBase');const r=b.offsetWidth/2;b.style.left=(tc.clientX-r)+'px';b.style.top=(tc.clientY-r)+'px';b.style.bottom='auto';}
+  else if(look.id===null){look.id=tc.identifier;look.x=tc.clientX;look.y=tc.clientY;look.moved=0;}}
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();for(const tc of e.changedTouches){
+ if(tc.identifier===joy.id){let dx=tc.clientX-joy.ox,dy=tc.clientY-joy.oy;const d=Math.hypot(dx,dy),mx=$('joyBase').offsetWidth*.42;if(d>mx){dx*=mx/d;dy*=mx/d;}joy.x=dx/mx;joy.y=dy/mx;$('joyKnob').style.transform=`translate(${dx}px,${dy}px)`;$('joyBase').classList.toggle('run',Math.hypot(joy.x,joy.y)>.96);}
+ else if(tc.identifier===look.id){const dx=tc.clientX-look.x,dy=tc.clientY-look.y;look.x=tc.clientX;look.y=tc.clientY;look.moved+=Math.abs(dx)+Math.abs(dy);const s=.0055*PREFS.sens;yaw-=dx*s;pitch=clamp(pitch-dy*s,-1.35,1.25);}
+}},{passive:false});
+function endTouch(e){for(const tc of e.changedTouches){if(tc.identifier===joy.id){joy.id=null;joy.x=joy.y=0;$('joyKnob').style.transform='';const b=$('joyBase');b.style.left='';b.style.top='';b.style.bottom='';b.classList.remove('run');}if(tc.identifier===look.id){if(look.moved<10&&state==='play')doInteract('any');look.id=null;}}}
+canvas.addEventListener('touchend',endTouch);canvas.addEventListener('touchcancel',endTouch);
+function tbtn(id,fn,hold){const b=$(id);
+ b.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();initAudio();if(state!=='play')return;fn();clearInterval(b._h);if(hold)b._h=setInterval(()=>{if(state==='play')fn(true);else clearInterval(b._h);},160);},{passive:false});
+ const up=e=>{e.preventDefault();clearInterval(b._h);};b.addEventListener('touchend',up);b.addEventListener('touchcancel',up);
+ b.addEventListener('mousedown',e=>{e.preventDefault();initAudio();if(state==='play')fn();});}
+tbtn('bPick',q=>doInteract('pick',q),true);
+tbtn('bPlace',q=>doInteract('place',q),true);
+tbtn('bDrop',()=>dropItem());
+tbtn('bMap',()=>openOverlay('mapOv'));
+tbtn('bUp',()=>openOverlay('upOv'));
+tbtn('bPause',()=>openOverlay('pauseOv'));
+
+// ================= LOOP =================
+let last=performance.now(),stepT=0,bobT=0,saveT=0,autoT=0,magT=0,frame=0;
+let perfAcc=0,perfFrames=0;
+function adaptPerf(dt){
+ if(PREFS.quality!=='auto')return;perfAcc+=dt;perfFrames++;
+ if(perfAcc<2.5)return;const fps=perfFrames/perfAcc;perfAcc=0;perfFrames=0;
+ const maxPR=isTouch?Math.min(DPR,1.5):Math.min(DPR,2);
+ if(fps<40&&curPR>.7){curPR=Math.max(.7,curPR-.15);renderer.setPixelRatio(curPR);renderer.setSize(innerWidth,innerHeight);if(shadowsOn&&fps<30)setShadows(false);}
+ else if(fps>58&&curPR<maxPR-.01){curPR=Math.min(maxPR,curPR+.1);renderer.setPixelRatio(curPR);renderer.setSize(innerWidth,innerHeight);}
+}
+function update(dt,tm){
+ let mx=0,mz=0;
+ if(keys.KeyW||keys.ArrowUp)mz+=1;if(keys.KeyS||keys.ArrowDown)mz-=1;if(keys.KeyA||keys.ArrowLeft)mx-=1;if(keys.KeyD||keys.ArrowRight)mx+=1;
+ mx+=joy.x;mz-=joy.y;
+ const len=Math.hypot(mx,mz);let moving=false;
+ if(len>.1){const n=Math.max(1,len);mx/=n;mz/=n;
+  const sprint=keys.ShiftLeft||keys.ShiftRight||(joy.id!==null&&Math.hypot(joy.x,joy.y)>.96);const spd=upv('speed')*(sprint?1.5:1)*(S.up.cart?0.95:1);
+  const fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);
+  player.x+=(fx*mz+rx*mx)*spd*dt;player.z+=(fz*mz+rz*mx)*spd*dt;collide(player,.35);moving=true;
+  bobT+=dt*spd*2.2;stepT-=dt*(sprint?1.5:1);if(stepT<=0){stepT=.42;sfx('step');}
+ }
+ const bob=moving?Math.sin(bobT)*.035:0;
+ camera.position.set(player.x,1.62+bob,player.z);camera.rotation.set(pitch,yaw,0);
+ holdGroup.position.y=-.46+(moving?Math.abs(Math.cos(bobT))*.02:0);
+ computeTarget();
+ if(interactHeld){interactTimer-=dt;if(interactTimer<=0){interactTimer=.14;doInteract('any',true);}}
+ if(S.up.auto&&S.held.length){autoT-=dt;if(autoT<=0){autoT=.18;for(const sh of shelves){if(!S.unlocked[sh.zone]||sh.filled>=sh.slots.length||!S.held.includes(sh.cat))continue;const d=Math.hypot(sh.front.x-player.x,sh.front.z-player.z);if(d<3.2&&Math.abs(player.x-sh.front.x)<sh.w/2+1.2){placeOn(sh,true);break;}}}}
+ const mr=upv('magnet');
+ if(mr>0){magT-=dt;if(magT<=0){magT=.12;if(S.held.length+pulling.length<capacity()){const want=S.held.length?new Set(S.held):null;let best=null,bd=mr;for(const f of floorItems){if(f.pulled)continue;if(want&&!want.has(f.c))continue;const d=Math.hypot(f.x-player.x,f.z-player.z);if(d<bd){bd=d;best=f;}}if(best){best.pulled=true;pulling.push(best);}}}}
+ for(let i=pulling.length-1;i>=0;i--){const f=pulling[i];if(!floorItems.includes(f)){pulling.splice(i,1);continue;}const dx=player.x-f.x,dz=player.z-f.z,d=Math.hypot(dx,dz);const sp=Math.min(d,dt*7);f.x+=dx/d*sp;f.z+=dz/d*sp;f.y+=(.6-f.y)*dt*4;f.ry+=dt*8;updateFloorItem(f);if(d<.7){pulling.splice(i,1);f.pulled=false;if(!pickItem(f,true)){f.y=f.y0;updateFloorItem(f);}}}
+ updateTweens(dt);updateGuides(tm);
+ if(frame%2===0||!isTouch)updatePrompt();
+ updateHUD();
+ const z=zoneAt(player.x,player.z);const zt=z.icon+' '+zn(z.id);if($('zoneName')._z!==zt){$('zoneName')._z=zt;$('zoneName').textContent=zt;}
+ if(++frame%(isTouch?8:5)===0)drawMap($('minimap'),false);
+ setCls('lockHint','hidden',noLock||locked||isTouch);
+ saveT+=dt;if(saveT>5){saveT=0;save();}
+ if(spillTimer>0){spillTimer-=dt;if(spillTimer<=0){const open=SHELF_ZONES.filter(z=>S.unlocked[z.id]);if(open.every(z=>S.cleared[z.id])&&!floorItems.length&&open.length<SHELF_ZONES.length)spill();}}
+ adaptPerf(dt);
+}
+function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;const tm=now/1000;
+ holdGroup.visible=state==='play';cartView.visible=state==='play'&&S.up.cart>0;
+ if(state==='play')update(dt,tm);else{updateTweens(dt);if(state==='menu'){camera.position.set(0,2.2,16);camera.rotation.set(-.12,Math.sin(tm*.15)*.5,0);}}
+ renderer.render(scene,camera);}
+addEventListener('beforeunload',save);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){save();if(state==='play'&&(isTouch||noLock))openOverlay('pauseOv');}});
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(LANGS[h])setLang(h);});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{relabel();});
+applyQuality();
+buildStart();
+requestAnimationFrame(loop);
+if(location.hash==='#autotest')setTimeout(autotest,800);
+function autotest(){
+ const R=[];const ok=(name,c)=>R.push((c?'✅ ':'❌ ')+name);
+ try{
+  renderer.render(scene,camera);ok('Draw calls (menu): '+renderer.info.render.calls, renderer.info.render.calls<400);
+  startGame(true);noLock=true;
+  ok('Items on floor: '+floorItems.length, floorItems.length===shelvesByZone.candy.concat(shelvesByZone.drinks).reduce((a,b)=>a+b.slots.length,0));
+  ok('3 quests', S.quests.length===3);
+  ok('7 fences', Object.keys(fences).length===7);
+  const z0=player.z;keys.KeyW=true;for(let i=0;i<30;i++)update(1/60,i/60);keys.KeyW=false;ok('Walk W ('+(z0-player.z).toFixed(2)+' m)', z0-player.z>1.5);
+  joy.id=99;joy.x=0;joy.y=-1;const z1=player.z;for(let i=0;i<30;i++)update(1/60,i/60);joy.id=null;joy.x=joy.y=0;ok('Joystick + auto-run ('+(z1-player.z).toFixed(2)+' m)', z1-player.z>2.5);
+  const sh0=shelvesByZone.candy[0];player.x=sh0.group.position.x;player.z=sh0.group.position.z;collide(player,.35);ok('Shelf collision', Math.abs(player.z-sh0.group.position.z)>sh0.d/2);
+  const aimAt=(x,z,y)=>{const dx=x-player.x,dz=z-player.z;yaw=Math.atan2(-dx,-dz);const d=Math.hypot(dx,dz);pitch=Math.atan2((y||0)-1.62,d);camera.position.set(player.x,1.62,player.z);camera.rotation.set(pitch,yaw,0);camera.updateMatrixWorld();};
+  const f=floorItems.find(f=>f.c===sh0.cat);player.x=f.x;player.z=f.z+1.6;collide(player,.35);aimAt(f.x,f.z,f.y);computeTarget();
+  ok('Aim at item', target&&target.type==='item');doInteract('any');ok('Pick up', S.held.length===1);
+  const shD=shelvesByZone.drinks[0];player.x=shD.front.x;player.z=shD.front.z+.8;aimAt(shD.front.x,shD.group.position.z,1);computeTarget();ok('Aim at shelf', target&&target.type==='shelf');
+  const c0=S.coins;doInteract('any');ok('Block wrong shelf', S.held.length===1&&shD.filled===0);
+  player.x=sh0.front.x;player.z=sh0.front.z+.8;aimAt(sh0.front.x,sh0.group.position.z,1);computeTarget();doInteract('any');ok('Stock right shelf (+'+(S.coins-c0)+')', sh0.filled===1&&S.coins>c0&&S.held.length===0);
+  // touch pick fallback (no aim)
+  const wasT=isTouch;isTouch=true;const f2=floorItems[0];player.x=f2.x+.8;player.z=f2.z;collide(player,.35);yaw+=Math.PI;target=null;doInteract('pick');ok('Touch PICK button picks nearby item', S.held.length===1);dropItem();isTouch=wasT;
+  const fs=floorItems.filter(f=>f.c===sh0.cat).slice(0,5);fs.forEach(f=>pickItem(f,true));ok('Capacity 3', S.held.length===3);
+  let guard=0;while((floorItems.length||S.held.length)&&guard++<500){while(S.held.length<capacity()&&floorItems.length)pickItem(floorItems[0],true);S.held.slice().forEach(c=>{const sh=nearestShelfFor(c);if(sh)placeOn(sh,true);});}
+  ok('Cleared Sweets & Drinks', S.cleared.candy&&S.cleared.drinks);
+  S.coins+=10000;tryUnlock('produce');ok('No out-of-order unlock', !S.unlocked.produce);
+  tryUnlock('canned');ok('Unlock Canned ('+floorItems.length+' items)', S.unlocked.canned&&!fences.canned&&floorItems.length===36);
+  UPG.forEach(u=>{while(S.up[u.id]<u.costs.length)buyUpgrade(u.id);});ok('All upgrades, capacity '+capacity(), capacity()===36);
+  closeOverlays();state='play';
+  const fm=floorItems[0];player.x=fm.x+2;player.z=fm.z;collide(player,.35);const before=S.held.length;for(let i=0;i<120;i++)update(1/60,i/60);ok('Magnet ('+(S.held.length-before)+')', S.held.length>before);
+  const c=S.held[0];const sa=nearestShelfFor(c);const f0=sa.filled;player.x=sa.front.x;player.z=sa.front.z+.3;collide(player,.35);for(let i=0;i<60;i++)update(1/60,i/60);ok('Auto-stock', sa.filled>f0);
+  const hl=S.held.length,fl=floorItems.length;if(hl){dropItem();ok('Drop', S.held.length===hl-1&&floorItems.length===fl+1);}
+  save();const snap=JSON.stringify([S.coins,S.unlocked,shelves.map(s=>s.filled),floorItems.length,S.held]);applyState(loadSave());const snap2=JSON.stringify([S.coins,S.unlocked,shelves.map(s=>s.filled),floorItems.length,S.held]);ok('Save/load roundtrip', snap===snap2);
+  // i18n
+  const langs=['en','pt','es','id','vi'];let allOk=true;const keysVi=Object.keys(T.vi);
+  langs.forEach(l=>{const miss=keysVi.filter(k=>T[l][k]==null);if(miss.length){allOk=false;R.push('❌ '+l+' missing: '+miss.join(','));}});
+  ok('All 5 languages have every key ('+keysVi.length+')', allOk);
+  const lbl0=dynLabels.length;setLang('pt');ok('Switch to PT: '+$('zoneName').textContent+' / '+document.title, document.title==='Supermercado Bagunçado HiHi'&&t('z_candy')==='Doces'&&$('pResume').textContent.includes('Continuar'));
+  ok('3D signs relabelled ('+dynLabels.length+')', dynLabels.length===lbl0&&lbl0>20);
+  setLang('es');renderUpgrades();ok('ES upgrades: '+$('upGrid').querySelector('h3').textContent, $('upGrid').querySelector('h3').textContent==='Capacidad');
+  setLang('id');ok('ID quest: '+$('qlist').textContent.slice(0,40), true);
+  setLang('en');
+  S.coins+=20000;['produce','household','fridge','warehouse','discount','premium'].forEach(z=>tryUnlock(z));ok('All 9 areas open, labels '+dynLabels.length, SHELF_ZONES.every(z=>S.unlocked[z.id])&&!Object.keys(fences).length);
+  guard=0;while((floorItems.length||S.held.length)&&guard++<500){while(S.held.length<capacity()&&floorItems.length)pickItem(floorItems[0],true);S.held.slice().forEach(c=>{const sh=nearestShelfFor(c);if(sh)placeOn(sh,true);});}
+  ok('All shelves full', shelves.every(s=>s.filled===s.slots.length)&&SHELF_ZONES.every(z=>S.cleared[z.id]));
+  showDayComplete();ok('Day complete: '+$('dayText').textContent.slice(0,40), !$('dayOv').classList.contains('hidden'));
+  startNewDay();ok('New day items '+floorItems.length, S.day===2&&floorItems.length===shelves.reduce((a,b)=>a+b.slots.length,0));
+  closeOverlays();state='play';player.x=0;player.z=5;yaw=0;pitch=0;update(1/60,0);renderer.render(scene,camera);ok('Draw calls in play (all shelves full + 282 floor items): '+renderer.info.render.calls, true);
+  renderMap();renderUpgrades();drawMap($('minimap'),false);ok('Map & upgrades render', true);
+  setLang('vi');
+ }catch(e){R.push('💥 '+e.message+' '+(e.stack||'').split('\n')[1]);}
+ noSave=true;try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem(PREF_KEY);}catch(e){}
+ closeOverlays();state='modal';
+ const d=document.createElement('div');d.style.cssText='position:fixed;inset:20px;z-index:100;background:#fff;color:#222;padding:16px;border-radius:12px;font:14px/1.45 Arial;overflow:auto';d.innerHTML='<b>AUTOTEST</b><br>'+R.join('<br>');document.body.appendChild(d);
+}
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="vi">
+  <head><script id="gamehihi-fresh-runtime">(function(w){"use strict";var V="5b6d9c6b5c0a";function fresh(u){if(typeof u!=="string"||!u||/^(?:data:|blob:|mailto:|tel:|javascript:|#)/i.test(u)||/^(?:https?:)?\/\//i.test(u)||/(?:[?&])ghv=/.test(u)){return u;}var h="",i=u.indexOf("#");if(i>=0){h=u.slice(i);u=u.slice(0,i);}u+=(u.indexOf("?")<0?"?":"&")+"ghv="+encodeURIComponent(V);return u+h;}w.GameHiHiFresh={version:V,url:fresh};var f=w.fetch;if(typeof f==="function"){w.fetch=function(input,init){if(typeof input==="string"){input=fresh(input);}return f.call(this,input,init);};}function patch(proto,prop){if(!proto){return;}var d=Object.getOwnPropertyDescriptor(proto,prop);if(!d||!d.get||!d.set||!d.configurable){return;}try{Object.defineProperty(proto,prop,{configurable:true,enumerable:d.enumerable,get:d.get,set:function(v){d.set.call(this,fresh(v));}});}catch(e){}}patch(w.HTMLImageElement&&w.HTMLImageElement.prototype,"src");patch(w.HTMLScriptElement&&w.HTMLScriptElement.prototype,"src");patch(w.HTMLAudioElement&&w.HTMLAudioElement.prototype,"src");patch(w.HTMLVideoElement&&w.HTMLVideoElement.prototype,"poster");})(window);</script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#3b1f0e" />
+    <title>Cháo Lòng Anh Béo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #2b170b;
+        overflow: hidden;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        font-family: 'Baloo 2', 'Nunito', Arial, sans-serif;
+      }
+      #game {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #game canvas {
+          display: block;
+          image-rendering: auto;
+          margin: 0 !important;
+      }
+      /* Điện thoại cầm dọc: canvas được xoay 90° (xem src/core/Orientation.ts) */
+      #game.rotated {
+        position: relative;
+      }
+      #game.rotated canvas {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(90deg);
+      }
+      /* Preload fonts by referencing them once (hidden) */
+      #font-warm {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #font-warm .a { font-family: 'Baloo 2'; font-weight: 800; }
+      #font-warm .b { font-family: 'Baloo 2'; font-weight: 700; }
+      #font-warm .c { font-family: 'Baloo 2'; font-weight: 500; }
+      #font-warm .d { font-family: 'Nunito'; font-weight: 800; }
+      #font-warm .e { font-family: 'Nunito'; font-weight: 600; }
+    </style>
+    <script type="module" crossorigin src="js/index-CgH6x0vo.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/phaser-0RJB29YE.js?ghv=5b6d9c6b5c0a">
+  <script>window.GameHiHiDirectEventScoreConfig={"enabled":true,"loggedIn":false,"restUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/score","restNonce":"","guestNonce":"ba55e2ef4eb682fd0ae595abbd05af3dad1253efd821f6f9ba9041a4689ad724","ajaxUrl":"https:\/\/gamehihi.com\/wp-admin\/admin-ajax.php","ajaxNonce":"5caf1c3107","contextNonce":"ba55e2ef4eb682fd0ae595abbd05af3dad1253efd821f6f9ba9041a4689ad724","gameId":5312,"seasonKey":"block-puzzle-01","initialScore":0,"initialTotalScore":0,"scoreLabel":"\u0110i\u1ec3m s\u1ef1 ki\u1ec7n","currentUserName":"GameHiHi-Play-17189","currentUserAvatar":"","caroMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/matchmake","caroRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/create","caroRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/join","caroStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/state","caroMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/move","caroLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/leave","caroRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/rematch","ludoMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/matchmake","ludoRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/create","ludoRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/join","ludoStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/state","ludoRollUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/roll","ludoMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/move","ludoLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/leave","ludoRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/rematch","analyticsUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/track","analyticsEventUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/event","analyticsNonce":"","analyticsUserId":0,"analyticsPlayerRef":"GameHiHi-Play-17189","analyticsUserScore":0,"analyticsUserAgeGroup":"","analyticsRegisteredSource":"","analyticsProfileComplete":0,"analyticsHasEmail":0,"analyticsHasPhone":0,"analyticsHasName":0,"gameSlug":"chao-long-anh-beo","gameName":"Ch\u00e1o L\u00f2ng Anh B\u00e9o","ga4MeasurementId":"G-3X19129X1W","ga4MasterEnabled":1,"ga4MasterMeasurementId":"G-5CDYMXDTW0","analyticsSourceSite":"https:\/\/gamehihi.com\/gamehihi-play\/","analyticsSchemaVersion":"2.0.56"};(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  var best=Number(cfg.initialScore||0), total=Number(cfg.initialTotalScore||0), pending=-1, pendingMode='', busy=false, timer=0;
+  function parseResponse(r){return r.json().then(function(j){if(!r.ok||j&&j.success===false)throw j;return j&&j.data?j.data:j;});}
+  function viaAjax(score,mode){
+    if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+    var body=new URLSearchParams();
+    body.set('action','gamehihi_event_save_score'); body.set('_ajax_nonce',cfg.ajaxNonce);
+    body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score)); body.set('mode',mode||'');
+    body.set('context_nonce',cfg.contextNonce||cfg.guestNonce||'');
+    return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+  }
+  function viaRest(score,mode){
+    if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+    return fetch(cfg.restUrl,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,context_nonce:cfg.contextNonce||cfg.guestNonce})}).then(parseResponse);
+  }
+  function flush(){
+    if(busy||pending<0||!cfg.enabled)return;
+    var score=pending, mode=pendingMode; pending=-1; busy=true;
+    viaAjax(score,mode).catch(function(){return viaRest(score,mode);})
+      .then(function(j){best=Math.max(best,Number(j.best_score||0));if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);try{window.dispatchEvent(new CustomEvent('gamehihi:event-score-saved',{detail:{score:best,totalScore:total,gameId:Number(cfg.gameId)||0}}));}catch(e){} if(window.console&&console.info)console.info('[GameHiHi Event Score] saved',j);})
+      .catch(function(e){if(window.console&&console.error)console.error('[GameHiHi Event Score] save failed',e);})
+      .finally(function(){busy=false;if(pending>=0)flush();});
+  }
+  window.GameHiHiDirectEventScore=function(payload){
+    if(!payload||payload.type!=='gamehihi:event-score'||!cfg.enabled)return;
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    if(!payload.final&&score<=best)return;
+    pending=Math.max(pending,score); pendingMode=String(payload.mode||'').slice(0,50);
+    clearTimeout(timer); timer=setTimeout(flush,payload.final?0:250);
+  };
+  // v1.3.0: Mỗi lần game kết thúc gọi API ngay và tạo 1 bản ghi lịch sử.
+  window.GameHiHiEndGame=function(payload){
+    payload=payload||{};
+    if(!cfg.enabled) return Promise.reject({message:'Event disabled'});
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    var mode=String(payload.mode||'').slice(0,50);
+    var result=String(payload.result||'').slice(0,20);
+    var meta=payload.meta&&typeof payload.meta==='object'?payload.meta:{};
+    function ajax(){
+      if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+      var body=new URLSearchParams();
+      body.set('action','gamehihi_event_end_game'); body.set('_ajax_nonce',cfg.ajaxNonce);
+      body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score));
+      body.set('mode',mode); body.set('result',result); body.set('meta',JSON.stringify(meta));
+      body.set('guest_nonce',cfg.guestNonce||'');
+      return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+    }
+    function rest(){
+      if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+      var url=String(cfg.restUrl).replace(/\/score\/?$/,'/end-game');
+      return fetch(url,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,result:result,meta:meta,guest_nonce:cfg.guestNonce})}).then(parseResponse);
+    }
+    return ajax().catch(function(){return rest();}).then(function(j){
+      best=Math.max(best,Number(j.best_score||0));
+      if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);
+      try{window.dispatchEvent(new CustomEvent('gamehihi:end-game-saved',{detail:j}));}catch(e){}
+      if(window.console&&console.info)console.info('[GameHiHi EndGame] saved',j);
+      return j;
+    }).catch(function(e){if(window.console&&console.error)console.error('[GameHiHi EndGame] save failed',e);throw e;});
+  };
+  window.GameHiHiEventScoreDebug={config:cfg,getBest:function(){return best;},getTotal:function(){return total;},flush:flush};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  if(!cfg.analyticsUrl||!cfg.gameId) return;
+  function randomKey(prefix){
+    var a=new Uint8Array(16); try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    var h=''; for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2); return prefix+h;
+  }
+  function getVisitor(){
+    var k='gh_visitor_v1',v='';
+    try{v=localStorage.getItem(k)||''; if(!v){v=randomKey('v_');localStorage.setItem(k,v);}}catch(e){v=randomKey('v_');}
+    return v.slice(0,64);
+  }
+  function acquisition(){
+    var landing=location.href, ref=document.referrer||'';
+    try{
+      if(window.top!==window.self && window.top.location.origin===location.origin){
+        landing=window.top.location.href;
+        ref=window.top.document.referrer||ref;
+        var saved=window.top.sessionStorage.getItem('gh_acq_v1');
+        if(saved){var o=JSON.parse(saved); if(o&&o.landing)landing=String(o.landing); if(o&&typeof o.referrer==='string')ref=o.referrer;}
+      }
+    }catch(e){}
+    return {landing:String(landing||'').slice(0,1000),referrer:String(ref||'').slice(0,1000)};
+  }
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua) || (/android/i.test(ua)&&!/mobile/i.test(ua))) return 'Tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'Mobile';
+    return 'Desktop';
+  }
+  var visitor=getVisitor(), session=randomKey('s_'), acq=acquisition();
+  var activeMs=0,playMs=0,last=performance.now(),started=false,lastSent={a:-1,p:-1,s:-1},sending=false,pending=false;
+  function accrue(){
+    var now=performance.now(),delta=Math.max(0,Math.min(5000,now-last)); last=now;
+    if(!document.hidden){activeMs+=delta;if(started)playMs+=delta;}
+  }
+  function markStarted(){accrue();started=true;}
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',markStarted,{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,markStarted,{passive:true,once:true});});
+  }
+  document.addEventListener('visibilitychange',function(){accrue(); if(document.hidden)flush(true);},{passive:true});
+  window.addEventListener('blur',accrue,{passive:true}); window.addEventListener('focus',function(){last=performance.now();},{passive:true});
+  function payload(){
+    accrue();
+    return {session_key:session,visitor_key:visitor,game_id:Number(cfg.gameId)||0,active_seconds:Math.min(28800,Math.floor(activeMs/1000)),play_seconds:Math.min(28800,Math.floor(playMs/1000)),started:started?1:0,landing_url:acq.landing,referrer:acq.referrer,language:String(navigator.language||'').slice(0,16),platform:platform(),logged_in:cfg.loggedIn?1:0};
+  }
+  function changed(d){return d.active_seconds!==lastSent.a||d.play_seconds!==lastSent.p||d.started!==lastSent.s;}
+  function remember(d){lastSent={a:d.active_seconds,p:d.play_seconds,s:d.started};}
+  function flush(beacon){
+    var d=payload(); if(!changed(d))return;
+    if(sending){pending=true;return;}
+    if(beacon && navigator.sendBeacon){
+      try{var blob=new Blob([JSON.stringify(d)],{type:'application/json'}); if(navigator.sendBeacon(cfg.analyticsUrl,blob)){remember(d);return;}}catch(e){}
+    }
+    sending=true;
+    var headers={'Content-Type':'application/json'}; if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    fetch(cfg.analyticsUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:JSON.stringify(d)})
+      .then(function(r){if(r.ok)remember(d);})
+      .catch(function(){})
+      .finally(function(){sending=false;if(pending){pending=false;flush(false);}});
+  }
+  setTimeout(function(){flush(false);},2500);
+  setInterval(function(){flush(false);},30000);
+  window.addEventListener('pagehide',function(){flush(true);},{passive:true});
+  window.addEventListener('beforeunload',function(){flush(true);},{passive:true});
+  window.GameHiHiAnalyticsDebug={flush:flush,visitor:visitor,session:session};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  function validMid(v){v=String(v||'').trim().toUpperCase();return /^G-[A-Z0-9]{4,20}$/.test(v)?v:'';}
+  var gameMid=validMid(cfg.ga4MeasurementId), masterMid=Number(cfg.ga4MasterEnabled)?validMid(cfg.ga4MasterMeasurementId):'';
+  var targets=[];
+  [gameMid,masterMid].forEach(function(id){if(id&&targets.indexOf(id)<0)targets.push(id);});
+  if(!targets.length) return;
+
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+  var script=document.createElement('script');
+  script.async=true;
+  script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(targets[0]);
+  document.head.appendChild(script);
+
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua)||(/android/i.test(ua)&&!/mobile/i.test(ua))) return 'tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  function visitorId(){
+    var key='gh_visitor_v1',v='';
+    try{
+      v=localStorage.getItem(key)||'';
+      if(!v){v='v_'+sessionId().replace(/^gs_/,'');localStorage.setItem(key,v);}
+    }catch(e){v='v_'+sessionId().replace(/^gs_/,'');}
+    return String(v||'').slice(0,64);
+  }
+  function sessionId(){
+    var a=new Uint8Array(12),h='';
+    try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2);
+    return 'gs_'+h;
+  }
+  function cleanMeta(meta){
+    var out={},count=0;
+    if(!meta||typeof meta!=='object')return out;
+    Object.keys(meta).forEach(function(raw){
+      if(count>=20)return;
+      var key=String(raw||'').toLowerCase().replace(/[^a-z0-9_]/g,'_').replace(/^_+|_+$/g,'').slice(0,30);
+      if(!key)return;
+      var val=meta[raw];
+      if(typeof val==='number'&&isFinite(val)){out['game_'+key]=val;count++;return;}
+      if(typeof val==='boolean'){out['game_'+key]=val?1:0;count++;return;}
+      if(typeof val==='string'){out['game_'+key]=val.slice(0,100);count++;}
+    });
+    return out;
+  }
+  function merge(a,b){var o={},k;for(k in a)if(Object.prototype.hasOwnProperty.call(a,k))o[k]=a[k];for(k in b)if(Object.prototype.hasOwnProperty.call(b,k))o[k]=b[k];return o;}
+
+  var uid=Math.max(0,Math.floor(Number(cfg.analyticsUserId)||0));
+  var userScore=Math.max(0,Math.floor(Number(cfg.analyticsUserScore)||0));
+  var ageGroup=String(cfg.analyticsUserAgeGroup||'').slice(0,20);
+  var registeredSource=String(cfg.analyticsRegisteredSource||'').slice(0,40);
+  var gameSession=sessionId();
+  var common={
+    game_id:String(Number(cfg.gameId)||0),
+    game_slug:String(cfg.gameSlug||''),
+    game_name:String(cfg.gameName||document.title||''),
+    player_type:cfg.loggedIn?'logged_in':'guest',
+    player_ref:String(cfg.analyticsPlayerRef||''),
+    user_total_score:userScore,
+    source_site:String(cfg.analyticsSourceSite||location.hostname||'').slice(0,80),
+    platform:platform(),
+    language:String(navigator.language||'').slice(0,16),
+    game_session_id:gameSession,
+    game_url:String(location.pathname||'').slice(0,200),
+    page_path:String((location.pathname||'')+(location.search||'')).slice(0,300),
+    analytics_schema_version:String(cfg.analyticsSchemaVersion||'2.0.56')
+  };
+  var vid=visitorId(); if(vid)common.game_visitor_id=vid;
+  if(uid>0){
+    common.wp_user_id=String(uid);
+    if(ageGroup) common.user_age_group=ageGroup;
+    if(registeredSource) common.user_registered_source=registeredSource;
+    common.user_profile_complete=Number(cfg.analyticsProfileComplete)?1:0;
+    common.user_has_email=Number(cfg.analyticsHasEmail)?1:0;
+    common.user_has_phone=Number(cfg.analyticsHasPhone)?1:0;
+    common.user_has_name=Number(cfg.analyticsHasName)?1:0;
+  }
+
+  gtag('js',new Date());
+  gtag('set',common);
+  targets.forEach(function(id){
+    var c={send_page_view:false};
+    if(uid>0)c.user_id=String(uid);
+    gtag('config',id,c);
+  });
+
+  var localSeq=0;
+  var localEventNames={page_view:1,game_view:1,game_start:1,game_score:1,score_submit:1,game_end:1,game_engaged_60s:1,game_exit:1};
+  function logLocal(name,data){
+    if(!cfg.analyticsEventUrl||!localEventNames[name])return;
+    localSeq++;
+    var payload={
+      event_key:(gameSession+'_'+localSeq+'_'+name).slice(0,96),
+      event_name:name,
+      session_key:gameSession,
+      visitor_key:String(common.game_visitor_id||''),
+      game_id:Number(cfg.gameId)||0,
+      game_slug:String(common.game_slug||''),
+      game_name:String(common.game_name||''),
+      player_type:String(common.player_type||''),
+      source_site:String(common.source_site||''),
+      platform:String(common.platform||''),
+      language:String(common.language||''),
+      game_url:String(common.game_url||''),
+      page_path:String(common.page_path||''),
+      score:Math.max(0,Math.floor(Number(data.score)||0)),
+      play_time_seconds:Math.max(0,Math.floor(Number(data.play_time_seconds)||0)),
+      meta:data
+    };
+    var body=JSON.stringify(payload),headers={'Content-Type':'application/json'};
+    if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    if(name==='game_exit'&&navigator.sendBeacon){
+      try{if(navigator.sendBeacon(cfg.analyticsEventUrl,new Blob([body],{type:'application/json'})))return;}catch(e){}
+    }
+    try{fetch(cfg.analyticsEventUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:body}).catch(function(){});}catch(e){}
+  }
+  function send(name,params){
+    params=params&&typeof params==='object'?params:{};
+    var data=merge(common,params);
+    targets.forEach(function(id){
+      var d=merge(data,{send_to:id});
+      try{gtag('event',name,d);}catch(e){}
+    });
+    logLocal(name,data);
+  }
+
+  send('page_view',{page_location:location.href,page_title:document.title,page_referrer:document.referrer||''});
+  send('game_view',{page_location:location.href,page_title:document.title});
+
+  var started=false,startAt=0,exitSent=false,lastSubmitScore=null,lastSubmitAt=0;
+  function playSeconds(){return startAt?Math.max(0,Math.floor((Date.now()-startAt)/1000)):0;}
+  function start(source){
+    if(started) return;
+    started=true; startAt=Date.now();
+    send('game_start',{start_source:String(source||'interaction'),play_time_seconds:0});
+    setTimeout(function(){if(started)send('game_engaged_60s',{play_time_seconds:60});},60000);
+  }
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',function(){start('game_started');},{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){
+    window.addEventListener(ev,function(){start(ev);},{passive:true,once:true});
+  });
+  }
+
+  function submitScore(score,mode,meta,source){
+    score=Math.max(0,Math.floor(Number(score)||0));
+    var now=Date.now();
+    if(lastSubmitScore===score && now-lastSubmitAt<3000)return;
+    lastSubmitScore=score;lastSubmitAt=now;
+    var data=merge({score:score,mode:String(mode||'').slice(0,50),play_time_seconds:playSeconds(),submit_source:String(source||'game')},cleanMeta(meta));
+    send('score_submit',data);
+  }
+
+  var originalScore=window.GameHiHiDirectEventScore;
+  if(typeof originalScore==='function'){
+    window.GameHiHiDirectEventScore=function(payload){
+      payload=payload||{}; start('score');
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      var data=merge({score:score,mode:String(payload.mode||'').slice(0,50),final:payload.final?1:0,play_time_seconds:playSeconds()},cleanMeta(payload.meta));
+      send('game_score',data); // giữ event cũ để không gãy report hiện tại
+      if(payload.final)submitScore(score,payload.mode,payload.meta,'final_score');
+      return originalScore.apply(this,arguments);
+    };
+  }
+
+  var originalEnd=window.GameHiHiEndGame;
+  if(typeof originalEnd==='function'){
+    window.GameHiHiEndGame=function(payload){
+      payload=payload||{}; start('end_game');
+      if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='oc-dem-hihi'||cfg.gameSlug==='net-co-hihi'||cfg.gameSlug==='1-ngay-lam-cho-hihi'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let'||cfg.gameSlug==='mot-ngay-lam-thu-ky'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+        return Promise.resolve(originalEnd.apply(this,arguments)).then(function(j){
+          if(j&&j.saved){
+            var actual=Math.max(0,Math.floor(Number(j.score)||0));
+            var data=merge({score:actual,mode:String(payload.mode||'').slice(0,50),result:String(payload.result||'').slice(0,40),play_time_seconds:playSeconds(),submit_source:((cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let')?'level_saved':(cfg.gameSlug==='o-to-bay'?'round_saved':'day_saved'))},cleanMeta(payload.meta));
+            send('game_score',data);
+            send('score_submit',data);
+            send('game_end',data);
+          }
+          return j;
+        });
+      }
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      submitScore(score,payload.mode,payload.meta,'end_game');
+      var data=merge({
+        score:score,
+        mode:String(payload.mode||'').slice(0,50),
+        result:String(payload.result||'').slice(0,40),
+        play_time_seconds:playSeconds()
+      },cleanMeta(payload.meta));
+      send('game_end',data);
+      return originalEnd.apply(this,arguments);
+    };
+  }
+
+  function sendExit(){
+    if(exitSent) return; exitSent=true;
+    send('game_exit',{started:started?1:0,play_time_seconds:playSeconds(),transport_type:'beacon'});
+  }
+  window.addEventListener('pagehide',sendExit,{passive:true});
+  window.addEventListener('beforeunload',sendExit,{passive:true});
+
+  window.GameHiHiGA4={measurementId:gameMid,masterMeasurementId:masterMid,targets:targets.slice(),userId:uid,sessionId:gameSession,send:send,start:start,submitScore:submitScore};
+})();</script>
+</head>
+  <body>
+    <div id="game"></div>
+    <div id="font-warm" aria-hidden="true">
+      <span class="a">Cháo Lòng Anh Béo ăn ngon tuyệt vời ắ ấ ầ ẩ ẫ ậ đ ơ ư ở ữ ự</span>
+      <span class="b">Cháo</span><span class="c">Cháo</span><span class="d">Cháo</span><span class="e">Cháo</span>
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html class="joydigi" lang="en">
+<head class="joydigi"><script>window.__JOYDIGI_I18N__={"lang":"en","source":"ip","country":"DE","ip_lang":"en","default_lang":"vi","supported":["vi","en","id","es"],"online":true};</script>
+<meta charset="utf-8" class="joydigi"/>
+<meta class="joydigi" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title class="joydigi">HiHi Motorbike Repair Shop</title>
+<meta class="joydigi" content="cover" name="claude:viewport-fit-sides"/>
+<meta class="joydigi" content="#2a1e1c" name="theme-color"/>
+<meta class="joydigi" content="yes" name="mobile-web-app-capable"/>
+<meta class="joydigi" content="yes" name="apple-mobile-web-app-capable"/>
+<meta class="joydigi" content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta class="joydigi" content="Motorbike Repair Shop" name="apple-mobile-web-app-title"/>
+<link class="joydigi" href="joydigi.webmanifest" rel="manifest"/>
+<link class="joydigi" href="assets/joydigi-chibi-icon-180.png" rel="apple-touch-icon"/>
+<meta class="joydigi" content="Pixel art idle tycoon game: restore your family motorbike repair shop in the Mekong Delta." name="description" />
+<link class="joydigi" href="assets/joydigi-chibi-favicon.png" rel="icon" type="image/png"/>
+<link class="joydigi" href="joydigi.css" rel="stylesheet"/></head>
+<body class="joydigi">
+
+<div class="joydigi" id="app">
+<header class="hud gutter joydigi" id="hud">
+<div class="res money joydigi" id="hudMoneyBox" title="Cash"><span class="icon px joydigi" id="hudMoneyIcon"></span><b class="joydigi" id="hudMoney">0k</b></div>
+<div class="res joydigi" title="Reputation"><span class="icon px joydigi" data-icon="ico_rep"></span><b class="joydigi" id="hudRep">0</b></div>
+<div class="res joydigi" title="Shop level"><span class="icon px joydigi" data-icon="ico_xp"></span>
+<div class="lvl-wrap joydigi"><b class="joydigi" id="hudLevel">Level 1</b><div class="bar joydigi"><i class="joydigi" id="hudXp"></i></div></div>
+</div>
+<button aria-label="Notebook: save &amp; transfer, collection, orders, branches, customers, KOLs, map, settings" class="hud-btn joydigi" id="btnMenu" type="button"><span class="icon px joydigi" data-icon="ico_book"></span><i class="dot joydigi" hidden="" id="dotMenu">!</i></button>
+<button aria-label="Online leaderboard" class="hud-btn joydigi" id="btnRank" title="Online leaderboard" type="button"><span class="icon px joydigi" data-icon="ico_trophy"></span></button>
+</header>
+<button aria-label="Open mission log" class="mission-strip gutter joydigi" id="missionStrip" type="button">
+<span class="icon px s32 joydigi" data-icon="ico_mission" id="msIcon"></span>
+<span class="ms-text joydigi">
+<span class="eyebrow joydigi" id="msEyebrow">C1 · 1/25</span>
+<span class="title joydigi" id="msTitle">—</span>
+<span class="goal joydigi" id="msGoal">—</span>
+<span class="order-line joydigi" hidden="" id="msOrder"></span>
+</span>
+<span class="prog joydigi" id="msRight">0/3</span>
+</button>
+<div class="scene-band joydigi" id="sceneBand">
+<canvas aria-label="Repair shop scene. Tap a vehicle to lend a hand, tap a customer or mechanic to see details." class="px joydigi" id="scene" role="img"></canvas>
+<div class="scene-overlay joydigi" id="sceneOverlay"><div class="joydigi" id="sceneBanners"></div><span aria-hidden="true" class="save-chip joydigi" id="saveChip">✓ Saved</span>
+<div class="chips-tl joydigi"><span class="hud-mini joydigi" hidden="" id="hudCombo" title="Wrench Rhythm combo">×2</span><span class="hud-mini set joydigi" hidden="" id="hudSet"></span></div>
+</div>
+</div>
+<section aria-live="polite" class="board gutter joydigi" id="board">
+<h3 class="joydigi">Job board <small class="joydigi" id="boardTitle"></small></h3>
+<div aria-label="Lift — tap Help to assist the mechanic" class="bay-dock joydigi" id="bayDock"></div>
+<div class="list joydigi" id="boardList"></div>
+</section>
+<nav aria-label="Main navigation" class="tabbar gutter joydigi">
+<button class="tab joydigi" data-open="upgrades" type="button"><span class="icon px joydigi" data-icon="ico_wrench"></span><span class="joydigi">Upgrades</span></button>
+<button class="tab joydigi" data-open="staff" type="button"><span class="icon px joydigi" data-icon="ico_staff"></span><span class="joydigi">Staff</span></button>
+<button class="tab joydigi" data-open="missions" type="button"><span class="icon px joydigi" data-icon="ico_mission"></span><span class="joydigi">Missions</span><i class="dot joydigi" hidden="" id="dotMission">!</i></button>
+<button class="tab joydigi" data-open="events" type="button"><span class="icon px joydigi" data-icon="ico_vip"></span><span class="joydigi">Events</span><i class="dot joydigi" hidden="" id="dotEvent">!</i></button>
+<button class="tab joydigi" data-open="shop" type="button"><span class="icon px joydigi" data-icon="ico_shop"></span><span class="joydigi">Shop</span><i class="dot joydigi" hidden="" id="dotShop">!</i></button>
+</nav>
+</div>
+<div aria-hidden="true" class="joydigi" id="fxLayer"></div>
+<div aria-live="polite" class="joydigi" id="toasts"></div>
+<div class="joydigi" id="sheetRoot"></div>
+<div class="joydigi" id="dialogRoot"></div>
+<div class="joydigi" id="modalRoot"></div>
+<script class="joydigi" src="js/joydigi.en.js" type="module"></script>
+<script class="joydigi" src="js/joydigi-online.js" defer></script>
+
+<script>
+/* GameHiHi scoring bridge: valid successful handover = 1 cumulative point. */
+(function(){
+'use strict';
+var key='gamehihi-garage-completed-v1', count=0;
+try{count=Math.max(0,Math.floor(Number(localStorage.getItem(key))||0));}catch(e){}
+var busy=Promise.resolve();
+window.addEventListener('gamehihi:garage-handover',function(ev){
+  var amount=Math.max(0,Number(ev.detail&&ev.detail.amount)||0);
+  if(amount<=0)return;
+  count=Math.min(100000000,count+1);
+  try{localStorage.setItem(key,String(count));}catch(e){}
+  window.dispatchEvent(new CustomEvent('gamehihi:garage-score',{detail:{score:count,vehicles:count,amount:amount}}));
+  if(typeof window.GameHiHiEndGame==='function'){
+    var payload={score:count,mode:'vehicles_served',result:'completed',meta:{vehicles_served:count,earned_amount:Math.floor(amount)}};
+    busy=busy.catch(function(){}).then(function(){return window.GameHiHiEndGame(payload);}).catch(function(err){console.warn('[GameHiHi score]',err);});
+  }
+});
+})();
+</script>
+</body>
+</html>

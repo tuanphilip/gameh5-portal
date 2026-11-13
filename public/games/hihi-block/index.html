@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script>window.__HIHI_GEO={"country":"DE","lang":"en","forced":null,"auto":false,"default_lang":"vi","api":"/api/public/v1"};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<title>Block Puzzle HiHi — Game Xếp Khối</title>
+<style>
+:root{
+    --bg:#1b1530; --bg2:#241c40; --panel:#2b2350; --panel-2:#332a5e;
+    --ink:#f4f0ff; --ink-dim:#a99cd4; --gold:#ffc94d; --accent:#8f7bff;
+    --danger:#ff6b81; --ok:#5ee6a8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    /* Nền ngoài khung: trên màn hình siêu rộng phần hai bên chỉ còn màu. */
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
+    overflow:hidden; user-select:none; -webkit-user-select:none;
+    touch-action:none; overscroll-behavior:none;
+    height:100dvh;
+  }
+  #app{
+    height:100%;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    margin:0 auto;
+    position:relative;
+    background:radial-gradient(120% 90% at 50% 0%, var(--bg2) 0%, var(--bg) 62%);
+  }
+
+  /*
+   * Desktop responsive:
+   * - <= 2200px: khung dùng toàn bộ chiều ngang khả dụng.
+   * - > 2200px: khung game khóa ở 1920px, phần dư hai bên chỉ là màu nền body.
+   */
+  @media (min-width:2201px){
+    #app{max-width:1920px}
+  }
+
+  /* ---------- HUD ---------- */
+  #hud{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 14px 2px;gap:8px;flex:0 0 auto;
+  }
+  .stat{min-width:86px}
+  .stat .lbl{font-size:10px;letter-spacing:2px;color:var(--ink-dim);font-weight:700}
+  .stat .val{font-size:25px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+  .stat.best .val{color:var(--gold)}
+  .stat.score{text-align:right}
+  #mid{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+  #chips{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+  .chip{
+    font-size:10px;font-weight:700;color:var(--ink-dim);
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+    padding:2px 8px;border-radius:20px;white-space:nowrap;
+  }
+  .chip b{color:var(--gold)}
+  .chip.click{cursor:pointer;color:var(--ink);background:rgba(143,123,255,.18);border-color:rgba(143,123,255,.4)}
+  .chip.click:active{transform:scale(.94)}
+  .chip.daily{color:#1b1530;background:var(--gold);border-color:var(--gold);display:none}
+
+  /* ---------- Mascot ---------- */
+  #mascot{width:42px;height:42px;line-height:0}
+  #mascot svg{width:100%;height:100%}
+  #mascot .f{display:none}
+  #mascot.idle .fi{display:block} #mascot.happy .fh{display:block}
+  #mascot.excited .fe{display:block} #mascot.worried .fw{display:block}
+  #mascot.sad .fs{display:block}
+  #mascot.idle svg{animation:bob 3.2s ease-in-out infinite}
+  #mascot.happy svg{animation:bounce .55s ease}
+  #mascot.excited svg{animation:jump .6s ease}
+  #mascot.worried svg{animation:wobble 1.1s ease-in-out infinite}
+  #mascot.sad svg{animation:droop .8s ease forwards}
+  @keyframes bob{50%{transform:translateY(-2px)}}
+  @keyframes bounce{30%{transform:scale(1.18,.85)}60%{transform:scale(.92,1.1)}}
+  @keyframes jump{30%{transform:translateY(-8px) rotate(-6deg)}60%{transform:translateY(0) rotate(4deg)}}
+  @keyframes wobble{25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+  @keyframes droop{to{transform:translateY(3px) rotate(-4deg)}}
+
+  #stage{flex:1 1 auto;position:relative;min-height:0}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+
+  #settingsBtn{
+    position:absolute;bottom:calc(10px + env(safe-area-inset-bottom));right:12px;z-index:5;
+    width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.07);color:var(--ink-dim);font-size:18px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  #settingsBtn:active{transform:scale(.92)}
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
+    background:rgba(15,10,32,.72);backdrop-filter:blur(4px);
+    opacity:0;pointer-events:none;transition:opacity .28s ease;
+  }
+  .overlay.show{opacity:1;pointer-events:auto}
+  .panel{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid rgba(255,255,255,.12);border-radius:22px;
+    padding:24px 24px 20px;width:min(324px,88vw);text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+    transform:scale(.82) translateY(14px);transition:transform .32s cubic-bezier(.2,1.4,.4,1);
+    max-height:88%;overflow-y:auto;
+  }
+  .overlay.show .panel{transform:scale(1) translateY(0)}
+  .panel h2{font-size:24px;letter-spacing:3px;margin-bottom:12px}
+  .panel .go-score{font-size:44px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .panel .go-best{color:var(--ink-dim);font-size:13px;margin-top:6px}
+  .panel .go-best b{color:var(--gold)}
+  #newBest{display:none;color:var(--gold);font-weight:800;font-size:13px;letter-spacing:2px;margin-top:8px;animation:pulse 1s infinite}
+  #goReason{margin-top:10px;font-size:12px;color:var(--ink-dim);line-height:1.45}
+  @keyframes pulse{50%{opacity:.45}}
+  #goDaily{margin-top:13px;font-size:12px;color:var(--ink-dim);line-height:1.5}
+  #goDaily b{color:var(--ok)}
+  .btn{
+    margin-top:16px;display:inline-block;border:none;cursor:pointer;
+    background:linear-gradient(180deg,#a08bff,#7c63f2);color:#fff;
+    font-size:14px;font-weight:800;letter-spacing:2px;
+    padding:13px 26px;border-radius:16px;
+    box-shadow:0 6px 0 #5a45c4, 0 12px 24px rgba(124,99,242,.35);
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 #5a45c4}
+  .btn.ghost{background:rgba(255,255,255,.08);box-shadow:none;color:var(--ink-dim);padding:10px 18px;font-size:12px}
+  .btn.gold{background:linear-gradient(180deg,#ffd76e,#f0b429);color:#3a2b00;box-shadow:0 6px 0 #c48f13,0 12px 24px rgba(240,180,41,.3)}
+  .btn.gold:active{box-shadow:0 3px 0 #c48f13}
+  #shareBtn{display:none;margin-left:8px}
+
+  /* settings */
+  .row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:14px}
+  .row:last-of-type{border-bottom:none}
+  .toggle{width:46px;height:26px;border-radius:20px;background:rgba(255,255,255,.14);position:relative;cursor:pointer;transition:background .2s}
+  .toggle.on{background:var(--ok)}
+  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+  .toggle.on::after{left:23px}
+  .row select,.row input{background:rgba(255,255,255,.1);color:var(--ink);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:6px 8px;font:inherit;font-size:13px;max-width:150px}
+  .row select option{background:var(--panel);color:var(--ink)}
+  .row input{width:150px}
+  #missions{margin-top:12px;text-align:left}
+  #missions h3{font-size:11px;letter-spacing:2px;color:var(--ink-dim);margin-bottom:6px}
+  .mission{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:var(--ink-dim)}
+  .mission.done{color:var(--ok)}
+  .statline{font-size:11px;color:var(--ink-dim);margin-top:12px}
+
+  #toast{
+    position:absolute;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);
+    background:rgba(94,230,168,.95);color:#0a2417;font-weight:800;font-size:13px;
+    padding:10px 18px;border-radius:14px;z-index:30;opacity:0;pointer-events:none;
+    transition:opacity .25s, transform .25s;white-space:nowrap;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  #debugHud{
+    position:absolute;top:6px;left:8px;z-index:20;font:11px/1.5 monospace;
+    color:#7dffb2;background:rgba(0,0,0,.55);padding:6px 8px;border-radius:8px;
+    pointer-events:none;white-space:pre;display:none;
+  }
+
+/* shared extension chrome */
+#app{height:calc(100% - 30px)}
+.ext-footer{
+  width:100%;height:30px;display:flex;align-items:center;justify-content:space-between;
+  margin:0 auto;padding:0 12px;font-size:11px;background:rgba(255,255,255,.04);
+  border-top:1px solid rgba(255,255,255,.07);
+}
+@media (min-width:2201px){
+  .ext-footer{max-width:1920px}
+}
+.ext-footer a{color:#a99cd4;text-decoration:none;font-weight:700}
+.ext-footer a:hover{color:#ffc94d}
+.ext-footer button{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  color:#a99cd4;border-radius:8px;width:24px;height:22px;cursor:pointer;font-size:12px;line-height:1;
+}
+
+
+/* ===== GameHiHi iframe layout: HUD left, playfield maximized ===== */
+@media (min-width:700px){
+  #app{
+    display:grid;
+    grid-template-columns:150px minmax(0,1fr);
+    grid-template-rows:1fr;
+    height:calc(100% - 30px);
+  }
+  #hud{
+    grid-column:1;grid-row:1;
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
+    gap:18px;
+    padding:18px 14px;
+    border-right:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.025);
+    overflow:hidden;
+  }
+  #mid{
+    order:-1;
+    flex:0 0 auto;
+    align-items:flex-start;
+    gap:10px;
+  }
+  #mascot{width:62px;height:62px}
+  #chips{justify-content:flex-start;gap:6px}
+  .stat{min-width:0;width:100%}
+  .stat .lbl{font-size:11px}
+  .stat .val{font-size:32px}
+  .stat.score{text-align:left}
+  #stage{
+    grid-column:2;grid-row:1;
+    width:100%;height:100%;min-width:0;min-height:0;
+  }
+  #settingsBtn{right:14px}
+}
+@media (min-width:700px) and (max-width:1100px){
+  #app{grid-template-columns:135px minmax(0,1fr)}
+  #hud{padding:14px 10px;gap:14px}
+  #mascot{width:52px;height:52px}
+  .stat .val{font-size:28px}
+}
+
+</style>
+<style id="gh-v1814-responsive-block-puzzle-hihi">
+
+/* Embedded games reserve a bottom safety strip for the GameHiHi action dock. */
+html.gh-embedded,html.gh-embedded body{width:100%;height:100%;min-height:100%;overflow:hidden}
+html.gh-embedded #app{min-height:220px}
+html.gh-embedded .ext-footer{height:30px!important;min-height:30px!important}
+@media (max-width:699px){
+  #hud{padding:5px 8px 2px!important;gap:5px!important}
+  .stat{min-width:64px!important}
+  .stat .lbl{font-size:8px!important;letter-spacing:1.2px!important}
+  .stat .val{font-size:20px!important}
+  #mascot{width:34px!important;height:34px!important}
+  #mid{gap:1px!important}
+  #chips{gap:3px!important}
+  .chip{font-size:8px!important;padding:1px 6px!important}
+  #settingsBtn{width:34px!important;height:34px!important;right:8px!important;bottom:8px!important}
+}
+@media (max-width:420px){
+  #hud{padding-inline:6px!important}
+  #mascot{width:30px!important;height:30px!important}
+  .stat .val{font-size:18px!important}
+  #chips .chip:not(.daily):nth-child(n+3){display:none!important}
+  #toast{max-width:calc(100vw - 20px)!important;white-space:normal!important;text-align:center!important}
+}
+@media (max-height:520px){
+  #hud{gap:4px!important;padding-top:4px!important}
+  #mascot{width:32px!important;height:32px!important}
+  .stat .val{font-size:19px!important}
+  .panel{max-height:82%!important;padding:16px!important}
+}
+@media (min-width:700px) and (max-height:520px){
+  #app{grid-template-columns:112px minmax(0,1fr)!important}
+  #hud{padding:8px!important;gap:8px!important}
+  #mascot{width:42px!important;height:42px!important}
+  .stat .lbl{font-size:9px!important}.stat .val{font-size:23px!important}
+  #chips{gap:4px!important}.chip{font-size:8px!important;padding:2px 5px!important}
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div class="stat best"><div class="lbl" id="lblBest">KỶ LỤC</div><div class="val" id="bestVal">0</div></div>
+    <div id="mid">
+      <div id="mascot" class="idle" title="Joyo">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#b58bff"/><stop offset="1" stop-color="#8256e8"/>
+          </linearGradient></defs>
+          <rect x="6" y="8" width="52" height="52" rx="13" fill="url(#mg)"/>
+          <rect x="12" y="13" width="40" height="15" rx="7.5" fill="rgba(255,255,255,.28)"/>
+          <g class="f fi">
+            <circle cx="24" cy="36" r="4.2" fill="#241c40"/><circle cx="40" cy="36" r="4.2" fill="#241c40"/>
+            <circle cx="25.4" cy="34.6" r="1.3" fill="#fff"/><circle cx="41.4" cy="34.6" r="1.3" fill="#fff"/>
+            <path d="M27 46 q5 4 10 0" stroke="#241c40" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          </g>
+          <g class="f fh">
+            <path d="M20 37 q4 -5 8 0" stroke="#241c40" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <path d="M36 37 q4 -5 8 0" stroke="#241c40" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+            <path d="M26 45 q6 6 12 0" stroke="#241c40" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          </g>
+          <g class="f fe">
+            <path d="M24 32 l1.4 3 3.2 .3 -2.4 2.2 .7 3.1 -2.9 -1.7 -2.9 1.7 .7 -3.1 -2.4 -2.2 3.2 -.3 z" fill="#ffe066"/>
+            <path d="M40 32 l1.4 3 3.2 .3 -2.4 2.2 .7 3.1 -2.9 -1.7 -2.9 1.7 .7 -3.1 -2.4 -2.2 3.2 -.3 z" fill="#ffe066"/>
+            <ellipse cx="32" cy="47" rx="4.6" ry="5" fill="#241c40"/>
+          </g>
+          <g class="f fw">
+            <path d="M20 31 l8 3" stroke="#241c40" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M44 31 l-8 3" stroke="#241c40" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="25" cy="38" r="3.4" fill="#241c40"/><circle cx="39" cy="38" r="3.4" fill="#241c40"/>
+            <path d="M27 47 q5 -3 10 0" stroke="#241c40" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+            <path d="M49 40 q3 4 0 6 q-3 -2 0 -6" fill="#59c2ff"/>
+          </g>
+          <g class="f fs">
+            <path d="M21 34 l7 5 M28 34 l-7 5" stroke="#241c40" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M36 34 l7 5 M43 34 l-7 5" stroke="#241c40" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M26 49 q6 -5 12 0" stroke="#241c40" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div id="chips">
+        <span class="chip"><span id="lblLv">Cấp</span> <b id="lvVal">1</b></span>
+        <span class="chip">⭐ <b id="starVal">0</b></span>
+        <span class="chip daily" id="dailyTag">HÔM NAY</span>
+        <span class="chip click" id="modeChip">📅</span>
+      </div>
+    </div>
+    <div class="stat score"><div class="lbl" id="lblScore">ĐIỂM</div><div class="val" id="scoreVal">0</div></div>
+  </div>
+
+  <div id="stage"><canvas id="cv"></canvas></div>
+
+  <button id="settingsBtn" aria-label="Cài đặt">⚙</button>
+  <div id="toast"></div>
+  <div id="debugHud"></div>
+
+  <!-- GAME OVER -->
+  <div class="overlay" id="goOverlay">
+    <div class="panel">
+      <h2 id="goTitle">HẾT LƯỢT</h2>
+      <div class="go-score" id="goScore">0</div>
+      <div class="go-best"><span id="goBestLbl">Kỷ lục</span> <b id="goBest">0</b></div>
+      <div id="goReason">Không còn khối nào có thể đặt.</div>
+      <div id="newBest">★ KỶ LỤC MỚI! ★</div>
+      <div id="goDaily"></div>
+      <button class="btn" id="playAgain">CHƠI LẠI</button><button class="btn gold" id="shareBtn">CHIA SẺ</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="overlay" id="setOverlay">
+    <div class="panel" style="text-align:left">
+      <h2 id="setTitle" style="text-align:center;font-size:18px">CÀI ĐẶT</h2>
+      <div class="row"><span id="lblSound">Âm thanh</span><div class="toggle" id="tglSound"></div></div>
+      <div class="row"><span id="lblVib">Rung</span><div class="toggle" id="tglVib"></div></div>
+      <div class="row"><span id="lblLang">Ngôn ngữ</span>
+        <select id="selLang">
+          <option value="auto">🌐 Auto (IP)</option>
+          <option value="vi">Tiếng Việt</option>
+          <option value="en">English</option>
+          <option value="id">Bahasa Indonesia</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+      <div class="row" id="rowName" style="display:none"><span id="lblName">Tên người chơi</span><input id="inpName" maxlength="24" autocomplete="nickname"></div>
+      <div id="missions">
+        <h3 id="lblMissions">NHIỆM VỤ HÔM NAY</h3>
+        <div id="missionList"></div>
+      </div>
+      <div class="statline" id="statline"></div>
+      <div style="text-align:center">
+        <button class="btn ghost" id="btnRestart">CHƠI LẠI TỪ ĐẦU</button>
+        <button class="btn" id="btnClose" style="margin-left:8px;padding:10px 22px;font-size:12px">ĐÓNG</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ext-footer">
+  <a href="https://gamehihi.com/" target="_blank" rel="noopener">🎮 GameHiHi.com</a>
+  
+</div>
+<script>
+'use strict';
+/* =====================================================================
+ * Block Puzzle HiHi — Game Xếp Khối (v3) — single-file HTML5 block puzzle
+ * Zero dependencies. Canvas rendering. Portal / iframe ready.
+ * v3: luật thua hoàn chỉnh · VI/EN/ID/ES · Hold · thử thách ngày · chia sẻ · mascot
+ * Ngôn ngữ: ?lang=vi|en|id|es  >  lựa chọn đã lưu  >  quốc gia theo IP (Cloudflare)
+ *           >  ngôn ngữ trình duyệt  >  GAME_CONFIG.defaultLang.   ?lang=auto = theo IP.
+ * ===================================================================== */
+
+/* ---------------- A/B-testable game config -------------- */
+const GAME_CONFIG = {
+  boardSize: 8,
+  baseScore: 10,
+  clearBonus: {1:100, 2:300, 3:600, 4:1000},
+  extraLineBonus: 500,
+  comboMultiplier: 1,
+  difficulty: 1,
+  hardScore: 4000,
+  midScore: 1500,
+  pieceRandomness: 0.35,
+  particleLevel: 1,
+  dragLiftPx: 84,
+  dailyChallengeLines: 30,
+  holdEnabled: true,          // strategic hold slot (A/B: on/off)
+  soundTheme: 'gun',          // 'gun' = gunshot SFX | 'soft' = original chimes
+  shareUrl: '',               // appended to daily share text, e.g. 'https://gamehihi.com'
+  defaultLang: 'vi',          // ngôn ngữ mặc định: 'vi' | 'en' | 'id' | 'es'
+  apiBase: '',                // '' = dùng Worker đang phục vụ trang (nếu có); hoặc 'https://<worker>.workers.dev'
+  leaderboardGame: 'block-puzzle-hihi',
+  submitScores: true,         // gửi điểm lên /api/public/v1/scores khi hết lượt
+};
+let DEBUG = /[?&]debug=1/.test(location.search);
+
+/*__CORE_START__*/
+/* =====================================================================
+ * PURE GAME LOGIC — no DOM. Testable in Node.
+ * ===================================================================== */
+
+/* ---------- Shape library — add a string to add a shape ---------- */
+const SHAPE_STRINGS = [
+  '1',
+  '11','111','1111','11111',
+  '1/1','1/1/1','1/1/1/1','1/1/1/1/1',
+  '11/11','111/111/111',
+  '111/111','11/11/11',
+  '11/10','11/01','10/11','01/11',
+  '10/10/11','01/01/11','11/10/10','11/01/01',
+  '111/100','111/001','100/111','001/111',
+  '111/010','010/111','10/11/10','01/11/01',
+  '011/110','110/011','10/11/01','01/11/10',
+  '100/110/011',
+];
+
+function buildShapes(strs){
+  return strs.map((s, id) => {
+    const rows = s.split('/');
+    const cells = [];
+    rows.forEach((row, r) => { [...row].forEach((ch, c) => { if (ch === '1') cells.push([r, c]); }); });
+    const h = rows.length, w = rows[0].length;
+    return { id, cells, w, h, size: cells.length,
+             rect: cells.length === w * h,
+             line: (w === 1 || h === 1) };
+  });
+}
+const SHAPES = buildShapes(SHAPE_STRINGS);
+
+/* ---------- Board helpers ---------- */
+function makeBoard(n){ return Array.from({length:n}, () => new Array(n).fill(0)); }
+function cloneBoard(b){ return b.map(r => r.slice()); }
+function emptyCount(b){ let n=0; for (const row of b) for (const v of row) if (!v) n++; return n; }
+
+function canPlace(board, shape, r, c){
+  const n = board.length;
+  if (r < 0 || c < 0 || r + shape.h > n || c + shape.w > n) return false;
+  for (const [dr, dc] of shape.cells) if (board[r+dr][c+dc]) return false;
+  return true;
+}
+function placeShape(board, shape, r, c, color){
+  for (const [dr, dc] of shape.cells) board[r+dr][c+dc] = color;
+}
+function allPositions(board, shape){
+  const n = board.length, out = [];
+  for (let r = 0; r <= n - shape.h; r++)
+    for (let c = 0; c <= n - shape.w; c++)
+      if (canPlace(board, shape, r, c)) out.push([r, c]);
+  return out;
+}
+function anyPosition(board, shape){
+  const n = board.length;
+  for (let r = 0; r <= n - shape.h; r++)
+    for (let c = 0; c <= n - shape.w; c++)
+      if (canPlace(board, shape, r, c)) return true;
+  return false;
+}
+function findFullLines(board){
+  const n = board.length, rows = [], cols = [];
+  for (let r = 0; r < n; r++){ let full = true; for (let c = 0; c < n; c++) if (!board[r][c]){ full = false; break; } if (full) rows.push(r); }
+  for (let c = 0; c < n; c++){ let full = true; for (let r = 0; r < n; r++) if (!board[r][c]){ full = false; break; } if (full) cols.push(c); }
+  return { rows, cols };
+}
+function clearLines(board, lines){
+  const n = board.length;
+  for (const r of lines.rows) for (let c = 0; c < n; c++) board[r][c] = 0;
+  for (const c of lines.cols) for (let r = 0; r < n; r++) board[r][c] = 0;
+}
+function movesAvailable(board, pieces){
+  let n = 0;
+  for (const p of pieces) if (p && anyPosition(board, p.shape)) n++;
+  return n;
+}
+
+/* ---------- Scoring ---------- */
+function placeScore(shape, cfg){ return shape.size * cfg.baseScore; }
+function clearBonus(lineCount, cfg){
+  if (lineCount <= 0) return 0;
+  if (cfg.clearBonus[lineCount]) return cfg.clearBonus[lineCount];
+  return cfg.clearBonus[4] + (lineCount - 4) * cfg.extraLineBonus;
+}
+function comboBonus(base, combo, cfg){
+  const mult = combo >= 2 ? combo * cfg.comboMultiplier : 1;
+  return Math.round(base * mult);
+}
+
+/* ---------- Deterministic RNG (Daily Puzzle) ---------- */
+function mulberry32(seed){
+  let s = seed >>> 0;
+  return function(){
+    s |= 0; s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStr(str){
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+/* ---------- Smart Piece Generator ----------
+ * Classic: board-aware weights + DFS fairness check.
+ * pure=true (Daily Puzzle): board-independent seeded picks so every
+ * player gets the exact same piece sequence for the day. */
+function createGenerator(cfg, rng, pure){
+  rng = rng || Math.random;
+
+  function difficulty(board, score){
+    const byScore = Math.min(1, score / cfg.hardScore);
+    const fill = pure ? 0 : 1 - emptyCount(board) / (board.length * board.length);
+    let d = (pure ? byScore : (0.72 * byScore + 0.28 * fill)) * cfg.difficulty;
+    return Math.max(0, Math.min(1, d));
+  }
+  function shapeWeight(s, d){
+    let w;
+    if (d < 0.34){
+      w = s.size <= 3 ? 3 : s.size === 4 ? 2.2 : s.size === 5 ? 1.2 : s.size >= 9 ? 0.35 : 1.4;
+      if (s.rect) w *= 1.35;
+      if (s.line && s.size <= 4) w *= 1.2;
+    } else if (d < 0.67){
+      w = s.size <= 2 ? 0.9 : s.size >= 6 ? 1.3 : 1.1;
+    } else {
+      w = s.size >= 5 ? 2.4 : s.size === 4 ? 1.6 : 0.7;
+      if (!s.rect) w *= 1.35;
+      if (s.size === 1) w = 0.25;
+    }
+    return w * (1 - cfg.pieceRandomness) + cfg.pieceRandomness;
+  }
+  function pickWeighted(weights){
+    let total = 0; for (const w of weights) total += w;
+    let x = rng() * total;
+    for (let i = 0; i < weights.length; i++){ x -= weights[i]; if (x <= 0) return i; }
+    return weights.length - 1;
+  }
+  function setPlayable(board, shapes, budget){
+    budget = budget || { n: 4500 };
+    if (!shapes.length) return true;
+    for (let i = 0; i < shapes.length; i++){
+      const s = shapes[i];
+      const pos = allPositions(board, s);
+      for (const [r, c] of pos){
+        if (--budget.n < 0) return false;
+        const nb = cloneBoard(board);
+        placeShape(nb, s, r, c, 1);
+        clearLines(nb, findFullLines(nb));
+        const rest = shapes.slice(); rest.splice(i, 1);
+        if (setPlayable(nb, rest, budget)) return true;
+      }
+    }
+    return false;
+  }
+  function generateSet(board, score){
+    const d = difficulty(board, score);
+    const weights = SHAPES.map(s => shapeWeight(s, d));
+    if (pure){
+      return { set: [0,0,0].map(() => SHAPES[pickWeighted(weights)]), d };
+    }
+    let fallback = null;
+    for (let attempt = 0; attempt < 14; attempt++){
+      const set = [0,0,0].map(() => SHAPES[pickWeighted(weights)]);
+      if (setPlayable(board, set)) return { set, d };
+      if (d > 0.8 && attempt >= 7 && set.some(s => anyPosition(board, s))){
+        fallback = fallback || set;
+      }
+    }
+    if (fallback) return { set: fallback, d };
+    const fitting = SHAPES.filter(s => anyPosition(board, s)).sort((a, b) => a.size - b.size);
+    if (fitting.length){
+      const pool = fitting.slice(0, Math.max(3, Math.min(6, fitting.length)));
+      return { set: [0,0,0].map(() => pool[Math.floor(rng() * pool.length)]), d };
+    }
+    return { set: [0,0,0].map(() => SHAPES[pickWeighted(weights)]), d };
+  }
+  return { generateSet, difficulty, setPlayable };
+}
+/*__CORE_END__*/
+
+/* Node test hook (ignored in browser) */
+if (typeof module !== 'undefined') {
+  module.exports = { GAME_CONFIG, SHAPES, makeBoard, cloneBoard, emptyCount, canPlace,
+    placeShape, allPositions, anyPosition, findFullLines, clearLines, movesAvailable,
+    placeScore, clearBonus, comboBonus, createGenerator, mulberry32, hashStr };
+}
+
+/* =====================================================================
+ * Everything below is browser-only.
+ * ===================================================================== */
+if (typeof document !== 'undefined') (function(){
+
+/* ---------------- Storage ---------------- */
+const Storage = {
+  k: s => 'hihiblock_' + s,
+  get(key, def){ try { const v = localStorage.getItem(this.k(key)); return v === null ? def : JSON.parse(v); } catch(e){ return def; } },
+  set(key, val){ try { localStorage.setItem(this.k(key), JSON.stringify(val)); } catch(e){} },
+};
+function todayKey(){ const d = new Date(); return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); }
+function loadDaily(){
+  let d = Storage.get('daily', null);
+  if (!d || d.date !== todayKey())
+    d = { date: todayKey(), lines: 0, games: 0, bestScore: 0, bestCombo: 0,
+          challengeDone: false, m: { clear10:false, score2000:false, combo5:false, play3:false } };
+  return d;
+}
+function loadDailyRun(){
+  let d = Storage.get('dailyRun', null);
+  if (!d || d.date !== todayKey()) d = { date: todayKey(), best: 0, plays: 0 };
+  return d;
+}
+
+/* ---------------- Văn bản giao diện: VI / EN / ID / ES ---------------- */
+const TEXTS = {
+  vi: {
+    title:'Block Puzzle HiHi — Game Xếp Khối',
+    best:'KỶ LỤC', score:'ĐIỂM', gameOver:'HẾT LƯỢT', bestLabel:'Kỷ lục',
+    gameOverReason:'Không còn khối nào có thể đặt.',
+    newBest:'★ KỶ LỤC MỚI! ★', playAgain:'CHƠI LẠI', share:'CHIA SẺ',
+    settings:'CÀI ĐẶT', sound:'Âm thanh', vibration:'Rung', language:'Ngôn ngữ', playerName:'Tên người chơi',
+    missions:'NHIỆM VỤ HÔM NAY', close:'ĐÓNG', restart:'CHƠI LẠI TỪ ĐẦU',
+    mDaily:'Thử thách ngày — xóa {n} hàng', mClear:'Xóa 10 hàng',
+    mScore:'Đạt 2.000 điểm', mCombo:'Đạt liên hoàn x5', mPlay:'Chơi 3 ván',
+    stats:'Số ván: {g} · Liên hoàn cao nhất: x{c} · Cấp {l}',
+    dailyDone:'Thử thách ngày <b>hoàn thành ✓</b> · Cấp {l}',
+    dailyProg:'Thử thách ngày: <b>{a}/{b} hàng</b> · Cấp {l}',
+    hold:'GIỮ',
+    modeToDaily:'📅 Hôm nay', modeToClassic:'🧩 Cổ điển', dailyTag:'HÔM NAY',
+    dailyResult:'Ván ngày {d}: kỷ lục hôm nay <b>{b}</b> · đã chơi {n} lần',
+    copied:'Đã sao chép kết quả!', points:'điểm', level:'Cấp',
+    combo:'LIÊN HOÀN x{n}', shareCombo:'Liên hoàn x{n}',
+    shareTitle:'Block Puzzle HiHi — Game Xếp Khối - Thử thách ngày {d}',
+  },
+  en: {
+    title:'Block Puzzle HiHi — Block Puzzle Game',
+    best:'BEST', score:'SCORE', gameOver:'GAME OVER', bestLabel:'Best',
+    gameOverReason:'No more blocks can be placed.',
+    newBest:'★ NEW BEST! ★', playAgain:'PLAY AGAIN', share:'SHARE',
+    settings:'SETTINGS', sound:'Sound', vibration:'Vibration', language:'Language', playerName:'Player name',
+    missions:"TODAY'S MISSIONS", close:'CLOSE', restart:'RESTART',
+    mDaily:'Daily challenge — clear {n} lines', mClear:'Clear 10 lines',
+    mScore:'Reach 2,000 points', mCombo:'Reach combo x5', mPlay:'Play 3 games',
+    stats:'Games: {g} · Best combo: x{c} · Level {l}',
+    dailyDone:'Daily challenge <b>complete ✓</b> · Level {l}',
+    dailyProg:'Daily challenge: <b>{a}/{b} lines</b> · Level {l}',
+    hold:'HOLD',
+    modeToDaily:'📅 Daily', modeToClassic:'🧩 Classic', dailyTag:'TODAY',
+    dailyResult:"Daily {d}: today's best <b>{b}</b> · played {n} times",
+    copied:'Result copied!', points:'points', level:'Lv',
+    combo:'COMBO x{n}', shareCombo:'Combo x{n}',
+    shareTitle:'Block Puzzle HiHi — Daily Challenge {d}',
+  },
+  id: {
+    title:'Block Puzzle HiHi — Game Puzzle Balok',
+    best:'TERBAIK', score:'SKOR', gameOver:'PERMAINAN SELESAI', bestLabel:'Terbaik',
+    gameOverReason:'Tidak ada balok yang bisa ditempatkan lagi.',
+    newBest:'★ REKOR BARU! ★', playAgain:'MAIN LAGI', share:'BAGIKAN',
+    settings:'PENGATURAN', sound:'Suara', vibration:'Getar', language:'Bahasa', playerName:'Nama pemain',
+    missions:'MISI HARI INI', close:'TUTUP', restart:'MULAI ULANG',
+    mDaily:'Tantangan harian — hapus {n} baris', mClear:'Hapus 10 baris',
+    mScore:'Capai 2.000 poin', mCombo:'Capai kombo x5', mPlay:'Main 3 kali',
+    stats:'Permainan: {g} · Kombo terbaik: x{c} · Level {l}',
+    dailyDone:'Tantangan harian <b>selesai ✓</b> · Level {l}',
+    dailyProg:'Tantangan harian: <b>{a}/{b} baris</b> · Level {l}',
+    hold:'SIMPAN',
+    modeToDaily:'📅 Harian', modeToClassic:'🧩 Klasik', dailyTag:'HARI INI',
+    dailyResult:'Harian {d}: terbaik hari ini <b>{b}</b> · dimainkan {n} kali',
+    copied:'Hasil disalin!', points:'poin', level:'Lv',
+    combo:'KOMBO x{n}', shareCombo:'Kombo x{n}',
+    shareTitle:'Block Puzzle HiHi — Tantangan Harian {d}',
+  },
+  es: {
+    title:'Block Puzzle HiHi — Juego de bloques',
+    best:'RÉCORD', score:'PUNTOS', gameOver:'FIN DEL JUEGO', bestLabel:'Récord',
+    gameOverReason:'No se puede colocar ningún bloque más.',
+    newBest:'★ ¡NUEVO RÉCORD! ★', playAgain:'JUGAR DE NUEVO', share:'COMPARTIR',
+    settings:'AJUSTES', sound:'Sonido', vibration:'Vibración', language:'Idioma', playerName:'Tu nombre',
+    missions:'MISIONES DE HOY', close:'CERRAR', restart:'REINICIAR',
+    mDaily:'Reto diario — limpia {n} líneas', mClear:'Limpia 10 líneas',
+    mScore:'Consigue 2.000 puntos', mCombo:'Logra combo x5', mPlay:'Juega 3 partidas',
+    stats:'Partidas: {g} · Mejor combo: x{c} · Nivel {l}',
+    dailyDone:'Reto diario <b>completado ✓</b> · Nivel {l}',
+    dailyProg:'Reto diario: <b>{a}/{b} líneas</b> · Nivel {l}',
+    hold:'GUARDAR',
+    modeToDaily:'📅 Diario', modeToClassic:'🧩 Clásico', dailyTag:'HOY',
+    dailyResult:'Diario {d}: récord de hoy <b>{b}</b> · jugado {n} veces',
+    copied:'¡Resultado copiado!', points:'puntos', level:'Nv',
+    combo:'COMBO x{n}', shareCombo:'Combo x{n}',
+    shareTitle:'Block Puzzle HiHi — Reto diario {d}',
+  },
+};
+const LANGS = Object.keys(TEXTS);
+const LOCALES = { vi:'vi-VN', en:'en-US', id:'id-ID', es:'es-ES' };
+function normLang(v){
+  if (!v) return null;
+  let s = String(v).trim().toLowerCase().split(/[-_]/)[0];
+  if (s === 'in') s = 'id';
+  return LANGS.includes(s) ? s : null;
+}
+
+/* Thông tin do Worker chèn vào trang: { country, lang (theo IP), forced, auto, default_lang, api } */
+const GEO = window.__HIHI_GEO || {};
+const QS = new URLSearchParams(location.search);
+const API_BASE = GAME_CONFIG.apiBase
+  ? GAME_CONFIG.apiBase.replace(/\/+$/, '') + '/api/public/v1'
+  : (GEO.api || '');
+
+/* Thứ tự ưu tiên: URL (?lang= hoặc /en) > đã lưu > quốc gia theo IP > trình duyệt > mặc định.
+ * ?lang=auto bỏ qua lựa chọn đã lưu và trình duyệt, chạy theo IP. */
+function resolveLang(opt){
+  opt = opt || {};
+  const q = QS.get('lang');
+  const auto = opt.auto || (q && q.toLowerCase() === 'auto') || !!GEO.auto;
+  if (!opt.auto){
+    const forced = normLang(q) || normLang(GEO.forced);
+    if (forced) return { lang: forced, source: 'url' };
+  }
+  if (!auto){
+    const saved = normLang(Storage.get('lang', null));
+    if (saved) return { lang: saved, source: 'saved' };
+  }
+  if (normLang(GEO.lang)) return { lang: normLang(GEO.lang), source: 'ip' };
+  if (!auto){
+    const nav = (navigator.languages || [navigator.language]).map(normLang).find(Boolean);
+    if (nav) return { lang: nav, source: 'browser' };
+  }
+  return { lang: normLang(GEO.default_lang) || normLang(GAME_CONFIG.defaultLang) || 'vi', source: 'default' };
+}
+let LANG_STATE = resolveLang();
+let LANG = LANG_STATE.lang;
+let TEXT = TEXTS[LANG];
+
+function t(key, vars){
+  let out = TEXT[key] != null ? TEXT[key] : (TEXTS.vi[key] != null ? TEXTS.vi[key] : key);
+  if (vars) for (const k in vars) out = out.replaceAll('{' + k + '}', vars[k]);
+  return out;
+}
+function fmt(n){ try { return n.toLocaleString(LOCALES[LANG]); } catch(e){ return '' + n; } }
+function fmtDayMonth(d){
+  try { return d.toLocaleDateString(LOCALES[LANG], { day:'numeric', month:'numeric' }); }
+  catch(e){ return d.getDate() + '/' + (d.getMonth()+1); }
+}
+
+/* ---------------- Leaderboard: người chơi + gửi điểm ---------------- */
+function playerId(){
+  let id = Storage.get('playerId', null);
+  if (!id || !/^[A-Za-z0-9_-]{8,64}$/.test(id)){
+    const a = new Uint8Array(12);
+    try { crypto.getRandomValues(a); } catch(e){ for (let i = 0; i < a.length; i++) a[i] = Math.random() * 256 | 0; }
+    id = Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+    Storage.set('playerId', id);
+  }
+  return id;
+}
+function playerName(){
+  const n = String(Storage.get('playerName', '') || '').trim();
+  return n || ('Player-' + playerId().slice(-4).toUpperCase());
+}
+
+/* ---------------- Analytics hooks ---------------- */
+const AnalyticsManager = {
+  queue: [],
+  track(event, data){
+    const e = { event, data: data || {}, t: Date.now() };
+    this.queue.push(e);
+    if (this.queue.length > 200) this.queue.shift();
+    try {
+      if (typeof window.gtag === 'function') window.gtag('event', event, e.data);
+      if (typeof window.onHiHiEvent === 'function') window.onHiHiEvent(event, e.data);
+    } catch(err){}
+    if (DEBUG) console.log('[analytics]', event, e.data);
+  }
+};
+window.HiHiAnalytics = AnalyticsManager;
+
+/* ---------------- Monetization callbacks ---------------- */
+window.HiHiAds = window.HiHiAds || {
+  onGameStart(){}, onGameOver(){}, onRestart(){},
+  onAdOpportunity(kind){ /* 'interstitial' | 'rewarded_continue' */ }
+};
+function ads(fn, arg){ try { window.HiHiAds[fn] && window.HiHiAds[fn](arg); } catch(e){} }
+
+/* ---------------- Sound (WebAudio, no assets) ----------------
+ * Two synthesized themes, switched by GAME_CONFIG.soundTheme:
+ *  'gun'  — gunshot crack (filtered noise) + bass thump, mechanical
+ *           clicks, ricochet ping. Clears fire a burst per line.
+ *  'soft' — original chime/click set.                              */
+const Sound = {
+  ctx: null, on: Storage.get('sound', true), _noise: null,
+  ac(){ if (!this.ctx){ const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); } if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); return this.ctx; },
+  gun(){ return GAME_CONFIG.soundTheme === 'gun'; },
+  noiseBuf(ctx){
+    if (!this._noise){
+      const len = Math.floor(ctx.sampleRate * 0.5);
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this._noise = buf;
+    }
+    return this._noise;
+  },
+  /* gunshot: sharp noise crack through a falling lowpass + low sine thump */
+  shot(when, power, gain){
+    if (!this.on) return; const ctx = this.ac(); if (!ctx) return;
+    const t0 = ctx.currentTime + (when || 0); power = power || 1; gain = gain || 0.24;
+    const src = ctx.createBufferSource(); src.buffer = this.noiseBuf(ctx);
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass';
+    f.frequency.setValueAtTime(2600 * power, t0);
+    f.frequency.exponentialRampToValueAtTime(300, t0 + 0.16 * power);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18 * power);
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start(t0); src.stop(t0 + 0.25 * power);
+    const o = ctx.createOscillator(), og = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(110 * power, t0);
+    o.frequency.exponentialRampToValueAtTime(45, t0 + 0.12);
+    og.gain.setValueAtTime(gain * 0.9, t0);
+    og.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.15);
+    o.connect(og); og.connect(ctx.destination); o.start(t0); o.stop(t0 + 0.2);
+  },
+  /* mechanical click: cocking / dry-fire */
+  click(when, bright){
+    if (!this.on) return; const ctx = this.ac(); if (!ctx) return;
+    const t0 = ctx.currentTime + (when || 0);
+    const src = ctx.createBufferSource(); src.buffer = this.noiseBuf(ctx);
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass';
+    f.frequency.value = bright ? 3200 : 1500; f.Q.value = 2.5;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.12, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start(t0); src.stop(t0 + 0.07);
+  },
+  /* ricochet / shell-casing ping */
+  ping(when){
+    if (!this.on) return; const ctx = this.ac(); if (!ctx) return;
+    const t0 = ctx.currentTime + (when || 0);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(2600, t0);
+    o.frequency.exponentialRampToValueAtTime(900, t0 + 0.3);
+    g.gain.setValueAtTime(0.11, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.32);
+    o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 0.35);
+  },
+  blip(freq, dur, type, gain, when){
+    if (!this.on) return; const ctx = this.ac(); if (!ctx) return;
+    const t0 = ctx.currentTime + (when || 0);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'triangle'; o.frequency.setValueAtTime(freq, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain || 0.16, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+  },
+  /* nhặt khối = lên đạn nhẹ */
+  pick(){ this.gun() ? this.click(0, true) : this.blip(340, .07, 'square', .06); },
+  /* đặt khối = một phát bắn */
+  place(){ this.gun() ? this.shot(0, 0.85, 0.2) : this.blip(190 + Math.random()*30, .08, 'square', .12); },
+  /* cất vào ô GIỮ = nạp đạn (2 tiếng click) */
+  hold(){
+    if (this.gun()){ this.click(0, false); this.click(0.08, true); }
+    else { this.blip(500, .09, 'triangle', .1); this.blip(700, .09, 'triangle', .08, .05); }
+  },
+  /* clear line = loạt bắn, mỗi line thêm một phát */
+  clear(n){
+    if (this.gun()) for (let i = 0; i <= Math.min(n, 4); i++) this.shot(i * 0.07, 0.9 + i * 0.05, 0.19);
+    else for (let i = 0; i < Math.min(n, 4); i++) this.blip(420 + i*140, .14, 'triangle', .14, i*.06);
+  },
+  /* combo = liên thanh + tiếng vỏ đạn */
+  combo(c){
+    if (this.gun()){
+      const k = Math.min(c, 6);
+      for (let i = 0; i < k; i++) this.shot(i * 0.055, 1, 0.17);
+      this.ping(k * 0.055 + 0.05);
+    } else [523,659,784,1046].slice(0, Math.min(4, c)).forEach((f,i)=>this.blip(f,.16,'triangle',.15,i*.05));
+  },
+  /* nước đi sai = kim hỏa khô (dry fire) */
+  invalid(){ this.gun() ? this.click(0, false) : this.blip(140, .09, 'sawtooth', .05); },
+  /* thua = phát súng trầm + ricochet + phát kết */
+  over(){
+    if (this.gun()){ this.shot(0, 1.4, 0.28); this.ping(0.25); this.shot(0.5, 1.6, 0.2); }
+    else [392,330,262,196].forEach((f,i)=>this.blip(f,.22,'triangle',.13,i*.12));
+  },
+};
+const Haptics = {
+  on: Storage.get('vibration', true),
+  buzz(p){ if (this.on && navigator.vibrate) { try { navigator.vibrate(p); } catch(e){} } }
+};
+
+/* ---------------- Palette ---------------- */
+const PALETTE = [
+  ['#ffb43a','#e08900'], ['#ff6b81','#d63e60'], ['#5ee6a8','#22b877'],
+  ['#59c2ff','#2a8fd8'], ['#b58bff','#8256e8'], ['#ffe066','#e8b31e'],
+  ['#ff8f5e','#e05a2b'], ['#6ef0e0','#26bcae'],
+];
+const SHARE_EMOJI = ['🟧','🟥','🟩','🟦','🟪','🟨','🟫','⬜'];
+
+/* ---------------- Game state ---------------- */
+const N = GAME_CONFIG.boardSize;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const stage = document.getElementById('stage');
+
+const S = {
+  board: makeBoard(N),
+  pieces: [null, null, null],
+  hold: null,                    // {shape, color}
+  mode: 'classic',               // 'classic' | 'daily'
+  rng: Math.random, gen: null,
+  score: 0, best: Storage.get('best', 0), bestAtStart: Storage.get('best', 0),
+  combo: 0, highestCombo: Storage.get('highestCombo', 0),
+  gamesPlayed: Storage.get('gamesPlayed', 0),
+  xp: Storage.get('xp', 0), stars: Storage.get('stars', 0),
+  daily: loadDaily(), dailyRun: loadDailyRun(),
+  over: false, paused: false,
+  scoreMilestones: {},
+  linesThisGame: 0, maxComboThisGame: 0,
+};
+
+/* ---------------- GameHiHi Event Score plugin bridge ----------------
+ * The standalone GameHiHi Event Score WordPress plugin receives this message
+ * from the parent page and stores the highest score for the active season.
+ */
+const GameHiHiEventBridge = (() => {
+  let lastSent = -1;
+  let timer = 0;
+  function post(payload){
+    if (payload && payload.type === 'gamehihi:event-score' && typeof window.GameHiHiDirectEventScore === 'function'){
+      try { window.GameHiHiDirectEventScore(payload); } catch(e) {}
+    }
+    if (window.parent && window.parent !== window){
+      try { window.parent.postMessage(payload, '*'); } catch(e) {}
+    }
+  }
+  function ready(){ post({ type:'gamehihi:event-ready', game:'block-puzzle-hihi' }); }
+  function send(score, final){
+    score = Math.max(0, Math.floor(Number(score) || 0));
+    if (!final && score <= lastSent) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      lastSent = Math.max(lastSent, score);
+      post({
+        type:'gamehihi:event-score',
+        game:'block-puzzle-hihi',
+        score:score,
+        bestScore:Math.max(score, Number(S.best) || 0),
+        mode:S.mode,
+        final:!!final
+      });
+    }, final ? 0 : 250);
+  }
+  return { ready, send };
+})();
+
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', GameHiHiEventBridge.ready, {once:true});
+} else {
+  GameHiHiEventBridge.ready();
+}
+
+/* layout metrics */
+const L = { dpr:1, w:0, h:0, cell:0, bx:0, by:0, bpx:0, trayY:0, trayH:0, slots:[], hold:null };
+
+function layout(){
+  const r = stage.getBoundingClientRect();
+  L.dpr = Math.min(2, window.devicePixelRatio || 1);
+  L.w = r.width; L.h = r.height;
+  cv.width = Math.round(r.width * L.dpr);
+  cv.height = Math.round(r.height * L.dpr);
+  ctx.setTransform(L.dpr, 0, 0, L.dpr, 0, 0);
+  const pad = Math.max(10, L.w * 0.03);
+  const trayFactor = 3.1;
+  L.cell = Math.floor(Math.min((L.w - pad*2) / N, (L.h - pad*2.6) / (N + trayFactor)));
+  L.bpx = L.cell * N;
+  L.bx = (L.w - L.bpx) / 2;
+  L.by = pad * 0.6;
+  L.trayY = L.by + L.bpx + pad * 0.9;
+  L.trayH = L.h - L.trayY - pad * 0.6;
+  if (GAME_CONFIG.holdEnabled){
+    const gap = L.cell * 0.22;
+    const holdW = Math.min(L.cell * 2.15, L.bpx * 0.22);
+    const slotsW = L.bpx - holdW - gap;
+    const slotW = slotsW / 3;
+    L.slots = [0,1,2].map(i => ({ x: L.bx + slotW*i + slotW/2, y: L.trayY + L.trayH/2, w: slotW }));
+    L.hold = { x: L.bx + slotsW + gap + holdW/2, y: L.trayY + L.trayH/2,
+               w: holdW, h: Math.min(L.trayH * 0.92, holdW + 16) };
+  } else {
+    const slotW = L.bpx / 3;
+    L.slots = [0,1,2].map(i => ({ x: L.bx + slotW*i + slotW/2, y: L.trayY + L.trayH/2, w: slotW }));
+    L.hold = null;
+  }
+}
+
+/* ---------------- FX ---------------- */
+const FX = {
+  particles: [], popups: [], clears: [], shakeT: 0, shakeMag: 0, comboFlash: null,
+  spawnBurst(x, y, color, n){
+    if (!GAME_CONFIG.particleLevel) return;
+    n = Math.round(n * (GAME_CONFIG.particleLevel === 2 ? 1.6 : 1));
+    for (let i = 0; i < n; i++){
+      let p = this.particles.find(q => q.dead);
+      if (!p){ if (this.particles.length > 220) continue; p = {}; this.particles.push(p); }
+      const a = Math.random() * Math.PI * 2, v = 40 + Math.random() * 160;
+      p.dead = false; p.x = x; p.y = y; p.vx = Math.cos(a)*v; p.vy = Math.sin(a)*v - 60;
+      p.life = p.t = 0.45 + Math.random()*0.35; p.size = 2 + Math.random()*4; p.color = color;
+    }
+  },
+  popup(x, y, txt, color, big, small){
+    this.popups.push({ x, y, txt, color: color || '#fff', t: 0, dur: big ? 1.2 : 0.9, big: !!big, small: !!small });
+  },
+  clearCell(x, y, color, delay){ this.clears.push({ x, y, color, t: -delay, dur: 0.28 }); },
+  shake(mag){ this.shakeT = 0.3; this.shakeMag = mag; },
+  update(dt){
+    for (const p of this.particles){ if (p.dead) continue;
+      p.t -= dt; if (p.t <= 0){ p.dead = true; continue; }
+      p.vy += 420 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    }
+    this.popups = this.popups.filter(p => (p.t += dt) < p.dur);
+    for (const c of this.clears){ c.t += dt; if (c.t > 0 && !c.fired){ c.fired = true; this.spawnBurst(c.x, c.y, c.color, 5); } }
+    this.clears = this.clears.filter(c => c.t < c.dur);
+    if (this.shakeT > 0) this.shakeT -= dt;
+    if (this.comboFlash && (this.comboFlash.t += dt) > this.comboFlash.dur) this.comboFlash = null;
+  }
+};
+
+/* ---------------- Mascot ---------------- */
+const $ = id => document.getElementById(id);
+const Mascot = {
+  el: $('mascot'), _to: null,
+  baseline(){
+    if (S.over) return 'sad';
+    const fill = 1 - emptyCount(S.board) / (N * N);
+    return fill > 0.72 ? 'worried' : 'idle';
+  },
+  set(state, dur){
+    this.el.className = state;
+    if (this._to){ clearTimeout(this._to); this._to = null; }
+    if (dur) this._to = setTimeout(() => { this._to = null; this.el.className = this.baseline(); }, dur);
+  },
+  refresh(){ if (!this._to) this.el.className = this.baseline(); }
+};
+
+/* ---------------- Drag state ---------------- */
+/* src: 0-2 = tray slot, 3 = hold slot */
+const Drag = {
+  active: false, src: -1, px: 0, py: 0, lift: 0,
+  returning: null, pointerId: null, valid: false, gr: -1, gc: -1,
+  previewLines: { rows: [], cols: [] },
+};
+function takePiece(src){ return src === 3 ? S.hold : S.pieces[src]; }
+
+/* ---------------- HUD ---------------- */
+function levelFromXp(xp){ return Math.floor(Math.sqrt(xp / 120)) + 1; }
+function updateHud(){
+  $('scoreVal').textContent = fmt(S.score);
+  $('bestVal').textContent = fmt(S.best);
+  $('lvVal').textContent = levelFromXp(S.xp);
+  $('starVal').textContent = S.stars;
+  $('dailyTag').style.display = S.mode === 'daily' ? 'inline-block' : 'none';
+  $('modeChip').textContent = S.mode === 'daily' ? t('modeToClassic') : t('modeToDaily');
+}
+function setLang(lang, source){
+  LANG = normLang(lang) || 'vi'; TEXT = TEXTS[LANG];
+  LANG_STATE = { lang: LANG, source: source || LANG_STATE.source };
+  applyI18n();
+  if ($('setOverlay').classList.contains('show')) renderSettings();
+  AnalyticsManager.track('language', { lang: LANG, source: LANG_STATE.source, country: GEO.country || null });
+}
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.title = t('title');
+  $('settingsBtn').setAttribute('aria-label', t('settings'));
+  $('lblLv').textContent = t('level');
+  $('lblLang').textContent = t('language');
+  $('lblName').textContent = t('playerName');
+  $('selLang').value = (LANG_STATE.source === 'saved' || LANG_STATE.source === 'url') ? LANG : 'auto';
+  $('lblBest').textContent = t('best');
+  $('lblScore').textContent = t('score');
+  $('goTitle').textContent = t('gameOver');
+  $('goBestLbl').textContent = t('bestLabel');
+  $('newBest').textContent = t('newBest');
+  $('goReason').textContent = t('gameOverReason');
+  $('playAgain').textContent = t('playAgain');
+  $('shareBtn').textContent = t('share');
+  $('setTitle').textContent = t('settings');
+  $('lblSound').textContent = t('sound');
+  $('lblVib').textContent = t('vibration');
+  $('lblMissions').textContent = t('missions');
+  $('btnRestart').textContent = t('restart');
+  $('btnClose').textContent = t('close');
+  $('dailyTag').textContent = t('dailyTag');
+  updateHud();
+}
+
+/* ---------------- Core flow ---------------- */
+function makeGenerator(fastForward){
+  S.rngCalls = 0;
+  if (S.mode === 'daily'){
+    const base = mulberry32(hashStr('blockjoy:' + todayKey()));
+    S.rng = function(){ S.rngCalls++; return base(); };
+    if (fastForward) for (let i = 0; i < fastForward; i++) S.rng();
+    S.gen = createGenerator(GAME_CONFIG, S.rng, true);
+  } else {
+    S.rng = function(){ S.rngCalls++; return Math.random(); };
+    S.gen = createGenerator(GAME_CONFIG);
+  }
+}
+function newPieceSet(){
+  const { set } = S.gen.generateSet(S.board, S.score);
+  S.pieces = set.map((shape, i) => ({ shape, color: 1 + Math.floor(S.rng()*PALETTE.length), slot: i, born: 0 }));
+}
+function startGame(isRestart, mode){
+  if (mode) S.mode = mode;
+  makeGenerator();
+  S.board = makeBoard(N);
+  S.pieces = [null, null, null]; S.hold = null;
+  S.score = 0; S.combo = 0; S.over = false; S.paused = false;
+  S.bestAtStart = S.best; S.startedAt = Date.now();
+  Drag.active = false; Drag.src = -1; Drag.pointerId = null; Drag.valid = false;
+  Drag.returning = null; Drag.previewLines = { rows: [], cols: [] };
+  S.scoreMilestones = {}; S.linesThisGame = 0; S.maxComboThisGame = 0;
+  newPieceSet();
+  FX.particles.forEach(p => p.dead = true); FX.popups.length = 0; FX.clears.length = 0;
+  $('goOverlay').classList.remove('show');
+  Mascot.set('idle');
+  updateHud();
+  if (S.mode === 'daily') AnalyticsManager.track('mode_daily_start');
+  AnalyticsManager.track(isRestart ? 'restart' : 'game_start', { mode: S.mode });
+  ads(isRestart ? 'onRestart' : 'onGameStart');
+  sessionSave();
+}
+
+function addScore(n){
+  S.score += n;
+  [1000, 5000].forEach(m => {
+    if (S.score >= m && !S.scoreMilestones[m]){ S.scoreMilestones[m] = true; AnalyticsManager.track('score_' + m); }
+  });
+  if (S.score > S.best){ S.best = S.score; Storage.set('best', S.best); }
+  updateHud();
+  // v1.3.0: không gọi API khi cộng điểm; chỉ lưu khi endGame để mỗi lượt chơi = 1 bản ghi.
+}
+
+function dailyMissionCheck(){
+  const d = S.daily, msg = [];
+  if (!d.m.clear10 && d.lines >= 10){ d.m.clear10 = true; msg.push(t('mClear')); }
+  if (!d.m.score2000 && d.bestScore >= 2000){ d.m.score2000 = true; msg.push(t('mScore')); }
+  if (!d.m.combo5 && d.bestCombo >= 5){ d.m.combo5 = true; msg.push(t('mCombo')); }
+  if (!d.m.play3 && d.games >= 3){ d.m.play3 = true; msg.push(t('mPlay')); }
+  let challengeJustDone = false;
+  if (!d.challengeDone && d.lines >= GAME_CONFIG.dailyChallengeLines){
+    d.challengeDone = true; challengeJustDone = true; S.stars += 3;
+    msg.push(t('mDaily', { n: GAME_CONFIG.dailyChallengeLines }));
+  }
+  if (msg.length){
+    S.stars += msg.length - (challengeJustDone ? 1 : 0);
+    Storage.set('stars', S.stars);
+    FX.popup(L.w/2, L.by + L.bpx*0.25, '⭐ +' + '', '#ffe066', true);
+    FX.popups[FX.popups.length-1].txt = '⭐ ' + msg[0] + ' ✓';
+  }
+  Storage.set('daily', d);
+}
+
+function activeMoves(){
+  const list = S.pieces.filter(Boolean).map(p => ({ shape: p.shape }));
+  if (S.hold) list.push({ shape: S.hold.shape });
+  return movesAvailable(S.board, list);
+}
+/* Luật thua chuẩn:
+ * Sau mỗi lượt, nếu không còn BẤT KỲ khối nào hiện có (3 ô khối + ô GIỮ)
+ * đặt được lên bàn thì ván chơi kết thúc ngay. Ô GIỮ trống không được coi
+ * là một nước đi vì nó không tạo ra khối có thể đặt lên bàn. */
+function checkGameOver(){
+  if (S.over) return true;
+  if (activeMoves() > 0) return false;
+  gameOver();
+  return true;
+}
+
+function commitPlacement(src, r, c){
+  const p = takePiece(src);
+  placeShape(S.board, p.shape, r, c, p.color);
+  let gained = placeScore(p.shape, GAME_CONFIG);
+  AnalyticsManager.track('piece_placed', { shape: p.shape.id, r, c, fromHold: src === 3 });
+
+  for (const [dr, dc] of p.shape.cells)
+    FX.spawnBurst(L.bx + (c+dc+0.5)*L.cell, L.by + (r+dr+0.5)*L.cell, PALETTE[p.color-1][0], 2);
+  Sound.place(); Haptics.buzz(10);
+
+  const lines = findFullLines(S.board);
+  const lineCount = lines.rows.length + lines.cols.length;
+  if (lineCount > 0){
+    S.combo++;
+    S.maxComboThisGame = Math.max(S.maxComboThisGame, S.combo);
+    if (S.combo > S.highestCombo){ S.highestCombo = S.combo; Storage.set('highestCombo', S.highestCombo); }
+    const bonus = comboBonus(clearBonus(lineCount, GAME_CONFIG), S.combo, GAME_CONFIG);
+    gained += bonus;
+
+    let order = 0;
+    for (const rr2 of lines.rows) for (let cc = 0; cc < N; cc++)
+      FX.clearCell(L.bx + (cc+0.5)*L.cell, L.by + (rr2+0.5)*L.cell, PALETTE[(S.board[rr2][cc]||1)-1][0], order++ * 0.018);
+    for (const cc of lines.cols) for (let rr2 = 0; rr2 < N; rr2++)
+      FX.clearCell(L.bx + (cc+0.5)*L.cell, L.by + (rr2+0.5)*L.cell, PALETTE[(S.board[rr2][cc]||1)-1][0], order++ * 0.018);
+
+    clearLines(S.board, lines);
+    Sound.clear(lineCount); Haptics.buzz(lineCount >= 2 ? [20,30,20] : 20);
+    if (lineCount >= 2) FX.shake(Math.min(6, 2 + lineCount * 1.4));
+
+    const cx = L.bx + L.bpx/2, cy = L.by + L.bpx * 0.42;
+    if (S.combo >= 2){
+      FX.comboFlash = { t: 0, dur: 1.1, combo: S.combo, bonus };
+      FX.popup(cx, cy, t('combo', { n: S.combo }), '#ffe066', true);
+      FX.popup(cx, cy + 30, '+' + fmt(bonus), '#fff', true);
+      Sound.combo(S.combo); Haptics.buzz([15,25,15,25,30]);
+      AnalyticsManager.track('combo', { combo: S.combo, bonus });
+      Mascot.set('excited', 1300);
+    } else {
+      FX.popup(cx, cy, '+' + fmt(bonus), '#fff', true);
+      Mascot.set('happy', 900);
+    }
+    AnalyticsManager.track('line_clear', { lines: lineCount, rows: lines.rows.length, cols: lines.cols.length, combo: S.combo });
+
+    S.linesThisGame += lineCount;
+    S.daily.lines += lineCount;
+    S.daily.bestCombo = Math.max(S.daily.bestCombo, S.combo);
+  } else {
+    S.combo = 0;
+    FX.popup(L.bx + (c + p.shape.w/2) * L.cell, L.by + r * L.cell, '+' + gained, '#cfc4f5');
+  }
+  addScore(gained);
+  S.daily.bestScore = Math.max(S.daily.bestScore, S.score);
+  dailyMissionCheck();
+
+  if (src === 3){ S.hold = null; AnalyticsManager.track('hold_played'); }
+  else S.pieces[src] = null;
+
+  if (S.pieces.every(q => !q)) newPieceSet();
+  checkGameOver();
+  Mascot.refresh();
+  sessionSave();
+}
+
+function dropOnHold(srcIdx){
+  const p = S.pieces[srcIdx];
+  const prev = S.hold;
+  S.hold = { shape: p.shape, color: p.color };
+  S.pieces[srcIdx] = prev ? { shape: prev.shape, color: prev.color, slot: srcIdx, born: 0.4 } : null;
+  Sound.hold(); Haptics.buzz(8);
+  AnalyticsManager.track('hold_used');
+  if (S.pieces.every(q => !q)) newPieceSet();
+  checkGameOver();
+  Mascot.refresh();
+  sessionSave();
+}
+
+function gameOver(){
+  if (S.over) return;
+  S.over = true;
+  Drag.active = false; Drag.src = -1; Drag.pointerId = null; Drag.valid = false; Drag.returning = null;
+  Storage.set('session', null);
+  S.gamesPlayed++; Storage.set('gamesPlayed', S.gamesPlayed);
+  S.daily.games++; Storage.set('daily', S.daily);
+  const gainedXp = Math.round(S.score / 10);
+  S.xp += gainedXp; Storage.set('xp', S.xp);
+  dailyMissionCheck();
+  if (S.mode === 'daily'){
+    S.dailyRun = loadDailyRun();
+    S.dailyRun.plays++;
+    S.dailyRun.best = Math.max(S.dailyRun.best, S.score);
+    Storage.set('dailyRun', S.dailyRun);
+  }
+  Sound.over(); Haptics.buzz([30,60,30]);
+  Mascot.set('sad');
+  AnalyticsManager.track('game_over', { mode: S.mode, score: S.score, lines: S.linesThisGame, maxCombo: S.maxComboThisGame });
+  // v1.3.0: MỖI lần chết/gameOver gọi API ngay, tạo 1 bản ghi lịch sử endGame.
+  try {
+    const payload = {
+      type:'gamehihi:event-end-game',
+      game:'block-puzzle-hihi',
+      score:Math.max(0, Math.floor(Number(S.score) || 0)),
+      result:'game-over',
+      mode:String(S.mode || 'classic'),
+      meta:{ lines:Number(S.linesThisGame)||0, maxCombo:Number(S.maxComboThisGame)||0, gamesPlayed:Number(S.gamesPlayed)||0 }
+    };
+    if (typeof window.GameHiHiEndGame === 'function') {
+      window.GameHiHiEndGame(payload).catch(()=>{});
+    } else if (window.parent && window.parent !== window) {
+      window.parent.postMessage(payload, '*');
+    }
+  } catch(e) {}
+  submitScore();
+  ads('onGameOver'); ads('onAdOpportunity', 'interstitial');
+
+  const isNewBest = S.score > S.bestAtStart;
+  setTimeout(() => {
+    $('goScore').textContent = fmt(S.score);
+    $('goBest').textContent = fmt(S.best);
+    $('newBest').style.display = isNewBest ? 'block' : 'none';
+    const lv = levelFromXp(S.xp);
+    if (S.mode === 'daily'){
+      const dnow = new Date();
+      $('goDaily').innerHTML = t('dailyResult', { d: fmtDayMonth(dnow), b: fmt(S.dailyRun.best), n: S.dailyRun.plays });
+      $('shareBtn').style.display = 'inline-block';
+    } else {
+      const d = S.daily, target = GAME_CONFIG.dailyChallengeLines;
+      $('goDaily').innerHTML = d.challengeDone
+        ? t('dailyDone', { l: lv })
+        : t('dailyProg', { a: Math.min(d.lines, target), b: target, l: lv });
+      $('shareBtn').style.display = 'none';
+    }
+    $('goOverlay').classList.add('show');
+    updateHud();
+  }, 550);
+}
+
+/* Gửi 1 bản ghi điểm lên Public API (board 'daily' cho ván ngày, 'default' cho cổ điển). */
+function submitScore(){
+  if (!API_BASE || !GAME_CONFIG.submitScores || !(S.score > 0)) return;
+  const body = {
+    game: GAME_CONFIG.leaderboardGame,
+    board: S.mode === 'daily' ? 'daily' : 'default',
+    player_id: playerId(), player_name: playerName(),
+    score: Math.floor(S.score),
+    duration_ms: Math.max(0, Date.now() - (S.startedAt || Date.now())),
+  };
+  try {
+    fetch(API_BASE + '/scores?lang=' + LANG, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body), keepalive: true,
+    }).then(r => r.json()).then(j => { if (DEBUG) console.log('[score]', j); }).catch(() => {});
+  } catch(e) {}
+}
+
+/* ---------------- Session resume (van do) ----------------
+ * Saves the in-progress game after every move; restores on boot.
+ * Daily mode replays the seeded RNG by call count so the piece
+ * sequence stays identical after a restore. */
+function sessionSave(){
+  if (S.over){ Storage.set('session', null); return; }
+  Storage.set('session', {
+    v: 2, mode: S.mode, date: todayKey(),
+    board: S.board,
+    pieces: S.pieces.map(p => p ? { id: p.shape.id, color: p.color } : null),
+    hold: S.hold ? { id: S.hold.shape.id, color: S.hold.color } : null,
+    score: S.score, combo: S.combo, bestAtStart: S.bestAtStart,
+    lines: S.linesThisGame, maxCombo: S.maxComboThisGame,
+    mile: S.scoreMilestones, rngCalls: S.rngCalls || 0, started: S.startedAt || Date.now()
+  });
+}
+function sessionRestore(){
+  const s = Storage.get('session', null);
+  if (!s || s.v !== 2) return false;
+  if (!Array.isArray(s.board) || s.board.length !== N) return false;
+  if (s.mode === 'daily' && s.date !== todayKey()) return false;
+  if (!s.pieces || (!s.pieces.some(p => p) && !s.hold)) return false;
+  S.mode = s.mode;
+  makeGenerator(s.mode === 'daily' ? s.rngCalls : 0);
+  S.board = s.board.map(r => r.slice());
+  S.pieces = s.pieces.map((p, i) => p && SHAPES[p.id] ? { shape: SHAPES[p.id], color: p.color, slot: i, born: 1 } : null);
+  S.hold = s.hold && SHAPES[s.hold.id] ? { shape: SHAPES[s.hold.id], color: s.hold.color } : null;
+  S.score = s.score; S.combo = s.combo;
+  S.bestAtStart = typeof s.bestAtStart === 'number' ? s.bestAtStart : S.best;
+  S.linesThisGame = s.lines; S.maxComboThisGame = s.maxCombo;
+  S.scoreMilestones = s.mile || {}; S.over = false;
+  S.startedAt = typeof s.started === 'number' ? s.started : Date.now();
+  updateHud(); Mascot.refresh();
+  return true;
+}
+
+/* ---------------- Share (Daily Puzzle) ---------------- */
+function shareText(){
+  const dnow = new Date();
+  const grid = S.board.map(row => row.map(v => v ? SHARE_EMOJI[(v-1) % SHARE_EMOJI.length] : '⬛').join('')).join('\n');
+  let txt = t('shareTitle', { d: fmtDayMonth(dnow) })
+    + '\n' + fmt(S.score) + ' ' + t('points') + ' · ' + t('shareCombo', { n: S.maxComboThisGame })
+    + '\n' + grid;
+  if (GAME_CONFIG.shareUrl) txt += '\n' + GAME_CONFIG.shareUrl;
+  return txt;
+}
+let toastT = 0;
+function toast(msg){
+  const el = $('toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1800);
+}
+function doShare(){
+  const txt = shareText();
+  AnalyticsManager.track('share_daily', { score: S.score });
+  if (navigator.share){
+    navigator.share({ text: txt }).catch(() => copyShare(txt));
+  } else copyShare(txt);
+}
+function copyShare(txt){
+  const done = () => toast(t('copied'));
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(() => legacyCopy(txt, done));
+  } else legacyCopy(txt, done);
+}
+function legacyCopy(txt, done){
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); done();
+  } catch(e){}
+}
+
+/* ---------------- Input ---------------- */
+function pieceAtPoint(x, y){
+  if (GAME_CONFIG.holdEnabled && S.hold && L.hold){
+    if (Math.abs(x - L.hold.x) < L.hold.w/2 + 8 && Math.abs(y - L.hold.y) < Math.max(50, L.hold.h/2 + 8)) return 3;
+  }
+  for (let i = 0; i < 3; i++){
+    const p = S.pieces[i]; if (!p) continue;
+    const s = L.slots[i];
+    if (Math.abs(x - s.x) < s.w/2 && Math.abs(y - s.y) < Math.max(60, L.trayH/2)) return i;
+  }
+  return -1;
+}
+function overHoldZone(x, y){
+  if (!GAME_CONFIG.holdEnabled || !L.hold) return false;
+  return Math.abs(x - L.hold.x) < L.hold.w/2 + 14 && Math.abs(y - L.hold.y) < Math.max(56, L.hold.h/2 + 14);
+}
+function dragTopLeft(){
+  const p = takePiece(Drag.src);
+  const pw = p.shape.w * L.cell, ph = p.shape.h * L.cell;
+  return [Drag.px - pw/2, Drag.py - Drag.lift - ph/2];
+}
+function updateDragTarget(){
+  const p = takePiece(Drag.src); if (!p){ Drag.valid = false; return; }
+  const [tx, ty] = dragTopLeft();
+  const c = Math.round((tx - L.bx) / L.cell), r = Math.round((ty - L.by) / L.cell);
+  Drag.gr = r; Drag.gc = c;
+  Drag.valid = canPlace(S.board, p.shape, r, c);
+  if (Drag.valid){
+    const sim = cloneBoard(S.board);
+    placeShape(sim, p.shape, r, c, 1);
+    Drag.previewLines = findFullLines(sim);
+  } else Drag.previewLines = { rows: [], cols: [] };
+}
+cv.addEventListener('pointerdown', e => {
+  if (S.over || S.paused) return;
+  Sound.ac();
+  const rect = cv.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  const src = pieceAtPoint(x, y);
+  if (src < 0) return;
+  cv.setPointerCapture(e.pointerId);
+  Drag.active = true; Drag.src = src; Drag.pointerId = e.pointerId;
+  Drag.px = x; Drag.py = y;
+  Drag.lift = e.pointerType === 'touch' ? GAME_CONFIG.dragLiftPx : 14;
+  Sound.pick(); Haptics.buzz(8);
+  AnalyticsManager.track('piece_selected', { shape: takePiece(src).shape.id, fromHold: src === 3 });
+  updateDragTarget();
+});
+cv.addEventListener('pointermove', e => {
+  if (!Drag.active || e.pointerId !== Drag.pointerId) return;
+  const rect = cv.getBoundingClientRect();
+  Drag.px = e.clientX - rect.left; Drag.py = e.clientY - rect.top;
+  updateDragTarget();
+});
+function endDrag(e){
+  if (!Drag.active || (e && e.pointerId !== Drag.pointerId)) return;
+  Drag.active = false;
+  const src = Drag.src;
+  updateDragTarget();
+  if (src !== 3 && overHoldZone(Drag.px, Drag.py)){
+    dropOnHold(src);                       // stash / swap into hold
+  } else if (Drag.valid){
+    commitPlacement(src, Drag.gr, Drag.gc);
+  } else {
+    const p = takePiece(src);
+    if (p){
+      const [tx, ty] = dragTopLeft();
+      Drag.returning = { src, x: tx, y: ty, t: 0, dur: 0.22 };
+      Sound.invalid();
+    }
+  }
+  Drag.src = -1; Drag.previewLines = { rows: [], cols: [] };
+}
+cv.addEventListener('pointerup', endDrag);
+cv.addEventListener('pointercancel', endDrag);
+
+/* ---------------- Rendering ---------------- */
+function rr(x, y, w, h, r){
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+  else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); }
+}
+function drawCell(x, y, size, colorIdx, alpha){
+  const [c1, c2] = PALETTE[colorIdx - 1];
+  const m = size * 0.06, s = size - m*2, rad = size * 0.18;
+  ctx.globalAlpha = alpha == null ? 1 : alpha;
+  const g = ctx.createLinearGradient(x, y, x, y + size);
+  g.addColorStop(0, c1); g.addColorStop(1, c2);
+  ctx.fillStyle = g;
+  rr(x + m, y + m, s, s, rad); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.28)';
+  rr(x + m + s*0.12, y + m + s*0.1, s*0.76, s*0.3, rad*0.8); ctx.fill();
+  ctx.globalAlpha = 1;
+}
+function drawShapeAt(shape, colorIdx, x, y, cell, alpha){
+  for (const [dr, dc] of shape.cells) drawCell(x + dc*cell, y + dr*cell, cell, colorIdx, alpha);
+}
+function drawBoard(){
+  ctx.fillStyle = 'rgba(255,255,255,.045)';
+  rr(L.bx - 8, L.by - 8, L.bpx + 16, L.bpx + 16, 18); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1; ctx.stroke();
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
+    const x = L.bx + c*L.cell, y = L.by + r*L.cell;
+    ctx.fillStyle = 'rgba(255,255,255,.05)';
+    rr(x + L.cell*0.07, y + L.cell*0.07, L.cell*0.86, L.cell*0.86, L.cell*0.14); ctx.fill();
+  }
+  if (Drag.active && Drag.valid){
+    const pulse = 0.22 + 0.14 * Math.sin(performance.now()/120);
+    ctx.fillStyle = 'rgba(255,255,255,' + pulse + ')';
+    for (const r of Drag.previewLines.rows) { rr(L.bx, L.by + r*L.cell, L.bpx, L.cell, 6); ctx.fill(); }
+    for (const c of Drag.previewLines.cols) { rr(L.bx + c*L.cell, L.by, L.cell, L.bpx, 6); ctx.fill(); }
+  }
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
+    if (S.board[r][c]) drawCell(L.bx + c*L.cell, L.by + r*L.cell, L.cell, S.board[r][c]);
+  }
+  if (Drag.active && Drag.valid){
+    const p = takePiece(Drag.src);
+    if (p) drawShapeAt(p.shape, p.color, L.bx + Drag.gc*L.cell, L.by + Drag.gr*L.cell, L.cell, 0.38);
+  }
+  if (DEBUG){
+    ctx.fillStyle = 'rgba(125,255,178,.6)'; ctx.font = '9px monospace'; ctx.textAlign = 'left';
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++)
+      ctx.fillText(r + ',' + c, L.bx + c*L.cell + 2, L.by + r*L.cell + 10);
+  }
+}
+function trayScaleFor(shape, forHold){
+  if (forHold && L.hold)
+    return Math.min(L.cell * 0.42, (L.hold.w * 0.66) / shape.w, (L.hold.h * 0.6) / shape.h);
+  const s = L.slots[0].w;
+  return Math.min(L.cell * 0.55, (s * 0.82) / shape.w, (L.trayH * 0.86) / shape.h);
+}
+function drawHoldZone(){
+  if (!GAME_CONFIG.holdEnabled || !L.hold) return;
+  const hz = L.hold;
+  const x = hz.x - hz.w/2, y = hz.y - hz.h/2;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,201,77,.5)'; ctx.lineWidth = 1.6;
+  ctx.setLineDash([5, 4]);
+  rr(x, y, hz.w, hz.h, 12); ctx.stroke();
+  ctx.setLineDash([]);
+  // highlight when a tray piece is being dragged (drop target affordance)
+  if (Drag.active && Drag.src !== 3 && Drag.src >= 0){
+    const hot = overHoldZone(Drag.px, Drag.py);
+    ctx.fillStyle = hot ? 'rgba(255,201,77,.22)' : 'rgba(255,201,77,.07)';
+    rr(x, y, hz.w, hz.h, 12); ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(255,201,77,.75)';
+  ctx.font = '700 ' + Math.max(9, Math.round(L.cell*0.24)) + 'px "Trebuchet MS",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(t('hold'), hz.x, y - 4);
+  if (S.hold && !(Drag.active && Drag.src === 3) && !(Drag.returning && Drag.returning.src === 3)){
+    const cell = trayScaleFor(S.hold.shape, true);
+    const w = S.hold.shape.w * cell, h = S.hold.shape.h * cell;
+    drawShapeAt(S.hold.shape, S.hold.color, hz.x - w/2, hz.y - h/2, cell, 1);
+  }
+  ctx.restore();
+}
+function drawTray(){
+  for (let i = 0; i < 3; i++){
+    const p = S.pieces[i]; if (!p) continue;
+    if (Drag.active && Drag.src === i) continue;
+    if (Drag.returning && Drag.returning.src === i) continue;
+    const cell = trayScaleFor(p.shape);
+    p.born = Math.min(1, (p.born || 0) + 0.08);
+    const pop = 0.6 + 0.4 * easeOutBack(p.born);
+    const w = p.shape.w * cell * pop, h = p.shape.h * cell * pop;
+    drawShapeAt(p.shape, p.color, L.slots[i].x - w/2, L.slots[i].y - h/2, cell * pop, p.born < 1 ? p.born : 1);
+  }
+  drawHoldZone();
+}
+function easeOutBack(t){ const c = 1.7; return 1 + (c+1)*Math.pow(t-1,3) + c*Math.pow(t-1,2); }
+function easeOutQuad(t){ return t * (2 - t); }
+function drawDrag(dt){
+  if (Drag.active && Drag.src >= 0){
+    const p = takePiece(Drag.src);
+    if (p){
+      const [tx, ty] = dragTopLeft();
+      if (!Drag.valid && Drag.gr >= -1 && Drag.gr <= N){
+        ctx.save(); drawShapeAt(p.shape, p.color, tx, ty, L.cell, 0.55);
+        ctx.globalAlpha = 0.25; ctx.fillStyle = '#ff6b81';
+        for (const [dr, dc] of p.shape.cells){ rr(tx + dc*L.cell + 2, ty + dr*L.cell + 2, L.cell - 4, L.cell - 4, L.cell*0.16); ctx.fill(); }
+        ctx.restore();
+      } else {
+        drawShapeAt(p.shape, p.color, tx, ty, L.cell, 0.95);
+      }
+    }
+  }
+  if (Drag.returning){
+    const R = Drag.returning; R.t += dt;
+    const p = takePiece(R.src);
+    if (!p || R.t >= R.dur){ Drag.returning = null; return; }
+    const isHold = R.src === 3;
+    const cell1 = trayScaleFor(p.shape, isHold);
+    const k = easeOutQuad(R.t / R.dur);
+    const cell = L.cell + (cell1 - L.cell) * k;
+    const cx1 = isHold ? L.hold.x : L.slots[R.src].x;
+    const cy1 = isHold ? L.hold.y : L.slots[R.src].y;
+    const tx1 = cx1 - p.shape.w * cell1 / 2;
+    const ty1 = cy1 - p.shape.h * cell1 / 2;
+    drawShapeAt(p.shape, p.color, R.x + (tx1 - R.x)*k, R.y + (ty1 - R.y)*k, cell, 0.9);
+  }
+}
+function drawFx(){
+  for (const c of FX.clears){
+    if (c.t < 0){
+      ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff';
+      rr(c.x - L.cell*0.42, c.y - L.cell*0.42, L.cell*0.84, L.cell*0.84, L.cell*0.14); ctx.fill();
+      ctx.globalAlpha = 1; continue;
+    }
+    const k = c.t / c.dur, s = L.cell * 0.84 * (1 - k);
+    ctx.globalAlpha = 1 - k; ctx.fillStyle = c.color;
+    rr(c.x - s/2, c.y - s/2, s, s, s*0.18); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  for (const p of FX.particles){ if (p.dead) continue;
+    ctx.globalAlpha = Math.max(0, p.t / p.life);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+  }
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'center';
+  for (const p of FX.popups){
+    const k = p.t / p.dur;
+    ctx.globalAlpha = k < 0.15 ? k/0.15 : 1 - Math.max(0, (k-0.6)/0.4);
+    const size = p.small ? L.cell*0.34 : p.big ? L.cell*0.62 : L.cell*0.44;
+    ctx.font = (p.big ? '800 ' : '700 ') + Math.round(size) + 'px "Trebuchet MS",sans-serif';
+    ctx.fillStyle = p.color;
+    ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.lineWidth = 3;
+    const y = p.y - k * 44;
+    ctx.strokeText(p.txt, p.x, y); ctx.fillText(p.txt, p.x, y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ---------------- Main loop ---------------- */
+let last = 0, fps = 0, fpsAcc = 0, fpsN = 0;
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+  last = now;
+  if (S.paused) return;
+  fpsAcc += dt; fpsN++;
+  if (fpsAcc >= 0.5){ fps = Math.round(fpsN / fpsAcc); fpsAcc = 0; fpsN = 0; }
+
+  FX.update(dt);
+  ctx.clearRect(0, 0, L.w, L.h);
+  ctx.save();
+  if (FX.shakeT > 0){
+    const m = FX.shakeMag * (FX.shakeT / 0.3);
+    ctx.translate((Math.random()-0.5)*m, (Math.random()-0.5)*m);
+  }
+  drawBoard();
+  drawTray();
+  drawFx();
+  drawDrag(dt);
+  ctx.restore();
+
+  if (DEBUG){
+    const dbg = $('debugHud');
+    dbg.style.display = 'block';
+    dbg.textContent =
+      'FPS ' + fps +
+      '\nmode ' + S.mode +
+      '\nempty ' + emptyCount(S.board) +
+      '\nmoves ' + activeMoves() +
+      '\ndiff ' + S.gen.difficulty(S.board, S.score).toFixed(2) +
+      '\ncombo ' + S.combo + ' hold ' + (S.hold ? S.hold.shape.id : '-') +
+      '\n[R]eset  [1-9] spawn';
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  S.paused = document.hidden;
+  if (!S.paused){ last = performance.now(); }
+});
+
+/* ---------------- Resize ---------------- */
+let resizeT = 0;
+function onResize(){ clearTimeout(resizeT); resizeT = setTimeout(() => { layout(); }, 60); layout(); }
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', onResize);
+
+/* ---------------- UI wiring ---------------- */
+$('playAgain').addEventListener('click', () => startGame(true));
+$('shareBtn').addEventListener('click', doShare);
+$('modeChip').addEventListener('click', () => startGame(true, S.mode === 'daily' ? 'classic' : 'daily'));
+$('settingsBtn').addEventListener('click', () => { renderSettings(); $('setOverlay').classList.add('show'); });
+$('btnClose').addEventListener('click', () => $('setOverlay').classList.remove('show'));
+$('btnRestart').addEventListener('click', () => { $('setOverlay').classList.remove('show'); startGame(true); });
+function bindToggle(id, get, set){
+  const el = $(id);
+  const paint = () => el.classList.toggle('on', get());
+  el.addEventListener('click', () => { set(!get()); paint(); });
+  paint();
+}
+bindToggle('tglSound', () => Sound.on, v => { Sound.on = v; Storage.set('sound', v); });
+bindToggle('tglVib', () => Haptics.on, v => { Haptics.on = v; Storage.set('vibration', v); });
+$('selLang').addEventListener('change', e => {
+  const v = e.target.value;
+  if (v === 'auto'){
+    Storage.set('lang', null);
+    const r = resolveLang({ auto: true });
+    setLang(r.lang, r.source);
+  } else {
+    Storage.set('lang', v);
+    setLang(v, 'saved');
+  }
+});
+if (API_BASE) $('rowName').style.display = '';
+$('inpName').addEventListener('change', e => {
+  Storage.set('playerName', String(e.target.value || '').replace(/[<>]/g, '').trim().slice(0, 24));
+  e.target.value = playerName();
+});
+function renderSettings(){
+  const d = S.daily, T = GAME_CONFIG.dailyChallengeLines;
+  const rows = [
+    [t('mDaily', { n: T }), Math.min(d.lines,T) + '/' + T, d.challengeDone],
+    [t('mClear'), Math.min(d.lines,10) + '/10', d.m.clear10],
+    [t('mScore'), fmt(Math.min(d.bestScore,2000)) + '/' + fmt(2000), d.m.score2000],
+    [t('mCombo'), 'x' + Math.min(d.bestCombo,5) + '/x5', d.m.combo5],
+    [t('mPlay'), Math.min(d.games,3) + '/3', d.m.play3],
+  ];
+  $('missionList').innerHTML = rows.map(([tt, p, done]) =>
+    '<div class="mission' + (done ? ' done' : '') + '"><span>' + (done ? '✓ ' : '') + tt + '</span><span>' + (done ? '⭐' : p) + '</span></div>').join('');
+  $('statline').textContent = t('stats', { g: S.gamesPlayed, c: S.highestCombo, l: levelFromXp(S.xp) });
+  if (document.activeElement !== $('inpName')) $('inpName').value = playerName();
+}
+
+/* ---------------- Debug ---------------- */
+if (DEBUG){
+  window.addEventListener('keydown', e => {
+    if (e.key === 'r' || e.key === 'R'){ startGame(true); }
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 9 && SHAPES[n-1]) S.pieces[0] = { shape: SHAPES[n-1], color: 1 + (n % PALETTE.length), slot: 0, born: 1 };
+  });
+  window.HiHiDebug = { S, SHAPES, GAME_CONFIG, FX, Mascot, sessionSave, sessionRestore, startGame, checkGameOver, activeMoves, setLang, resolveLang, GEO };
+}
+
+/* Trang không do Worker phục vụ (vd. host tĩnh) nhưng có GAME_CONFIG.apiBase:
+ * hỏi /geo để lấy ngôn ngữ theo IP — chỉ áp dụng khi chưa có lựa chọn mạnh hơn. */
+function fetchGeoLang(){
+  if (window.__HIHI_GEO || !API_BASE) return;
+  fetch(API_BASE + '/geo').then(r => r.json()).then(j => {
+    if (!j || !j.ok) return;
+    GEO.country = j.country; GEO.lang = j.lang; GEO.default_lang = j.default_lang;
+    const r = resolveLang();
+    if (r.source === 'ip' && r.lang !== LANG) setLang(r.lang, 'ip');
+  }).catch(() => {});
+}
+
+/* ---------------- Boot ---------------- */
+function boot(){
+  layout();
+  applyI18n();
+  fetchGeoLang();
+  if (!sessionRestore()) startGame(false);
+  else {
+    AnalyticsManager.track('session_resume', { mode: S.mode });
+    checkGameOver();
+  }
+  requestAnimationFrame(tm => { last = tm; frame(tm); });
+}
+if (window.__HIHI_DEFER_BOOT){
+  window.__hihiBoot = boot;
+  if (typeof window.__hihiReady === 'function') window.__hihiReady();
+} else boot();
+
+})();
+
+</script>
+
+<script id="gh-v1814-embedded-detector">
+(function(){
+  'use strict';
+  function embedded(){try{return window.self!==window.top;}catch(e){return true;}}
+  function sync(){
+    var root=document.documentElement;
+    root.classList.toggle('gh-embedded',embedded());
+    root.classList.toggle('gh-w-xs',window.innerWidth<=420);
+    root.classList.toggle('gh-w-sm',window.innerWidth<=599);
+    root.classList.toggle('gh-w-md',window.innerWidth<=800);
+    root.classList.toggle('gh-h-short',window.innerHeight<=560);
+  }
+  sync();
+  window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('orientationchange',function(){setTimeout(sync,120);},{passive:true});
+  window.addEventListener('message',function(e){if(e&&e.data&&e.data.type==='gamehihi:viewport')sync();});
+})();
+</script>
+</body>
+</html>

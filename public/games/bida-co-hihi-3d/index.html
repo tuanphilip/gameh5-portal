@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="vi">
+<head><script id="gamehihi-fresh-runtime">(function(w){"use strict";var V="bf1a11396c67";function fresh(u){if(typeof u!=="string"||!u||/^(?:data:|blob:|mailto:|tel:|javascript:|#)/i.test(u)||/^(?:https?:)?\/\//i.test(u)||/(?:[?&])ghv=/.test(u)){return u;}var h="",i=u.indexOf("#");if(i>=0){h=u.slice(i);u=u.slice(0,i);}u+=(u.indexOf("?")<0?"?":"&")+"ghv="+encodeURIComponent(V);return u+h;}w.GameHiHiFresh={version:V,url:fresh};var f=w.fetch;if(typeof f==="function"){w.fetch=function(input,init){if(typeof input==="string"){input=fresh(input);}return f.call(this,input,init);};}function patch(proto,prop){if(!proto){return;}var d=Object.getOwnPropertyDescriptor(proto,prop);if(!d||!d.get||!d.set||!d.configurable){return;}try{Object.defineProperty(proto,prop,{configurable:true,enumerable:d.enumerable,get:d.get,set:function(v){d.set.call(this,fresh(v));}});}catch(e){}}patch(w.HTMLImageElement&&w.HTMLImageElement.prototype,"src");patch(w.HTMLScriptElement&&w.HTMLScriptElement.prototype,"src");patch(w.HTMLAudioElement&&w.HTMLAudioElement.prototype,"src");patch(w.HTMLVideoElement&&w.HTMLVideoElement.prototype,"poster");})(window);</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bida Cỏ HiHi 3D</title>
+<style>
+:root { color-scheme: dark; }
+/* BIDA CỎ HIHI 3D — UI styles (original design for Game HiHi) */
+:root {
+  --hihi: #ffcc2e; --hihi-d: #e0a800; --pink: #ff3fa4; --cyan: #35e0ff; --ok: #5affb4; --bad: #ff5a5a;
+  --glass: rgba(18, 12, 26, 0.72); --glass-2: rgba(30, 20, 44, 0.88); --line: rgba(255, 255, 255, 0.14);
+  --text: #fff8ea; --muted: #cbbfd8;
+  --font: "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #0e0b10; color: var(--text); font-family: var(--font); user-select: none; -webkit-user-select: none; touch-action: none; }
+#app { position: fixed; inset: 0; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+.hidden { display: none !important; }
+button { font-family: inherit; color: inherit; cursor: pointer; border: 0; }
+
+/* ---------------- loading */
+#loading { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #2b1a3a, #0e0b10 70%); z-index: 50; transition: opacity .5s; }
+#loading .logo-ball { width: 84px; height: 84px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c8, var(--hihi) 40%, #b88400); position: relative; animation: spin 1.2s linear infinite; box-shadow: 0 0 40px rgba(255, 204, 46, .5); }
+#loading .logo-ball::after { content: "HI"; position: absolute; inset: 22px; border-radius: 50%; background: #fff; color: #1b1030; font-weight: 900; display: grid; place-items: center; font-size: 18px; }
+#loading p { margin-top: 18px; color: var(--muted); text-align: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-box { max-width: 520px; margin: 0 20px; padding: 24px; border-radius: 18px; background: var(--glass-2); border: 1px solid var(--bad); text-align: center; line-height: 1.5; }
+
+/* ---------------- screens */
+.screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; background: linear-gradient(180deg, rgba(10, 6, 16, .25), rgba(10, 6, 16, .7)); }
+.panel { width: min(560px, 100%); max-height: calc(100% - 16px); overflow: auto; background: var(--glass-2); border: 1px solid var(--line); border-radius: 22px; padding: 22px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 20px 60px rgba(0, 0, 0, .5); }
+.panel.wide { width: min(820px, 100%); }
+.panel h2 { margin: 0 0 14px; font-size: 22px; letter-spacing: .5px; }
+.title-wrap { text-align: center; margin-bottom: 18px; }
+.game-title { font-size: clamp(30px, 6vw, 52px); font-weight: 900; line-height: 1.25; margin: 0; padding-top: 6px; letter-spacing: 1px;
+  background: linear-gradient(90deg, var(--hihi), #fff3c4 40%, var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 18px rgba(255, 63, 164, .35)); }
+.game-title small { display: block; font-size: .42em; letter-spacing: 6px; margin-top: 6px; color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+.tagline { color: var(--muted); margin: 10px 0 0; font-size: 15px; }
+.menu-grid { display: grid; gap: 10px; }
+.big-btn { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); text-align: left; transition: transform .12s, background .12s, border-color .12s; }
+.big-btn:hover, .big-btn:focus-visible { background: rgba(255, 204, 46, .12); border-color: var(--hihi); transform: translateY(-1px); outline: none; }
+.big-btn .ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-size: 22px; background: rgba(255, 204, 46, .18); flex: none; }
+.big-btn b { display: block; font-size: 17px; }
+.big-btn span.d { color: var(--muted); font-size: 13px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.chip-btn { padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, .08); border: 1px solid var(--line); font-weight: 600; font-size: 14px; }
+.chip-btn:hover { border-color: var(--hihi); }
+.chip-btn.primary { background: linear-gradient(180deg, var(--hihi), var(--hihi-d)); color: #241600; border: 0; }
+.coins-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 204, 46, .15); color: var(--hihi); font-weight: 800; font-size: 14px; }
+.coin { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c8, var(--hihi) 50%, #a87800); display: inline-block; }
+.menu-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+.lang-toggle { display: inline-flex; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.lang-toggle button { background: transparent; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+.lang-toggle button.on { background: var(--hihi); color: #241600; }
+
+/* opponent cards */
+.opp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.opp-card { padding: 14px; border-radius: 16px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); text-align: center; }
+.opp-card:hover { border-color: var(--hihi); background: rgba(255, 204, 46, .1); }
+.avatar { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 14px; color: #1b1030; margin: 0 auto 8px; border: 3px solid rgba(255, 255, 255, .7); }
+.opp-card b { display: block; }
+.opp-card .lvl { font-size: 12px; color: var(--hihi); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.opp-card q { display: block; font-size: 12.5px; color: var(--muted); margin-top: 8px; font-style: italic; }
+.opp-card .rec { font-size: 12px; margin-top: 6px; color: var(--ok); }
+
+/* levels */
+.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.level-card { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); text-align: left; min-height: 96px; }
+.level-card:hover:not(:disabled) { border-color: var(--hihi); }
+.level-card:disabled { opacity: .45; cursor: not-allowed; }
+.level-card .n { font-size: 12px; color: var(--hihi); font-weight: 800; }
+.level-card b { display: block; margin: 2px 0 4px; font-size: 15px; }
+.level-card .st { color: var(--hihi); letter-spacing: 2px; font-size: 15px; }
+.level-card .st i { color: rgba(255, 255, 255, .25); font-style: normal; }
+
+/* shop / achievements / settings */
+.shop-sec h3 { margin: 16px 0 8px; font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.shop-item { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.shop-item .sw { height: 26px; border-radius: 8px; }
+.shop-item.on { border-color: var(--ok); }
+.ach-list { display: grid; gap: 8px; }
+.ach { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); }
+.ach .medal { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .1); font-size: 18px; flex: none; }
+.ach.got .medal { background: var(--hihi); color: #241600; }
+.ach small { color: var(--muted); display: block; }
+.set-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.set-row select, .set-row input[type=range] { accent-color: var(--hihi); }
+.set-row select { background: #2a1d3a; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-family: inherit; }
+.switch { width: 46px; height: 26px; border-radius: 999px; background: rgba(255, 255, 255, .2); position: relative; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; }
+.switch.on { background: var(--hihi); }
+.switch.on::after { left: 23px; }
+.howto-list { line-height: 1.55; padding-left: 0; list-style: none; margin: 0; }
+.howto-list li { margin-bottom: 10px; padding: 10px 12px; background: rgba(255, 255, 255, .05); border-radius: 12px; }
+
+/* result */
+.result-title { font-size: 34px; font-weight: 900; text-align: center; margin: 4px 0 6px; }
+.result-title.win { color: var(--hihi); }
+.result-title.lose { color: var(--bad); }
+.result-stars { text-align: center; font-size: 40px; color: var(--hihi); letter-spacing: 6px; }
+.result-stars i { color: rgba(255, 255, 255, .2); font-style: normal; }
+.result-body { text-align: center; color: var(--muted); }
+
+/* ---------------- HUD */
+#hud { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+#hud > * { pointer-events: auto; }
+#topbar { position: absolute; top: calc(8px + var(--safe-t)); left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; pointer-events: none; }
+.pcard { pointer-events: none; display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); min-width: 0; max-width: 34vw; transition: box-shadow .2s, border-color .2s; }
+.pcard.active { border-color: var(--hihi); box-shadow: 0 0 0 2px rgba(255, 204, 46, .35), 0 0 22px rgba(255, 204, 46, .25); }
+.pcard .avatar { width: 38px; height: 38px; margin: 0; font-size: 11px; border-width: 2px; flex: none; }
+.pcard .pname { font-weight: 800; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pcard .pgroup { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.prack { display: flex; gap: 2px; margin-top: 3px; flex-wrap: wrap; }
+.prack .mb { width: 13px; height: 13px; border-radius: 50%; font-size: 7px; font-weight: 900; display: grid; place-items: center; color: #111; box-shadow: inset -2px -2px 3px rgba(0, 0, 0, .35); }
+.prack .mb.st { background-image: linear-gradient(180deg, #f6f1e3 25%, transparent 25%, transparent 75%, #f6f1e3 75%) !important; }
+.prack .mb.gone { opacity: .22; }
+#center-info { text-align: center; pointer-events: none; padding: 6px 14px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); min-width: 0; }
+#turn { font-weight: 900; font-size: 15px; white-space: nowrap; }
+#subinfo { font-size: 12px; color: var(--muted); }
+#topbtns { position: absolute; top: calc(64px + var(--safe-t)); right: 8px; display: flex; flex-direction: column; gap: 6px; }
+.icon-btn { width: 42px; height: 42px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line); font-size: 18px; display: grid; place-items: center; }
+.icon-btn:hover { border-color: var(--hihi); }
+.icon-btn.on { background: rgba(255, 204, 46, .25); border-color: var(--hihi); }
+#toolsLeft { position: absolute; top: calc(64px + var(--safe-t)); left: 8px; display: flex; flex-direction: column; gap: 6px; }
+.tool-btn { padding: 9px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line); font-weight: 700; font-size: 13px; text-align: left; }
+.tool-btn:hover { border-color: var(--hihi); }
+
+#toast { position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%) scale(.9); padding: 12px 26px; border-radius: 18px; font-weight: 900; font-size: clamp(20px, 4vw, 34px); text-align: center; background: var(--glass-2); border: 2px solid var(--hihi); color: var(--hihi); opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; text-shadow: 0 2px 10px rgba(0, 0, 0, .5); max-width: 90vw; }
+#toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+#toast.bad { border-color: var(--bad); color: var(--bad); }
+#toast small { display: block; font-size: .5em; color: var(--text); font-weight: 700; margin-top: 2px; }
+#bubble { position: absolute; padding: 8px 12px; border-radius: 14px; background: #fff8ea; color: #241600; font-size: 13px; font-weight: 600; max-width: 230px; transform: translate(-50%, -100%); pointer-events: none; opacity: 0; transition: opacity .25s; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+#bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); border: 8px solid transparent; border-top-color: #fff8ea; border-bottom: 0; }
+#bubble.show { opacity: 1; }
+#feed { position: absolute; left: 10px; bottom: calc(150px + var(--safe-b)); display: flex; flex-direction: column; gap: 4px; pointer-events: none; max-width: min(360px, 60vw); }
+#feed div { padding: 6px 10px; border-radius: 10px; background: var(--glass); font-size: 13px; animation: feedIn .25s ease-out; border-left: 3px solid var(--pink); }
+@keyframes feedIn { from { opacity: 0; transform: translateX(-10px); } }
+
+/* controls */
+#spinBox { position: absolute; left: 12px; bottom: calc(14px + var(--safe-b)); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#spinBall { width: 86px; height: 86px; border-radius: 50%; background: radial-gradient(circle at 38% 32%, #fff, #e9e3d2 55%, #b9b19c); position: relative; border: 2px solid rgba(255, 255, 255, .6); touch-action: none; box-shadow: 0 6px 20px rgba(0, 0, 0, .4); }
+#spinBall::before, #spinBall::after { content: ""; position: absolute; background: rgba(0, 0, 0, .12); }
+#spinBall::before { left: 50%; top: 8px; bottom: 8px; width: 1px; }
+#spinBall::after { top: 50%; left: 8px; right: 8px; height: 1px; }
+#spinDot { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #d7262b; border: 2px solid #fff; left: 50%; top: 50%; z-index: 1; }
+.ctl-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--muted); background: var(--glass); padding: 2px 8px; border-radius: 6px; }
+#aimBtns { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(14px + var(--safe-b)); display: flex; gap: 10px; }
+#aimBtns .icon-btn { width: 56px; height: 48px; font-size: 20px; }
+#powerBox { position: absolute; right: 12px; bottom: calc(14px + var(--safe-b)); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+#powerBar { width: 48px; height: min(240px, 36vh); border-radius: 16px; background: var(--glass-2); border: 1px solid var(--line); position: relative; overflow: hidden; touch-action: none; cursor: ns-resize; }
+#powerFill { position: absolute; left: 0; right: 0; top: 0; height: 0%; background: linear-gradient(180deg, var(--ok), var(--hihi) 55%, var(--bad)); }
+#powerCue { position: absolute; left: 50%; top: 0; width: 10px; height: 100%; margin-left: -5px; border-radius: 5px; background: linear-gradient(180deg, #3a6fd8 0 3%, #f4f1ea 3% 6%, #e7cf9f 6% 60%, #5a2c16 60%); box-shadow: 0 0 6px rgba(0, 0, 0, .5); }
+#powerPct { font-size: 12px; font-weight: 800; }
+#shootBtn { width: 92px; height: 56px; border-radius: 16px; font-size: 18px; font-weight: 900; letter-spacing: 1px; background: linear-gradient(180deg, var(--hihi), var(--hihi-d)); color: #241600; box-shadow: 0 6px 18px rgba(255, 204, 46, .35); }
+#shootBtn:disabled { filter: grayscale(1) brightness(.6); cursor: not-allowed; }
+#hint { position: absolute; left: 50%; bottom: calc(76px + var(--safe-b)); transform: translateX(-50%); font-size: 13px; padding: 6px 12px; border-radius: 10px; background: var(--glass); color: var(--text); white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.lock .ctl-disable { opacity: .45; pointer-events: none; }
+
+/* small screens */
+@media (max-width: 640px), (max-height: 480px) {
+  .pcard { max-width: 30vw; padding: 4px 8px 4px 4px; }
+  .pcard .avatar { width: 30px; height: 30px; font-size: 9px; }
+  .pcard .pname { font-size: 12px; }
+  #center-info { padding: 4px 8px; }
+  #turn { font-size: 12px; }
+  #subinfo { font-size: 10.5px; }
+  #spinBall { width: 70px; height: 70px; }
+  #powerBar { height: min(200px, 32vh); width: 44px; }
+  #shootBtn { width: 80px; height: 52px; font-size: 16px; }
+  #feed { bottom: calc(118px + var(--safe-b)); font-size: 12px; }
+  #hint { font-size: 11.5px; bottom: calc(70px + var(--safe-b)); }
+  #aimBtns .icon-btn { width: 50px; height: 44px; }
+  .panel { padding: 16px; border-radius: 18px; }
+  .big-btn { padding: 11px 12px; }
+  .big-btn .ico { width: 38px; height: 38px; font-size: 19px; }
+  .prack .mb { width: 10px; height: 10px; font-size: 0; }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  #topbtns, #toolsLeft { top: calc(52px + var(--safe-t)); }
+  .icon-btn { width: 36px; height: 36px; font-size: 15px; }
+  #powerBar { height: 44vh; }
+  #feed { display: none; }
+}
+@media (pointer: fine) { #aimBtns { display: none; } }
+
+</style>
+<script>window.GameHiHiDirectEventScoreConfig={"enabled":true,"loggedIn":false,"restUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/score","restNonce":"","guestNonce":"633bc07c35ee398be0a7a8628c561e1e990a7f350157ab0334fa683bf46c7f36","ajaxUrl":"https:\/\/gamehihi.com\/wp-admin\/admin-ajax.php","ajaxNonce":"5caf1c3107","contextNonce":"633bc07c35ee398be0a7a8628c561e1e990a7f350157ab0334fa683bf46c7f36","gameId":4562,"seasonKey":"block-puzzle-01","initialScore":0,"initialTotalScore":0,"scoreLabel":"\u0110i\u1ec3m s\u1ef1 ki\u1ec7n","currentUserName":"GameHiHi-Play-17195","currentUserAvatar":"","caroMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/matchmake","caroRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/create","caroRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/join","caroStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/state","caroMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/move","caroLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/leave","caroRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/rematch","ludoMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/matchmake","ludoRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/create","ludoRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/join","ludoStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/state","ludoRollUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/roll","ludoMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/move","ludoLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/leave","ludoRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/rematch","analyticsUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/track","analyticsEventUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/event","analyticsNonce":"","analyticsUserId":0,"analyticsPlayerRef":"GameHiHi-Play-17195","analyticsUserScore":0,"analyticsUserAgeGroup":"","analyticsRegisteredSource":"","analyticsProfileComplete":0,"analyticsHasEmail":0,"analyticsHasPhone":0,"analyticsHasName":0,"gameSlug":"bida-co-hihi","gameName":"Bida C\u1ecf HiHi 3D","ga4MeasurementId":"G-397WR2WE5S","ga4MasterEnabled":1,"ga4MasterMeasurementId":"G-5CDYMXDTW0","analyticsSourceSite":"https:\/\/gamehihi.com\/gamehihi-play\/","analyticsSchemaVersion":"2.0.56"};(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  var best=Number(cfg.initialScore||0), total=Number(cfg.initialTotalScore||0), pending=-1, pendingMode='', busy=false, timer=0;
+  function parseResponse(r){return r.json().then(function(j){if(!r.ok||j&&j.success===false)throw j;return j&&j.data?j.data:j;});}
+  function viaAjax(score,mode){
+    if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+    var body=new URLSearchParams();
+    body.set('action','gamehihi_event_save_score'); body.set('_ajax_nonce',cfg.ajaxNonce);
+    body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score)); body.set('mode',mode||'');
+    body.set('context_nonce',cfg.contextNonce||cfg.guestNonce||'');
+    return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+  }
+  function viaRest(score,mode){
+    if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+    return fetch(cfg.restUrl,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,context_nonce:cfg.contextNonce||cfg.guestNonce})}).then(parseResponse);
+  }
+  function flush(){
+    if(busy||pending<0||!cfg.enabled)return;
+    var score=pending, mode=pendingMode; pending=-1; busy=true;
+    viaAjax(score,mode).catch(function(){return viaRest(score,mode);})
+      .then(function(j){best=Math.max(best,Number(j.best_score||0));if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);try{window.dispatchEvent(new CustomEvent('gamehihi:event-score-saved',{detail:{score:best,totalScore:total,gameId:Number(cfg.gameId)||0}}));}catch(e){} if(window.console&&console.info)console.info('[GameHiHi Event Score] saved',j);})
+      .catch(function(e){if(window.console&&console.error)console.error('[GameHiHi Event Score] save failed',e);})
+      .finally(function(){busy=false;if(pending>=0)flush();});
+  }
+  window.GameHiHiDirectEventScore=function(payload){
+    if(!payload||payload.type!=='gamehihi:event-score'||!cfg.enabled)return;
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    if(!payload.final&&score<=best)return;
+    pending=Math.max(pending,score); pendingMode=String(payload.mode||'').slice(0,50);
+    clearTimeout(timer); timer=setTimeout(flush,payload.final?0:250);
+  };
+  // v1.3.0: Mỗi lần game kết thúc gọi API ngay và tạo 1 bản ghi lịch sử.
+  window.GameHiHiEndGame=function(payload){
+    payload=payload||{};
+    if(!cfg.enabled) return Promise.reject({message:'Event disabled'});
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    var mode=String(payload.mode||'').slice(0,50);
+    var result=String(payload.result||'').slice(0,20);
+    var meta=payload.meta&&typeof payload.meta==='object'?payload.meta:{};
+    function ajax(){
+      if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+      var body=new URLSearchParams();
+      body.set('action','gamehihi_event_end_game'); body.set('_ajax_nonce',cfg.ajaxNonce);
+      body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score));
+      body.set('mode',mode); body.set('result',result); body.set('meta',JSON.stringify(meta));
+      body.set('guest_nonce',cfg.guestNonce||'');
+      return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+    }
+    function rest(){
+      if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+      var url=String(cfg.restUrl).replace(/\/score\/?$/,'/end-game');
+      return fetch(url,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,result:result,meta:meta,guest_nonce:cfg.guestNonce})}).then(parseResponse);
+    }
+    return ajax().catch(function(){return rest();}).then(function(j){
+      best=Math.max(best,Number(j.best_score||0));
+      if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);
+      try{window.dispatchEvent(new CustomEvent('gamehihi:end-game-saved',{detail:j}));}catch(e){}
+      if(window.console&&console.info)console.info('[GameHiHi EndGame] saved',j);
+      return j;
+    }).catch(function(e){if(window.console&&console.error)console.error('[GameHiHi EndGame] save failed',e);throw e;});
+  };
+  window.GameHiHiEventScoreDebug={config:cfg,getBest:function(){return best;},getTotal:function(){return total;},flush:flush};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  if(!cfg.analyticsUrl||!cfg.gameId) return;
+  function randomKey(prefix){
+    var a=new Uint8Array(16); try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    var h=''; for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2); return prefix+h;
+  }
+  function getVisitor(){
+    var k='gh_visitor_v1',v='';
+    try{v=localStorage.getItem(k)||''; if(!v){v=randomKey('v_');localStorage.setItem(k,v);}}catch(e){v=randomKey('v_');}
+    return v.slice(0,64);
+  }
+  function acquisition(){
+    var landing=location.href, ref=document.referrer||'';
+    try{
+      if(window.top!==window.self && window.top.location.origin===location.origin){
+        landing=window.top.location.href;
+        ref=window.top.document.referrer||ref;
+        var saved=window.top.sessionStorage.getItem('gh_acq_v1');
+        if(saved){var o=JSON.parse(saved); if(o&&o.landing)landing=String(o.landing); if(o&&typeof o.referrer==='string')ref=o.referrer;}
+      }
+    }catch(e){}
+    return {landing:String(landing||'').slice(0,1000),referrer:String(ref||'').slice(0,1000)};
+  }
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua) || (/android/i.test(ua)&&!/mobile/i.test(ua))) return 'Tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'Mobile';
+    return 'Desktop';
+  }
+  var visitor=getVisitor(), session=randomKey('s_'), acq=acquisition();
+  var activeMs=0,playMs=0,last=performance.now(),started=false,lastSent={a:-1,p:-1,s:-1},sending=false,pending=false;
+  function accrue(){
+    var now=performance.now(),delta=Math.max(0,Math.min(5000,now-last)); last=now;
+    if(!document.hidden){activeMs+=delta;if(started)playMs+=delta;}
+  }
+  function markStarted(){accrue();started=true;}
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',markStarted,{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,markStarted,{passive:true,once:true});});
+  }
+  document.addEventListener('visibilitychange',function(){accrue(); if(document.hidden)flush(true);},{passive:true});
+  window.addEventListener('blur',accrue,{passive:true}); window.addEventListener('focus',function(){last=performance.now();},{passive:true});
+  function payload(){
+    accrue();
+    return {session_key:session,visitor_key:visitor,game_id:Number(cfg.gameId)||0,active_seconds:Math.min(28800,Math.floor(activeMs/1000)),play_seconds:Math.min(28800,Math.floor(playMs/1000)),started:started?1:0,landing_url:acq.landing,referrer:acq.referrer,language:String(navigator.language||'').slice(0,16),platform:platform(),logged_in:cfg.loggedIn?1:0};
+  }
+  function changed(d){return d.active_seconds!==lastSent.a||d.play_seconds!==lastSent.p||d.started!==lastSent.s;}
+  function remember(d){lastSent={a:d.active_seconds,p:d.play_seconds,s:d.started};}
+  function flush(beacon){
+    var d=payload(); if(!changed(d))return;
+    if(sending){pending=true;return;}
+    if(beacon && navigator.sendBeacon){
+      try{var blob=new Blob([JSON.stringify(d)],{type:'application/json'}); if(navigator.sendBeacon(cfg.analyticsUrl,blob)){remember(d);return;}}catch(e){}
+    }
+    sending=true;
+    var headers={'Content-Type':'application/json'}; if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    fetch(cfg.analyticsUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:JSON.stringify(d)})
+      .then(function(r){if(r.ok)remember(d);})
+      .catch(function(){})
+      .finally(function(){sending=false;if(pending){pending=false;flush(false);}});
+  }
+  setTimeout(function(){flush(false);},2500);
+  setInterval(function(){flush(false);},30000);
+  window.addEventListener('pagehide',function(){flush(true);},{passive:true});
+  window.addEventListener('beforeunload',function(){flush(true);},{passive:true});
+  window.GameHiHiAnalyticsDebug={flush:flush,visitor:visitor,session:session};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  function validMid(v){v=String(v||'').trim().toUpperCase();return /^G-[A-Z0-9]{4,20}$/.test(v)?v:'';}
+  var gameMid=validMid(cfg.ga4MeasurementId), masterMid=Number(cfg.ga4MasterEnabled)?validMid(cfg.ga4MasterMeasurementId):'';
+  var targets=[];
+  [gameMid,masterMid].forEach(function(id){if(id&&targets.indexOf(id)<0)targets.push(id);});
+  if(!targets.length) return;
+
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+  var script=document.createElement('script');
+  script.async=true;
+  script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(targets[0]);
+  document.head.appendChild(script);
+
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua)||(/android/i.test(ua)&&!/mobile/i.test(ua))) return 'tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  function visitorId(){
+    var key='gh_visitor_v1',v='';
+    try{
+      v=localStorage.getItem(key)||'';
+      if(!v){v='v_'+sessionId().replace(/^gs_/,'');localStorage.setItem(key,v);}
+    }catch(e){v='v_'+sessionId().replace(/^gs_/,'');}
+    return String(v||'').slice(0,64);
+  }
+  function sessionId(){
+    var a=new Uint8Array(12),h='';
+    try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2);
+    return 'gs_'+h;
+  }
+  function cleanMeta(meta){
+    var out={},count=0;
+    if(!meta||typeof meta!=='object')return out;
+    Object.keys(meta).forEach(function(raw){
+      if(count>=20)return;
+      var key=String(raw||'').toLowerCase().replace(/[^a-z0-9_]/g,'_').replace(/^_+|_+$/g,'').slice(0,30);
+      if(!key)return;
+      var val=meta[raw];
+      if(typeof val==='number'&&isFinite(val)){out['game_'+key]=val;count++;return;}
+      if(typeof val==='boolean'){out['game_'+key]=val?1:0;count++;return;}
+      if(typeof val==='string'){out['game_'+key]=val.slice(0,100);count++;}
+    });
+    return out;
+  }
+  function merge(a,b){var o={},k;for(k in a)if(Object.prototype.hasOwnProperty.call(a,k))o[k]=a[k];for(k in b)if(Object.prototype.hasOwnProperty.call(b,k))o[k]=b[k];return o;}
+
+  var uid=Math.max(0,Math.floor(Number(cfg.analyticsUserId)||0));
+  var userScore=Math.max(0,Math.floor(Number(cfg.analyticsUserScore)||0));
+  var ageGroup=String(cfg.analyticsUserAgeGroup||'').slice(0,20);
+  var registeredSource=String(cfg.analyticsRegisteredSource||'').slice(0,40);
+  var gameSession=sessionId();
+  var common={
+    game_id:String(Number(cfg.gameId)||0),
+    game_slug:String(cfg.gameSlug||''),
+    game_name:String(cfg.gameName||document.title||''),
+    player_type:cfg.loggedIn?'logged_in':'guest',
+    player_ref:String(cfg.analyticsPlayerRef||''),
+    user_total_score:userScore,
+    source_site:String(cfg.analyticsSourceSite||location.hostname||'').slice(0,80),
+    platform:platform(),
+    language:String(navigator.language||'').slice(0,16),
+    game_session_id:gameSession,
+    game_url:String(location.pathname||'').slice(0,200),
+    page_path:String((location.pathname||'')+(location.search||'')).slice(0,300),
+    analytics_schema_version:String(cfg.analyticsSchemaVersion||'2.0.56')
+  };
+  var vid=visitorId(); if(vid)common.game_visitor_id=vid;
+  if(uid>0){
+    common.wp_user_id=String(uid);
+    if(ageGroup) common.user_age_group=ageGroup;
+    if(registeredSource) common.user_registered_source=registeredSource;
+    common.user_profile_complete=Number(cfg.analyticsProfileComplete)?1:0;
+    common.user_has_email=Number(cfg.analyticsHasEmail)?1:0;
+    common.user_has_phone=Number(cfg.analyticsHasPhone)?1:0;
+    common.user_has_name=Number(cfg.analyticsHasName)?1:0;
+  }
+
+  gtag('js',new Date());
+  gtag('set',common);
+  targets.forEach(function(id){
+    var c={send_page_view:false};
+    if(uid>0)c.user_id=String(uid);
+    gtag('config',id,c);
+  });
+
+  var localSeq=0;
+  var localEventNames={page_view:1,game_view:1,game_start:1,game_score:1,score_submit:1,game_end:1,game_engaged_60s:1,game_exit:1};
+  function logLocal(name,data){
+    if(!cfg.analyticsEventUrl||!localEventNames[name])return;
+    localSeq++;
+    var payload={
+      event_key:(gameSession+'_'+localSeq+'_'+name).slice(0,96),
+      event_name:name,
+      session_key:gameSession,
+      visitor_key:String(common.game_visitor_id||''),
+      game_id:Number(cfg.gameId)||0,
+      game_slug:String(common.game_slug||''),
+      game_name:String(common.game_name||''),
+      player_type:String(common.player_type||''),
+      source_site:String(common.source_site||''),
+      platform:String(common.platform||''),
+      language:String(common.language||''),
+      game_url:String(common.game_url||''),
+      page_path:String(common.page_path||''),
+      score:Math.max(0,Math.floor(Number(data.score)||0)),
+      play_time_seconds:Math.max(0,Math.floor(Number(data.play_time_seconds)||0)),
+      meta:data
+    };
+    var body=JSON.stringify(payload),headers={'Content-Type':'application/json'};
+    if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    if(name==='game_exit'&&navigator.sendBeacon){
+      try{if(navigator.sendBeacon(cfg.analyticsEventUrl,new Blob([body],{type:'application/json'})))return;}catch(e){}
+    }
+    try{fetch(cfg.analyticsEventUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:body}).catch(function(){});}catch(e){}
+  }
+  function send(name,params){
+    params=params&&typeof params==='object'?params:{};
+    var data=merge(common,params);
+    targets.forEach(function(id){
+      var d=merge(data,{send_to:id});
+      try{gtag('event',name,d);}catch(e){}
+    });
+    logLocal(name,data);
+  }
+
+  send('page_view',{page_location:location.href,page_title:document.title,page_referrer:document.referrer||''});
+  send('game_view',{page_location:location.href,page_title:document.title});
+
+  var started=false,startAt=0,exitSent=false,lastSubmitScore=null,lastSubmitAt=0;
+  function playSeconds(){return startAt?Math.max(0,Math.floor((Date.now()-startAt)/1000)):0;}
+  function start(source){
+    if(started) return;
+    started=true; startAt=Date.now();
+    send('game_start',{start_source:String(source||'interaction'),play_time_seconds:0});
+    setTimeout(function(){if(started)send('game_engaged_60s',{play_time_seconds:60});},60000);
+  }
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',function(){start('game_started');},{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){
+    window.addEventListener(ev,function(){start(ev);},{passive:true,once:true});
+  });
+  }
+
+  function submitScore(score,mode,meta,source){
+    score=Math.max(0,Math.floor(Number(score)||0));
+    var now=Date.now();
+    if(lastSubmitScore===score && now-lastSubmitAt<3000)return;
+    lastSubmitScore=score;lastSubmitAt=now;
+    var data=merge({score:score,mode:String(mode||'').slice(0,50),play_time_seconds:playSeconds(),submit_source:String(source||'game')},cleanMeta(meta));
+    send('score_submit',data);
+  }
+
+  var originalScore=window.GameHiHiDirectEventScore;
+  if(typeof originalScore==='function'){
+    window.GameHiHiDirectEventScore=function(payload){
+      payload=payload||{}; start('score');
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      var data=merge({score:score,mode:String(payload.mode||'').slice(0,50),final:payload.final?1:0,play_time_seconds:playSeconds()},cleanMeta(payload.meta));
+      send('game_score',data); // giữ event cũ để không gãy report hiện tại
+      if(payload.final)submitScore(score,payload.mode,payload.meta,'final_score');
+      return originalScore.apply(this,arguments);
+    };
+  }
+
+  var originalEnd=window.GameHiHiEndGame;
+  if(typeof originalEnd==='function'){
+    window.GameHiHiEndGame=function(payload){
+      payload=payload||{}; start('end_game');
+      if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='oc-dem-hihi'||cfg.gameSlug==='net-co-hihi'||cfg.gameSlug==='1-ngay-lam-cho-hihi'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let'||cfg.gameSlug==='mot-ngay-lam-thu-ky'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+        return Promise.resolve(originalEnd.apply(this,arguments)).then(function(j){
+          if(j&&j.saved){
+            var actual=Math.max(0,Math.floor(Number(j.score)||0));
+            var data=merge({score:actual,mode:String(payload.mode||'').slice(0,50),result:String(payload.result||'').slice(0,40),play_time_seconds:playSeconds(),submit_source:((cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let')?'level_saved':(cfg.gameSlug==='o-to-bay'?'round_saved':'day_saved'))},cleanMeta(payload.meta));
+            send('game_score',data);
+            send('score_submit',data);
+            send('game_end',data);
+          }
+          return j;
+        });
+      }
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      submitScore(score,payload.mode,payload.meta,'end_game');
+      var data=merge({
+        score:score,
+        mode:String(payload.mode||'').slice(0,50),
+        result:String(payload.result||'').slice(0,40),
+        play_time_seconds:playSeconds()
+      },cleanMeta(payload.meta));
+      send('game_end',data);
+      return originalEnd.apply(this,arguments);
+    };
+  }
+
+  function sendExit(){
+    if(exitSent) return; exitSent=true;
+    send('game_exit',{started:started?1:0,play_time_seconds:playSeconds(),transport_type:'beacon'});
+  }
+  window.addEventListener('pagehide',sendExit,{passive:true});
+  window.addEventListener('beforeunload',sendExit,{passive:true});
+
+  window.GameHiHiGA4={measurementId:gameMid,masterMeasurementId:masterMid,targets:targets.slice(),userId:uid,sessionId:gameSession,send:send,start:start,submitScore:submitScore};
+})();</script>
+</head>
+<body>
+
+<div id="app">
+  <canvas id="c" tabindex="0" aria-label="Bàn bida 3D"></canvas>
+
+  <!-- ===================== HUD ===================== -->
+  <div id="hud" class="hidden">
+    <div id="topbar">
+      <div class="pcard" id="p0"><div class="avatar" id="p0av"></div><div style="min-width:0"><div class="pname" id="p0name"></div><div class="pgroup" id="p0group"></div><div class="prack" id="p0rack"></div></div></div>
+      <div id="center-info"><div id="turn"></div><div id="subinfo"></div></div>
+      <div class="pcard" id="p1"><div class="avatar" id="p1av"></div><div style="min-width:0"><div class="pname" id="p1name"></div><div class="pgroup" id="p1group"></div><div class="prack" id="p1rack"></div></div></div>
+    </div>
+    <div id="topbtns">
+      <button class="icon-btn" id="btnPause" title="Menu" aria-label="Menu">☰</button>
+      <button class="icon-btn" id="btnCam" title="Camera" aria-label="Camera">🎥</button>
+      <button class="icon-btn" id="btnCamReset" title="Reset camera" aria-label="Reset camera">⟲</button>
+      <button class="icon-btn" id="btnSound" title="Sound" aria-label="Sound">🔊</button>
+    </div>
+    <div id="toolsLeft">
+      <button class="tool-btn" id="btnPlace">✋ <span data-t="placeBall"></span></button>
+      <button class="tool-btn" id="btnRerack">🔺 <span data-t="rerack"></span></button>
+    </div>
+    <div id="feed"></div>
+    <div id="toast"></div>
+    <div id="bubble"></div>
+    <div id="hint"></div>
+    <div id="spinBox" class="ctl-disable">
+      <div id="spinBall" aria-label="Spin"><div id="spinDot"></div></div>
+      <div class="ctl-label" data-t="spin"></div>
+    </div>
+    <div id="aimBtns" class="ctl-disable">
+      <button class="icon-btn" id="aimL" aria-label="Aim left">◀</button>
+      <button class="icon-btn" id="aimR" aria-label="Aim right">▶</button>
+    </div>
+    <div id="powerBox" class="ctl-disable">
+      <div class="ctl-label" data-t="power"></div>
+      <div id="powerBar" aria-label="Power"><div id="powerFill"></div><div id="powerCue"></div></div>
+      <div id="powerPct">0%</div>
+      <button id="shootBtn" data-t="shoot"></button>
+    </div>
+  </div>
+
+  <!-- ===================== SCREENS ===================== -->
+  <div id="scrMenu" class="screen hidden">
+    <div class="panel">
+      <div class="menu-top">
+        <span class="coins-pill"><i class="coin"></i><span id="menuCoins">0</span></span>
+        <div class="lang-toggle"><button data-lang="vi">VI</button><button data-lang="en">EN</button></div>
+      </div>
+      <div class="title-wrap">
+        <h1 class="game-title">BIDA CỎ<small>HIHI 3D</small></h1>
+        <p class="tagline" data-t="tagline"></p>
+      </div>
+      <div class="menu-grid">
+        <button class="big-btn" data-go="practice"><span class="ico">🎱</span><span><b data-t="practice"></b><span class="d" data-t="practiceDesc"></span></span></button>
+        <button class="big-btn" data-go="levels"><span class="ico">🎯</span><span><b data-t="challenge"></b><span class="d" data-t="challengeDesc"></span></span></button>
+        <button class="big-btn" data-go="opp"><span class="ico">🤖</span><span><b data-t="vsai"></b><span class="d" data-t="vsaiDesc"></span></span></button>
+      </div>
+      <div class="row-btns">
+        <button class="chip-btn" data-go="shop">🛒 <span data-t="shop"></span></button>
+        <button class="chip-btn" data-go="ach">🏆 <span data-t="achievements"></span></button>
+        <button class="chip-btn" data-go="settings">⚙️ <span data-t="settings"></span></button>
+        <button class="chip-btn" data-go="howto">❓ <span data-t="howto"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="scrOpp" class="screen hidden"><div class="panel wide"><h2 data-t="chooseOpp"></h2><div class="opp-grid" id="oppGrid"></div><div class="row-btns"><button class="chip-btn" data-go="menu" data-t="back"></button></div></div></div>
+  <div id="scrLevels" class="screen hidden"><div class="panel wide"><h2 data-t="challenge"></h2><div class="level-grid" id="levelGrid"></div><div class="row-btns"><button class="chip-btn" data-go="menu" data-t="back"></button></div></div></div>
+  <div id="scrShop" class="screen hidden"><div class="panel wide"><div class="menu-top"><h2 data-t="shop" style="margin:0"></h2><span class="coins-pill"><i class="coin"></i><span id="shopCoins">0</span></span></div><div id="shopBody"></div><div class="row-btns"><button class="chip-btn" data-go="menu" data-t="back"></button></div></div></div>
+  <div id="scrAch" class="screen hidden"><div class="panel"><h2 data-t="achievements"></h2><div class="ach-list" id="achList"></div><div class="row-btns"><button class="chip-btn" data-go="menu" data-t="back"></button></div></div></div>
+  <div id="scrSettings" class="screen hidden"><div class="panel"><h2 data-t="settings"></h2><div id="setBody"></div><div class="row-btns"><button class="chip-btn" id="setBack" data-t="back"></button></div></div></div>
+  <div id="scrHowto" class="screen hidden"><div class="panel"><h2 data-t="howto"></h2><ul class="howto-list" id="howtoList"></ul><div class="row-btns"><button class="chip-btn" id="howBack" data-t="back"></button></div></div></div>
+  <div id="scrPause" class="screen hidden"><div class="panel" style="width:min(380px,100%)"><h2>☰</h2><div class="menu-grid">
+    <button class="big-btn" id="pResume"><span class="ico">▶</span><b data-t="resume"></b></button>
+    <button class="big-btn" id="pRestart"><span class="ico">↻</span><b data-t="restart"></b></button>
+    <button class="big-btn" id="pHowto"><span class="ico">❓</span><b data-t="howto"></b></button>
+    <button class="big-btn" id="pSettings"><span class="ico">⚙️</span><b data-t="settings"></b></button>
+    <button class="big-btn" id="pMenu"><span class="ico">⌂</span><b data-t="menu"></b></button>
+  </div></div></div>
+  <div id="scrResult" class="screen hidden"><div class="panel" style="width:min(420px,100%)">
+    <div class="result-title" id="resTitle"></div>
+    <div class="result-stars" id="resStars"></div>
+    <p class="result-body" id="resBody"></p>
+    <div class="row-btns" style="justify-content:center" id="resBtns"></div>
+  </div></div>
+
+  <div id="loading"><div style="display:grid;place-items:center"><div class="logo-ball"></div><p id="loadingText">Đang dọn bàn...</p></div></div>
+</div>
+<script type="module" src="js/main.js?ghv=bf1a11396c67"></script>
+
+</body>
+</html>

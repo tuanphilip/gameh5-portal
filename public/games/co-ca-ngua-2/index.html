@@ -1,0 +1,1125 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cờ Cá Ngựa HiHi</title>
+<meta name="description" content="Chơi Cờ Cá Ngựa online miễn phí đúng luật Việt Nam: gieo xúc xắc, ra quân, đá ngựa đối thủ, leo chuồng đúng số. Đấu với 3 máy hoặc 2-4 người chơi chung, nhạc nền vui nhộn, chạy mượt trên PC và điện thoại!">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#1E4A38;color:#FFF6E8;user-select:none;-webkit-user-select:none}
+body.playing{overflow:hidden;touch-action:none;height:100vh}
+#cv{position:fixed;inset:0;width:100%;height:100vh;display:block;touch-action:none;z-index:1}
+
+.hud{position:fixed;inset:0;height:100vh;pointer-events:none;z-index:5;display:none}
+body.playing .hud{display:block}
+#turnTag{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  background:rgba(10,30,20,.72);border:2px solid rgba(255,220,130,.4);border-radius:999px;
+  padding:8px 20px;font-weight:800;font-size:14.5px;display:flex;gap:9px;align-items:center;white-space:nowrap}
+#turnTag i{width:15px;height:15px;border-radius:50%;display:inline-block;box-shadow:0 0 8px currentColor}
+#diceWrap{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);pointer-events:auto;
+  display:flex;flex-direction:column;align-items:center;gap:8px}
+#diceCv{width:76px;height:76px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));cursor:pointer}
+#rollBtn{font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;letter-spacing:.5px;color:#4A2500;
+  background:linear-gradient(180deg,#FFD86B,#FF9E3D);border:none;border-radius:999px;padding:11px 30px;
+  cursor:pointer;box-shadow:0 4px 0 #B85E10,0 10px 22px rgba(0,0,0,.35)}
+#rollBtn:disabled{filter:grayscale(.6) brightness(.75);box-shadow:0 4px 0 #6b4a20;cursor:default}
+#rollBtn:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #B85E10}
+.mtoggles{position:absolute;top:10px;right:10px;display:flex;gap:8px;pointer-events:auto}
+.tgl{width:40px;height:40px;border-radius:50%;background:rgba(10,30,20,.72);
+  border:2px solid rgba(255,220,130,.4);color:#FFD97A;font-size:17px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+.tgl.off{opacity:.45;filter:grayscale(1)}
+#toast{position:absolute;top:64px;left:50%;transform:translateX(-50%);text-align:center;
+  font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(17px,3.6vw,26px);color:#FFE07A;
+  text-shadow:0 0 14px rgba(255,180,60,.6),0 2px 0 #4A2500;opacity:0;transition:opacity .25s;
+  pointer-events:none;white-space:nowrap;max-width:96vw}
+#toast.show{opacity:1}
+#quitBtn{position:absolute;top:10px;left:10px;pointer-events:auto;width:40px;height:40px;border-radius:50%;
+  background:rgba(10,30,20,.72);border:2px solid rgba(255,220,130,.4);color:#FFD97A;font-size:16px;cursor:pointer}
+
+.scr{position:fixed;inset:0;height:100vh;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(900px 560px at 50% 16%,rgba(50,150,100,.4),transparent 70%),rgba(8,28,18,.9);
+  text-align:center;padding:18px;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);overflow:auto}
+.scr.hide{display:none}
+.biglogo{font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(36px,9vw,64px);line-height:1.05;
+  background:linear-gradient(180deg,#FFF3C4,#FFC53E 55%,#D4691E);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 20px rgba(255,190,80,.45)) drop-shadow(0 4px 0 rgba(60,25,0,.9))}
+.tagline{margin-top:8px;font-size:14px;font-weight:700;color:#CFEEDC}
+.modes{margin-top:18px;display:flex;flex-direction:column;gap:10px;width:min(340px,86vw)}
+.modebtn{font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;color:#3A1B00;cursor:pointer;
+  background:linear-gradient(180deg,#FFD86B,#FF9E3D);border:none;border-radius:16px;padding:14px;
+  box-shadow:0 5px 0 #B85E10;transition:transform .08s}
+.modebtn.alt{background:linear-gradient(180deg,#9AE8B4,#3FBF74);box-shadow:0 5px 0 #1E7A44;color:#06331C}
+.modebtn:active{transform:translateY(3px);box-shadow:0 2px 0 #B85E10}
+.mrow{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.mbtn{font-family:inherit;font-weight:800;font-size:13px;color:#EFFFE8;cursor:pointer;
+  background:rgba(20,60,40,.8);border:1.5px solid rgba(160,255,200,.35);border-radius:999px;padding:10px 18px}
+.hint{margin-top:14px;font-size:12.5px;font-weight:600;color:#A8CBB4;line-height:1.7;max-width:460px}
+.hint b{color:#FFE07A}
+.scroll-cue{margin-top:16px;font-size:11.5px;color:#8FB49B;font-weight:700}
+#goTitle{font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(28px,7vw,48px);color:#FFE07A;
+  text-shadow:0 0 18px rgba(255,200,80,.5),0 3px 0 #4A2500}
+.ranks{margin-top:16px;display:flex;flex-direction:column;gap:8px;width:min(320px,86vw)}
+.rk{display:flex;align-items:center;gap:12px;background:rgba(14,40,26,.85);
+  border:2px solid rgba(255,220,130,.3);border-radius:14px;padding:10px 16px;font-weight:800;font-size:15px}
+.rk i{width:16px;height:16px;border-radius:50%}
+.rk .medal{font-size:20px}
+.event-award{display:none;margin-top:12px;padding:9px 16px;border-radius:999px;background:rgba(255,224,122,.12);border:1.5px solid rgba(255,224,122,.38);color:#FFE07A;font-weight:800;font-size:14px}
+
+.modal{position:fixed;inset:0;z-index:20;background:rgba(4,14,9,.75);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal.hide{display:none}
+.mcard{background:linear-gradient(180deg,#1C4A34,#0E2B1D);border:2px solid rgba(160,255,200,.35);border-radius:20px;
+  width:min(540px,94vw);max-height:84vh;overflow:auto;padding:20px;text-align:left;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.mcard h3{font-family:'Baloo 2',cursive;color:#FFD97A;font-size:20px;margin-bottom:10px;text-align:center}
+.mcard p,.mcard li{font-size:13.5px;line-height:1.75;color:#DDF2E2;font-weight:600}
+.mcard ul{padding-left:18px;margin:6px 0}
+.mclose{display:block;margin:16px auto 0;font-family:inherit;font-weight:800;color:#3A1B00;cursor:pointer;
+  background:linear-gradient(180deg,#FFD86B,#FF9E3D);border:none;border-radius:999px;padding:11px 30px}
+
+#page{position:relative;z-index:12;pointer-events:none}
+.scr,article{pointer-events:auto}
+#spacer{height:100vh;pointer-events:none}
+article{background:#0C2417;border-top:3px solid #2E7A50;padding:34px 18px 60px}
+article .wrap{max-width:760px;margin:0 auto}
+article h1{font-family:'Baloo 2',cursive;font-size:32px;color:#FFD97A;margin-bottom:6px}
+article h2{font-family:'Baloo 2',cursive;font-size:20px;color:#9AE8B4;margin:24px 0 8px}
+article p,article li{font-size:14.5px;line-height:1.85;color:#CFE8D6;font-weight:500}
+article ul{padding-left:20px}
+article b{color:#FFE07A}
+
+/* ===== XÚC XẮC 3D + TIMER lấy phong cách từ Cờ Cá Ngựa HiHi ===== */
+#turnTag b{min-width:36px;padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.12);font-size:11px;color:#FFF4B5;text-align:center}
+#turnTag b.warn{background:rgba(232,69,42,.35);color:#fff;animation:timerPulse .55s ease-in-out infinite alternate}
+@keyframes timerPulse{to{transform:scale(1.08)}}
+#diceWrap{bottom:14px;gap:6px}
+#rollBtn.hihi-dice{--dice-color:#E8452A;--dice-dark:#8A1F0E;--dice-soft:rgba(232,69,42,.22);width:94px;height:94px;padding:0;border:5px solid var(--dice-color);border-radius:23px;background:linear-gradient(145deg,#fff,#edf3f7);box-shadow:0 8px 0 var(--dice-dark),0 15px 28px rgba(0,0,0,.34),0 0 0 0 var(--dice-soft);display:grid;place-items:center;perspective:760px;position:relative;overflow:visible;transition:transform .12s ease,box-shadow .12s ease,filter .12s ease;color:var(--dice-color)}
+#rollBtn.hihi-dice::before{content:"";position:absolute;inset:7px;border-radius:16px;border:2px solid color-mix(in srgb,var(--dice-color) 42%,transparent);pointer-events:none}
+#rollBtn.hihi-dice:disabled{cursor:default;filter:saturate(.82) brightness(.94);opacity:1}
+#rollBtn.hihi-dice.ready:not(:disabled){animation:diceGlow 1s ease-in-out infinite}
+#rollBtn.hihi-dice:not(:disabled):active{transform:translateY(3px);box-shadow:0 4px 0 var(--dice-dark),0 9px 18px rgba(0,0,0,.26)}
+#rollBtn.hihi-dice.rolling{animation:diceFloat .28s ease-in-out infinite alternate;box-shadow:0 9px 0 var(--dice-dark),0 18px 34px rgba(0,0,0,.36),0 0 28px var(--dice-soft)}
+#rollBtn.hihi-dice.land{animation:diceLand .4s cubic-bezier(.2,1.55,.4,1)}
+#diceCube{width:58px;height:58px;position:relative;display:block;transform-style:preserve-3d;transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg);transition:transform .46s cubic-bezier(.16,.84,.26,1.18);will-change:transform}
+#diceCube .df{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(145deg,#fff 0%,#fbfdff 58%,#e5edf2 100%);border:2px solid #c6d3dc;border-radius:12px;font-size:40px;line-height:1;color:var(--dice-color);backface-visibility:hidden;box-shadow:inset 0 2px 0 #fff,inset 0 -3px 8px rgba(20,55,80,.10),0 0 8px rgba(255,255,255,.3)}
+#diceCube .f1{transform:translateZ(29px)}#diceCube .f6{transform:rotateY(180deg) translateZ(29px)}#diceCube .f3{transform:rotateY(90deg) translateZ(29px)}#diceCube .f4{transform:rotateY(-90deg) translateZ(29px)}#diceCube .f2{transform:rotateX(90deg) translateZ(29px)}#diceCube .f5{transform:rotateX(-90deg) translateZ(29px)}
+#rollBtn.hihi-dice.rolling #diceCube{transition:none;animation:diceCubeSpin .78s linear infinite}
+#diceLabel{font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;letter-spacing:.5px;color:#FFE8A8;text-shadow:0 2px 6px rgba(0,0,0,.38);min-height:20px}
+@keyframes diceGlow{50%{box-shadow:0 8px 0 var(--dice-dark),0 15px 28px rgba(0,0,0,.34),0 0 0 9px var(--dice-soft),0 0 30px var(--dice-soft)}}
+@keyframes diceFloat{from{transform:translateY(3px) rotate(-1.5deg)}to{transform:translateY(-6px) rotate(1.5deg)}}
+@keyframes diceCubeSpin{0%{transform:rotateX(0) rotateY(0) rotateZ(0)}20%{transform:rotateX(288deg) rotateY(432deg) rotateZ(144deg)}40%{transform:rotateX(576deg) rotateY(864deg) rotateZ(288deg)}60%{transform:rotateX(864deg) rotateY(1296deg) rotateZ(432deg)}80%{transform:rotateX(1152deg) rotateY(1728deg) rotateZ(576deg)}100%{transform:rotateX(1440deg) rotateY(2160deg) rotateZ(720deg)}}
+@keyframes diceLand{0%{transform:translateY(-14px) scale(1.1) rotate(-3deg)}55%{transform:translateY(4px) scale(.93) rotate(2deg)}100%{transform:none}}
+@media(max-width:560px){#rollBtn.hihi-dice{width:80px;height:80px;border-radius:20px}#diceCube{width:50px;height:50px}#diceCube .df{font-size:34px;border-radius:10px}#diceCube .f1{transform:translateZ(25px)}#diceCube .f6{transform:rotateY(180deg) translateZ(25px)}#diceCube .f3{transform:rotateY(90deg) translateZ(25px)}#diceCube .f4{transform:rotateY(-90deg) translateZ(25px)}#diceCube .f2{transform:rotateX(90deg) translateZ(25px)}#diceCube .f5{transform:rotateX(-90deg) translateZ(25px)}#diceLabel{font-size:12px}}
+@media(prefers-reduced-motion:reduce){#rollBtn.hihi-dice.ready,#rollBtn.hihi-dice.rolling,#rollBtn.hihi-dice.rolling #diceCube,#rollBtn.hihi-dice.land,#turnTag b.warn{animation:none!important}}
+/* ===== Dice v1.1: bỏ viền/nền sát xúc xắc, chỉ giữ khối Three.js ===== */
+#rollBtn.hihi-dice{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+#rollBtn.hihi-dice::before{display:none!important;content:none!important}
+#rollBtn.hihi-dice.ready:not(:disabled),
+#rollBtn.hihi-dice.rolling,
+#rollBtn.hihi-dice:not(:disabled):active{
+  box-shadow:none!important;
+  background:transparent!important;
+}
+#rollBtn.hihi-dice.ready:not(:disabled){animation:none!important}
+#rollBtn.hihi-dice:not(:disabled):active{transform:none!important}
+
+
+/* ===== THREE.JS DICE - dùng engine giống bản Cờ Cá Ngựa HiHi ===== */
+#rollBtn.hihi-dice.has-three #diceCube{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+#rollBtn.hihi-dice.has-three{overflow:visible}
+.three-dice-mount{position:absolute;left:50%;top:50%;width:142px;height:142px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+.three-dice-mount canvas{width:100%!important;height:100%!important;display:block!important;overflow:visible!important}
+@media(max-width:560px){.three-dice-mount{width:124px;height:124px}}
+
+/* ===== Landscape thấp kiểu ~800 x 400 ===== */
+@media (max-width: 900px) and (max-height: 650px){
+  .scr{justify-content:center!important;padding:12px 14px 18px;overflow:auto}
+  .biglogo{font-size:clamp(30px,6vw,46px);line-height:1}
+  .tagline{margin-top:4px;font-size:12.5px}
+  #scrStart .modes{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px;width:min(680px,92vw);margin-top:12px}
+  #scrStart .modebtn{width:100%;padding:11px 10px;font-size:14.5px;line-height:1.2;min-height:54px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .mrow{margin-top:10px;gap:8px}
+  .mbtn{padding:9px 14px;font-size:12px}
+  .hint{margin-top:10px;font-size:11.5px;line-height:1.45;max-width:650px}
+  .scroll-cue{display:none}
+
+  #diceWrap{left:auto;right:12px;bottom:12px;transform:none;align-items:center;gap:3px}
+  #rollBtn.hihi-dice{width:76px;height:76px}
+  #diceCube{width:46px;height:46px}
+  #diceCube .df{font-size:31px;border-radius:10px}
+  #diceCube .f1{transform:translateZ(23px)}
+  #diceCube .f6{transform:rotateY(180deg) translateZ(23px)}
+  #diceCube .f3{transform:rotateY(90deg) translateZ(23px)}
+  #diceCube .f4{transform:rotateY(-90deg) translateZ(23px)}
+  #diceCube .f2{transform:rotateX(90deg) translateZ(23px)}
+  #diceCube .f5{transform:rotateX(-90deg) translateZ(23px)}
+  .three-dice-mount{width:108px;height:108px}
+  #diceLabel{font-size:11px;line-height:1.15;min-height:auto;text-align:center;max-width:90px}
+  #turnTag{top:8px;left:50%;transform:translateX(-50%);padding:7px 14px;font-size:12.5px}
+  .mtoggles{top:8px;right:8px;gap:6px}
+  .tgl,#quitBtn{width:36px;height:36px;font-size:15px}
+}
+
+</style>
+<script>window.GameHiHiDirectEventScoreConfig={"enabled":true,"loggedIn":false,"restUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/score","restNonce":"","guestNonce":"cbbb2d50ac01a32cbdad007097ed87f5cb858351fc8466b664ba7300e281dc5c","ajaxUrl":"https:\/\/gamehihi.com\/wp-admin\/admin-ajax.php","ajaxNonce":"5caf1c3107","contextNonce":"cbbb2d50ac01a32cbdad007097ed87f5cb858351fc8466b664ba7300e281dc5c","gameId":1878,"seasonKey":"block-puzzle-01","initialScore":0,"initialTotalScore":0,"scoreLabel":"\u0110i\u1ec3m s\u1ef1 ki\u1ec7n","currentUserName":"GameHiHi-Play-17200","currentUserAvatar":"","caroMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/matchmake","caroRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/create","caroRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/join","caroStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/state","caroMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/move","caroLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/leave","caroRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/rematch","ludoMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/matchmake","ludoRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/create","ludoRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/join","ludoStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/state","ludoRollUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/roll","ludoMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/move","ludoLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/leave","ludoRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/rematch","analyticsUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/track","analyticsEventUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/event","analyticsNonce":"","analyticsUserId":0,"analyticsPlayerRef":"GameHiHi-Play-17200","analyticsUserScore":0,"analyticsUserAgeGroup":"","analyticsRegisteredSource":"","analyticsProfileComplete":0,"analyticsHasEmail":0,"analyticsHasPhone":0,"analyticsHasName":0,"gameSlug":"co-ca-ngua-hihi","gameName":"C\u1edd C\u00e1 Ng\u1ef1a HiHi","ga4MeasurementId":"G-00QCYKS1VM","ga4MasterEnabled":1,"ga4MasterMeasurementId":"G-5CDYMXDTW0","analyticsSourceSite":"https:\/\/gamehihi.com\/gamehihi-play\/","analyticsSchemaVersion":"2.0.56"};(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  var best=Number(cfg.initialScore||0), total=Number(cfg.initialTotalScore||0), pending=-1, pendingMode='', busy=false, timer=0;
+  function parseResponse(r){return r.json().then(function(j){if(!r.ok||j&&j.success===false)throw j;return j&&j.data?j.data:j;});}
+  function viaAjax(score,mode){
+    if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+    var body=new URLSearchParams();
+    body.set('action','gamehihi_event_save_score'); body.set('_ajax_nonce',cfg.ajaxNonce);
+    body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score)); body.set('mode',mode||'');
+    body.set('context_nonce',cfg.contextNonce||cfg.guestNonce||'');
+    return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+  }
+  function viaRest(score,mode){
+    if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+    return fetch(cfg.restUrl,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,context_nonce:cfg.contextNonce||cfg.guestNonce})}).then(parseResponse);
+  }
+  function flush(){
+    if(busy||pending<0||!cfg.enabled)return;
+    var score=pending, mode=pendingMode; pending=-1; busy=true;
+    viaAjax(score,mode).catch(function(){return viaRest(score,mode);})
+      .then(function(j){best=Math.max(best,Number(j.best_score||0));if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);try{window.dispatchEvent(new CustomEvent('gamehihi:event-score-saved',{detail:{score:best,totalScore:total,gameId:Number(cfg.gameId)||0}}));}catch(e){} if(window.console&&console.info)console.info('[GameHiHi Event Score] saved',j);})
+      .catch(function(e){if(window.console&&console.error)console.error('[GameHiHi Event Score] save failed',e);})
+      .finally(function(){busy=false;if(pending>=0)flush();});
+  }
+  window.GameHiHiDirectEventScore=function(payload){
+    if(!payload||payload.type!=='gamehihi:event-score'||!cfg.enabled)return;
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    if(!payload.final&&score<=best)return;
+    pending=Math.max(pending,score); pendingMode=String(payload.mode||'').slice(0,50);
+    clearTimeout(timer); timer=setTimeout(flush,payload.final?0:250);
+  };
+  // v1.3.0: Mỗi lần game kết thúc gọi API ngay và tạo 1 bản ghi lịch sử.
+  window.GameHiHiEndGame=function(payload){
+    payload=payload||{};
+    if(!cfg.enabled) return Promise.reject({message:'Event disabled'});
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    var mode=String(payload.mode||'').slice(0,50);
+    var result=String(payload.result||'').slice(0,20);
+    var meta=payload.meta&&typeof payload.meta==='object'?payload.meta:{};
+    function ajax(){
+      if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+      var body=new URLSearchParams();
+      body.set('action','gamehihi_event_end_game'); body.set('_ajax_nonce',cfg.ajaxNonce);
+      body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score));
+      body.set('mode',mode); body.set('result',result); body.set('meta',JSON.stringify(meta));
+      body.set('guest_nonce',cfg.guestNonce||'');
+      return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+    }
+    function rest(){
+      if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+      var url=String(cfg.restUrl).replace(/\/score\/?$/,'/end-game');
+      return fetch(url,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,result:result,meta:meta,guest_nonce:cfg.guestNonce})}).then(parseResponse);
+    }
+    return ajax().catch(function(){return rest();}).then(function(j){
+      best=Math.max(best,Number(j.best_score||0));
+      if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);
+      try{window.dispatchEvent(new CustomEvent('gamehihi:end-game-saved',{detail:j}));}catch(e){}
+      if(window.console&&console.info)console.info('[GameHiHi EndGame] saved',j);
+      return j;
+    }).catch(function(e){if(window.console&&console.error)console.error('[GameHiHi EndGame] save failed',e);throw e;});
+  };
+  window.GameHiHiEventScoreDebug={config:cfg,getBest:function(){return best;},getTotal:function(){return total;},flush:flush};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  if(!cfg.analyticsUrl||!cfg.gameId) return;
+  function randomKey(prefix){
+    var a=new Uint8Array(16); try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    var h=''; for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2); return prefix+h;
+  }
+  function getVisitor(){
+    var k='gh_visitor_v1',v='';
+    try{v=localStorage.getItem(k)||''; if(!v){v=randomKey('v_');localStorage.setItem(k,v);}}catch(e){v=randomKey('v_');}
+    return v.slice(0,64);
+  }
+  function acquisition(){
+    var landing=location.href, ref=document.referrer||'';
+    try{
+      if(window.top!==window.self && window.top.location.origin===location.origin){
+        landing=window.top.location.href;
+        ref=window.top.document.referrer||ref;
+        var saved=window.top.sessionStorage.getItem('gh_acq_v1');
+        if(saved){var o=JSON.parse(saved); if(o&&o.landing)landing=String(o.landing); if(o&&typeof o.referrer==='string')ref=o.referrer;}
+      }
+    }catch(e){}
+    return {landing:String(landing||'').slice(0,1000),referrer:String(ref||'').slice(0,1000)};
+  }
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua) || (/android/i.test(ua)&&!/mobile/i.test(ua))) return 'Tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'Mobile';
+    return 'Desktop';
+  }
+  var visitor=getVisitor(), session=randomKey('s_'), acq=acquisition();
+  var activeMs=0,playMs=0,last=performance.now(),started=false,lastSent={a:-1,p:-1,s:-1},sending=false,pending=false;
+  function accrue(){
+    var now=performance.now(),delta=Math.max(0,Math.min(5000,now-last)); last=now;
+    if(!document.hidden){activeMs+=delta;if(started)playMs+=delta;}
+  }
+  function markStarted(){accrue();started=true;}
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',markStarted,{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,markStarted,{passive:true,once:true});});
+  }
+  document.addEventListener('visibilitychange',function(){accrue(); if(document.hidden)flush(true);},{passive:true});
+  window.addEventListener('blur',accrue,{passive:true}); window.addEventListener('focus',function(){last=performance.now();},{passive:true});
+  function payload(){
+    accrue();
+    return {session_key:session,visitor_key:visitor,game_id:Number(cfg.gameId)||0,active_seconds:Math.min(28800,Math.floor(activeMs/1000)),play_seconds:Math.min(28800,Math.floor(playMs/1000)),started:started?1:0,landing_url:acq.landing,referrer:acq.referrer,language:String(navigator.language||'').slice(0,16),platform:platform(),logged_in:cfg.loggedIn?1:0};
+  }
+  function changed(d){return d.active_seconds!==lastSent.a||d.play_seconds!==lastSent.p||d.started!==lastSent.s;}
+  function remember(d){lastSent={a:d.active_seconds,p:d.play_seconds,s:d.started};}
+  function flush(beacon){
+    var d=payload(); if(!changed(d))return;
+    if(sending){pending=true;return;}
+    if(beacon && navigator.sendBeacon){
+      try{var blob=new Blob([JSON.stringify(d)],{type:'application/json'}); if(navigator.sendBeacon(cfg.analyticsUrl,blob)){remember(d);return;}}catch(e){}
+    }
+    sending=true;
+    var headers={'Content-Type':'application/json'}; if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    fetch(cfg.analyticsUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:JSON.stringify(d)})
+      .then(function(r){if(r.ok)remember(d);})
+      .catch(function(){})
+      .finally(function(){sending=false;if(pending){pending=false;flush(false);}});
+  }
+  setTimeout(function(){flush(false);},2500);
+  setInterval(function(){flush(false);},30000);
+  window.addEventListener('pagehide',function(){flush(true);},{passive:true});
+  window.addEventListener('beforeunload',function(){flush(true);},{passive:true});
+  window.GameHiHiAnalyticsDebug={flush:flush,visitor:visitor,session:session};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  function validMid(v){v=String(v||'').trim().toUpperCase();return /^G-[A-Z0-9]{4,20}$/.test(v)?v:'';}
+  var gameMid=validMid(cfg.ga4MeasurementId), masterMid=Number(cfg.ga4MasterEnabled)?validMid(cfg.ga4MasterMeasurementId):'';
+  var targets=[];
+  [gameMid,masterMid].forEach(function(id){if(id&&targets.indexOf(id)<0)targets.push(id);});
+  if(!targets.length) return;
+
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+  var script=document.createElement('script');
+  script.async=true;
+  script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(targets[0]);
+  document.head.appendChild(script);
+
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua)||(/android/i.test(ua)&&!/mobile/i.test(ua))) return 'tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  function visitorId(){
+    var key='gh_visitor_v1',v='';
+    try{
+      v=localStorage.getItem(key)||'';
+      if(!v){v='v_'+sessionId().replace(/^gs_/,'');localStorage.setItem(key,v);}
+    }catch(e){v='v_'+sessionId().replace(/^gs_/,'');}
+    return String(v||'').slice(0,64);
+  }
+  function sessionId(){
+    var a=new Uint8Array(12),h='';
+    try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2);
+    return 'gs_'+h;
+  }
+  function cleanMeta(meta){
+    var out={},count=0;
+    if(!meta||typeof meta!=='object')return out;
+    Object.keys(meta).forEach(function(raw){
+      if(count>=20)return;
+      var key=String(raw||'').toLowerCase().replace(/[^a-z0-9_]/g,'_').replace(/^_+|_+$/g,'').slice(0,30);
+      if(!key)return;
+      var val=meta[raw];
+      if(typeof val==='number'&&isFinite(val)){out['game_'+key]=val;count++;return;}
+      if(typeof val==='boolean'){out['game_'+key]=val?1:0;count++;return;}
+      if(typeof val==='string'){out['game_'+key]=val.slice(0,100);count++;}
+    });
+    return out;
+  }
+  function merge(a,b){var o={},k;for(k in a)if(Object.prototype.hasOwnProperty.call(a,k))o[k]=a[k];for(k in b)if(Object.prototype.hasOwnProperty.call(b,k))o[k]=b[k];return o;}
+
+  var uid=Math.max(0,Math.floor(Number(cfg.analyticsUserId)||0));
+  var userScore=Math.max(0,Math.floor(Number(cfg.analyticsUserScore)||0));
+  var ageGroup=String(cfg.analyticsUserAgeGroup||'').slice(0,20);
+  var registeredSource=String(cfg.analyticsRegisteredSource||'').slice(0,40);
+  var gameSession=sessionId();
+  var common={
+    game_id:String(Number(cfg.gameId)||0),
+    game_slug:String(cfg.gameSlug||''),
+    game_name:String(cfg.gameName||document.title||''),
+    player_type:cfg.loggedIn?'logged_in':'guest',
+    player_ref:String(cfg.analyticsPlayerRef||''),
+    user_total_score:userScore,
+    source_site:String(cfg.analyticsSourceSite||location.hostname||'').slice(0,80),
+    platform:platform(),
+    language:String(navigator.language||'').slice(0,16),
+    game_session_id:gameSession,
+    game_url:String(location.pathname||'').slice(0,200),
+    page_path:String((location.pathname||'')+(location.search||'')).slice(0,300),
+    analytics_schema_version:String(cfg.analyticsSchemaVersion||'2.0.56')
+  };
+  var vid=visitorId(); if(vid)common.game_visitor_id=vid;
+  if(uid>0){
+    common.wp_user_id=String(uid);
+    if(ageGroup) common.user_age_group=ageGroup;
+    if(registeredSource) common.user_registered_source=registeredSource;
+    common.user_profile_complete=Number(cfg.analyticsProfileComplete)?1:0;
+    common.user_has_email=Number(cfg.analyticsHasEmail)?1:0;
+    common.user_has_phone=Number(cfg.analyticsHasPhone)?1:0;
+    common.user_has_name=Number(cfg.analyticsHasName)?1:0;
+  }
+
+  gtag('js',new Date());
+  gtag('set',common);
+  targets.forEach(function(id){
+    var c={send_page_view:false};
+    if(uid>0)c.user_id=String(uid);
+    gtag('config',id,c);
+  });
+
+  var localSeq=0;
+  var localEventNames={page_view:1,game_view:1,game_start:1,game_score:1,score_submit:1,game_end:1,game_engaged_60s:1,game_exit:1};
+  function logLocal(name,data){
+    if(!cfg.analyticsEventUrl||!localEventNames[name])return;
+    localSeq++;
+    var payload={
+      event_key:(gameSession+'_'+localSeq+'_'+name).slice(0,96),
+      event_name:name,
+      session_key:gameSession,
+      visitor_key:String(common.game_visitor_id||''),
+      game_id:Number(cfg.gameId)||0,
+      game_slug:String(common.game_slug||''),
+      game_name:String(common.game_name||''),
+      player_type:String(common.player_type||''),
+      source_site:String(common.source_site||''),
+      platform:String(common.platform||''),
+      language:String(common.language||''),
+      game_url:String(common.game_url||''),
+      page_path:String(common.page_path||''),
+      score:Math.max(0,Math.floor(Number(data.score)||0)),
+      play_time_seconds:Math.max(0,Math.floor(Number(data.play_time_seconds)||0)),
+      meta:data
+    };
+    var body=JSON.stringify(payload),headers={'Content-Type':'application/json'};
+    if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    if(name==='game_exit'&&navigator.sendBeacon){
+      try{if(navigator.sendBeacon(cfg.analyticsEventUrl,new Blob([body],{type:'application/json'})))return;}catch(e){}
+    }
+    try{fetch(cfg.analyticsEventUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:body}).catch(function(){});}catch(e){}
+  }
+  function send(name,params){
+    params=params&&typeof params==='object'?params:{};
+    var data=merge(common,params);
+    targets.forEach(function(id){
+      var d=merge(data,{send_to:id});
+      try{gtag('event',name,d);}catch(e){}
+    });
+    logLocal(name,data);
+  }
+
+  send('page_view',{page_location:location.href,page_title:document.title,page_referrer:document.referrer||''});
+  send('game_view',{page_location:location.href,page_title:document.title});
+
+  var started=false,startAt=0,exitSent=false,lastSubmitScore=null,lastSubmitAt=0;
+  function playSeconds(){return startAt?Math.max(0,Math.floor((Date.now()-startAt)/1000)):0;}
+  function start(source){
+    if(started) return;
+    started=true; startAt=Date.now();
+    send('game_start',{start_source:String(source||'interaction'),play_time_seconds:0});
+    setTimeout(function(){if(started)send('game_engaged_60s',{play_time_seconds:60});},60000);
+  }
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',function(){start('game_started');},{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){
+    window.addEventListener(ev,function(){start(ev);},{passive:true,once:true});
+  });
+  }
+
+  function submitScore(score,mode,meta,source){
+    score=Math.max(0,Math.floor(Number(score)||0));
+    var now=Date.now();
+    if(lastSubmitScore===score && now-lastSubmitAt<3000)return;
+    lastSubmitScore=score;lastSubmitAt=now;
+    var data=merge({score:score,mode:String(mode||'').slice(0,50),play_time_seconds:playSeconds(),submit_source:String(source||'game')},cleanMeta(meta));
+    send('score_submit',data);
+  }
+
+  var originalScore=window.GameHiHiDirectEventScore;
+  if(typeof originalScore==='function'){
+    window.GameHiHiDirectEventScore=function(payload){
+      payload=payload||{}; start('score');
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      var data=merge({score:score,mode:String(payload.mode||'').slice(0,50),final:payload.final?1:0,play_time_seconds:playSeconds()},cleanMeta(payload.meta));
+      send('game_score',data); // giữ event cũ để không gãy report hiện tại
+      if(payload.final)submitScore(score,payload.mode,payload.meta,'final_score');
+      return originalScore.apply(this,arguments);
+    };
+  }
+
+  var originalEnd=window.GameHiHiEndGame;
+  if(typeof originalEnd==='function'){
+    window.GameHiHiEndGame=function(payload){
+      payload=payload||{}; start('end_game');
+      if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='oc-dem-hihi'||cfg.gameSlug==='net-co-hihi'||cfg.gameSlug==='1-ngay-lam-cho-hihi'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let'||cfg.gameSlug==='mot-ngay-lam-thu-ky'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+        return Promise.resolve(originalEnd.apply(this,arguments)).then(function(j){
+          if(j&&j.saved){
+            var actual=Math.max(0,Math.floor(Number(j.score)||0));
+            var data=merge({score:actual,mode:String(payload.mode||'').slice(0,50),result:String(payload.result||'').slice(0,40),play_time_seconds:playSeconds(),submit_source:((cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let')?'level_saved':(cfg.gameSlug==='o-to-bay'?'round_saved':'day_saved'))},cleanMeta(payload.meta));
+            send('game_score',data);
+            send('score_submit',data);
+            send('game_end',data);
+          }
+          return j;
+        });
+      }
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      submitScore(score,payload.mode,payload.meta,'end_game');
+      var data=merge({
+        score:score,
+        mode:String(payload.mode||'').slice(0,50),
+        result:String(payload.result||'').slice(0,40),
+        play_time_seconds:playSeconds()
+      },cleanMeta(payload.meta));
+      send('game_end',data);
+      return originalEnd.apply(this,arguments);
+    };
+  }
+
+  function sendExit(){
+    if(exitSent) return; exitSent=true;
+    send('game_exit',{started:started?1:0,play_time_seconds:playSeconds(),transport_type:'beacon'});
+  }
+  window.addEventListener('pagehide',sendExit,{passive:true});
+  window.addEventListener('beforeunload',sendExit,{passive:true});
+
+  window.GameHiHiGA4={measurementId:gameMid,masterMeasurementId:masterMid,targets:targets.slice(),userId:uid,sessionId:gameSession,send:send,start:start,submitScore:submitScore};
+})();</script>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div class="hud">
+  <button id="quitBtn" aria-label="Thoát">↩</button>
+  <div id="turnTag"><i></i><span>Lượt của Bạn</span><b id="turnTimer">10s</b></div>
+  <div class="mtoggles">
+    <button class="tgl" id="tMusic" title="Nhạc nền">🎵</button>
+    <button class="tgl" id="tSfx" title="Hiệu ứng">🔔</button>
+  </div>
+  <div id="diceWrap">
+    <button id="rollBtn" class="hihi-dice ready" aria-label="Gieo xúc xắc">
+      <span class="dice-cube" id="diceCube" aria-hidden="true">
+        <span class="df f1">⚀</span><span class="df f2">⚁</span><span class="df f3">⚂</span>
+        <span class="df f4">⚃</span><span class="df f5">⚄</span><span class="df f6">⚅</span>
+      </span>
+    </button>
+    <div id="diceLabel">GIEO XÚC XẮC</div>
+  </div>
+  <div id="toast"></div>
+</div>
+
+<div id="page">
+<section class="scr" id="scrStart">
+  <div class="biglogo">CỜ CÁ NGỰA</div>
+  <div class="tagline">Gieo xúc xắc, đá ngựa, leo chuồng — đúng luật Việt Nam!</div>
+  <div class="modes">
+    <button class="modebtn" data-mode="ai">🤖 Bạn đấu 3 Máy</button>
+    <button class="modebtn alt" data-mode="p2">👥 2 Người (chung máy)</button>
+    <button class="modebtn alt" data-mode="p3">👥 3 Người (chung máy)</button>
+    <button class="modebtn alt" data-mode="p4">👥 4 Người (chung máy)</button>
+  </div>
+  <div class="mrow">
+    <button class="mbtn" id="btnGuide">📖 Luật chơi</button>
+    <button class="mbtn" id="btnMusicPick">🎵 Nhạc: <span id="musName">Hội Làng</span></button>
+  </div>
+  <div class="hint">
+    Gieo được <b>6</b> để ra quân và được gieo thêm lượt. <b>Ô ★ là ô an toàn</b>, không bị đá.
+    Đá được ngựa đối thủ sẽ <b>được thêm lượt</b>; ra <b>3 lần số 6 liên tiếp</b> sẽ mất lượt. Về đích phải <b>đúng số</b>, không được vượt quá.
+  </div>
+  <div class="scroll-cue">▼ Kéo xuống xem giới thiệu, cách chơi và FAQ</div>
+</section>
+
+<section class="scr hide" id="scrOver">
+  <div id="goTitle">🏆 VÁN ĐẤU KẾT THÚC</div>
+  <div class="ranks" id="ranks"></div>
+  <div class="event-award" id="eventAward"></div>
+  <div class="modes" style="margin-top:20px">
+    <button class="modebtn" id="btnAgain">CHƠI LẠI</button>
+    <button class="modebtn alt" id="btnMenu">VỀ MENU</button>
+  </div>
+</section>
+
+<div id="spacer"></div>
+<article>
+  <div class="wrap">
+    <h1>Cờ Cá Ngựa Online</h1>
+    <p><b>Cờ Cá Ngựa</b> là trò chơi bàn cờ quốc dân của Việt Nam nay đã có mặt trên trình duyệt: gieo xúc xắc ra quân, phi ngựa vòng quanh bàn cờ, chặn đường, đá ngựa đối thủ về chuồng và khéo léo gieo đúng số để leo từng bậc về đích. Chơi ngay với 3 máy có AI biết đá, biết chặn, hoặc truyền tay 2-4 người trên cùng một máy — kèm nhạc nền vui nhộn được soạn riêng.</p>
+    <h2>Cách chơi</h2>
+    <ul>
+      <li>Đến lượt, bấm <b>GIEO XÚC XẮC</b> (hoặc phím Space). Gieo được <b>6</b> mới được ra quân và được gieo thêm lượt; nếu ra <b>3 lần số 6 liên tiếp</b> sẽ mất lượt.</li>
+      <li>Chạm vào ngựa đang phát sáng để đi. Ngựa đi đúng số ô vừa gieo và có thể vượt qua các quân khác theo logic của bản HiHi.</li>
+      <li>Đáp vào ngựa đối thủ ở ô thường → ngựa đó bị <b>đá về chuồng</b> và bạn được thêm lượt. Các ô có dấu <b>★</b> là ô an toàn.</li>
+      <li>Đi trọn vòng rồi tiến vào đường màu của mình. Nước đi chỉ hợp lệ khi tổng bước <b>không vượt quá đích</b>, vì vậy phải về đúng số.</li>
+      <li>Ai đưa đủ 4 ngựa vào chuồng trước là thắng; các vị trí còn lại xếp hạng theo tiến độ.</li>
+    </ul>
+    <h2>Mẹo hay</h2>
+    <ul>
+      <li>Đừng dồn hết vào một ngựa — ngựa đơn độc đi trước dễ bị cả bàn rượt đá.</li>
+      <li>Đứng chắn ngay trước cửa chuồng đối thủ là cách khóa đường leo bậc cực khó chịu.</li>
+      <li>Khi có ngựa sắp về, ưu tiên gieo cho nó leo bậc thay vì tham đá.</li>
+    </ul>
+    <h2>Câu hỏi thường gặp (FAQ)</h2>
+    <p><b>Game có cần mạng hay tải về không?</b> Không — chạy trực tiếp trên trình duyệt điện thoại và máy tính.</p>
+    <p><b>Chơi mấy người được?</b> 1 người đấu 3 máy, hoặc 2-4 người truyền tay trên cùng một thiết bị.</p>
+    <p><b>Nhạc nền có tắt được không?</b> Được — nút 🎵 tắt/bật nhạc, nút 🔔 tắt/bật hiệu ứng, và có 2 bản nhạc để đổi ngay ở menu.</p>
+    <p><b>Luật leo chuồng thế nào?</b> Sau một vòng, ngựa đi vào đường về đích của màu mình; nếu số xúc xắc làm vượt quá đích thì quân đó không được đi.</p>
+  </div>
+</article>
+</div>
+
+<div class="modal hide" id="mGuide"><div class="mcard">
+  <h3>LUẬT CHƠI CỜ CÁ NGỰA</h3>
+  <ul>
+    <li><b>Ra quân:</b> gieo được 6. Ngựa được đặt vào ô xuất phát; ô xuất phát là ô an toàn.</li>
+    <li><b>Gieo 6:</b> được gieo thêm một lượt; 3 lần số 6 liên tiếp sẽ mất lượt.</li>
+    <li><b>Di chuyển:</b> đi đúng số ô đã gieo. Ngựa có thể vượt qua quân khác theo logic bản HiHi.</li>
+    <li><b>Đá ngựa:</b> đáp vào ngựa đối thủ ở ô thường → nó về chuồng và bạn được thêm lượt. Ô ★ là ô an toàn.</li>
+    <li><b>Về đích:</b> sau một vòng, ngựa đi tiếp vào đường màu của mình; tổng bước không được vượt quá đích nên phải về đúng số.</li>
+    <li><b>Thắng:</b> đủ 4 ngựa vào chuồng.</li>
+    <li>Không có nước đi hợp lệ → mất lượt (game tự báo).</li>
+  </ul>
+  <button class="mclose" data-close="mGuide">Đã hiểu</button>
+</div></div>
+
+<script src="js/three.min.js"></script>
+<script>
+(()=>{ 'use strict';
+const TAU=Math.PI*2;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const $=id=>document.getElementById(id);
+let W=0,H=0,DPR=1;
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;
+  cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
+addEventListener('resize',resize);resize();
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>(a+Math.random()*(b-a+1))|0;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ================= ÂM THANH + NHẠC NỀN ================= */
+let AC=null,MG=null,musicBus=null,sfxBus=null;
+let musicOn=store.get('caNgua.music','1')==='1';
+let sfxOn=store.get('caNgua.sfx','1')==='1';
+function audio(){try{
+  if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+    AC=new C();MG=AC.createGain();MG.gain.value=.85;MG.connect(AC.destination);
+    sfxBus=AC.createGain();sfxBus.gain.value=sfxOn?1:0;sfxBus.connect(MG);
+    musicBus=AC.createGain();musicBus.gain.value=musicOn?1:0;
+    const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=4200;
+    const dly=AC.createDelay(0.6);dly.delayTime.value=0.27;
+    const fb=AC.createGain();fb.gain.value=.22;
+    const wet=AC.createGain();wet.gain.value=.16;
+    musicBus.connect(lp);lp.connect(MG);
+    lp.connect(dly);dly.connect(fb);fb.connect(dly);dly.connect(wet);wet.connect(MG);
+  }
+  if(AC.state==='suspended')AC.resume();return AC;
+}catch(e){AC=null;return null}}
+let noiseBuf=null;
+function noise(){if(noiseBuf)return noiseBuf;
+  const b=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;noiseBuf=b;return b}
+function blip(bus,f,d,type,v,when,slide){try{
+  const ac=audio();if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain(),t=when||ac.currentTime;
+  o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(28,f+slide),t+d);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.008);
+  g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(g);g.connect(bus);o.start(t);o.stop(t+d+.03);
+}catch(e){}}
+function hiss(bus,d,v,when,hp){try{
+  const ac=audio();if(!ac)return;
+  const s=ac.createBufferSource();s.buffer=noise();
+  const f=ac.createBiquadFilter();f.type=hp?'highpass':'bandpass';f.frequency.value=hp||1800;
+  const g=ac.createGain();const t=when||ac.currentTime;
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+  s.connect(f);f.connect(g);g.connect(bus);s.start(t);s.stop(t+d+.02);
+}catch(e){}}
+const SND={
+  click(){blip(sfxBus,620,.06,'square',.16)},
+  dice(){for(let i=0;i<7;i++)hiss(sfxBus,.04,.12,AC?AC.currentTime+i*.07:0,3200)},
+  diceStop(){blip(sfxBus,300,.1,'triangle',.24);blip(sfxBus,430,.12,'triangle',.2,AC?AC.currentTime+.06:0)},
+  hop(){blip(sfxBus,rnd(500,560),.05,'triangle',.16);blip(sfxBus,rnd(760,820),.04,'sine',.1,AC?AC.currentTime+.03:0)},
+  out(){[392,523,659].forEach((f,i)=>blip(sfxBus,f,.14,'triangle',.22,AC?AC.currentTime+i*.07:0))},
+  kick(){blip(sfxBus,180,.3,'sawtooth',.3,0,-110);hiss(sfxBus,.18,.2,0,1200);
+    [880,660,440,330].forEach((f,i)=>blip(sfxBus,f,.09,'square',.14,AC?AC.currentTime+.1+i*.05:0))},
+  climb(){[523,659,784].forEach((f,i)=>blip(sfxBus,f,.1,'sine',.2,AC?AC.currentTime+i*.05:0))},
+  deny(){blip(sfxBus,150,.12,'square',.16,0,-40)},
+  win(){[523,659,784,1047,784,1047].forEach((f,i)=>blip(sfxBus,f,.22,'triangle',.26,AC?AC.currentTime+i*.11:0))},
+  lose(){[392,330,262].forEach((f,i)=>blip(sfxBus,f,.24,'triangle',.2,AC?AC.currentTime+i*.14:0))},
+};
+
+/* ---- Nhạc nền: 2 bản soạn riêng, sequencer 16th-note ---- */
+const N=n=>440*Math.pow(2,(n-69)/12); /* midi -> Hz */
+const THEMES=[
+ { name:'Hội Làng', bpm:116, swing:.012,
+   /* C–G–Am–F ×2, giai điệu ngũ cung tươi sáng */
+   prog:[[48,55,60,64],[43,50,59,62],[45,52,57,60],[41,48,57,65],
+         [48,55,60,64],[43,50,59,62],[45,52,57,60],[43,50,59,62]],
+   bass:[[0,36,4],[8,43,4],[0,31,4],[8,38,4],[0,33,4],[8,40,4],[0,29,4],[8,36,3],[14,38,1],
+         [0,36,4],[8,43,4],[0,31,4],[8,38,4],[0,33,4],[8,40,4],[0,31,2],[4,38,2],[8,43,2],[12,47,2]],
+   bassBar:true,
+   mel:[ /* [bar, step, midi, len16] — phrase A+B, 8 bar */
+    [0,0,67,2],[0,2,64,2],[0,4,67,2],[0,6,69,2],[0,8,67,3],[0,12,64,2],[0,14,62,2],
+    [1,0,62,2],[1,2,59,2],[1,4,62,2],[1,6,67,2],[1,8,71,4],[1,12,69,2],[1,14,67,2],
+    [2,0,69,2],[2,2,72,2],[2,4,69,2],[2,6,64,2],[2,8,69,4],[2,12,67,4],
+    [3,0,65,2],[3,2,69,2],[3,4,72,4],[3,8,69,2],[3,10,67,2],[3,12,64,2],[3,14,62,2],
+    [4,0,72,2],[4,2,74,2],[4,4,76,4],[4,8,74,2],[4,10,72,2],[4,12,69,2],[4,14,67,2],
+    [5,0,71,2],[5,2,67,2],[5,4,71,2],[5,6,74,2],[5,8,71,4],[5,12,67,2],[5,14,64,2],
+    [6,0,69,2],[6,2,72,2],[6,4,76,2],[6,6,72,2],[6,8,69,3],[6,12,72,2],[6,14,69,2],
+    [7,0,67,4],[7,4,65,2],[7,6,64,2],[7,8,62,2],[7,10,64,2],[7,12,67,4],
+   ],
+   melType:'triangle',melVol:.2,
+   arp:true,arpVol:.06,
+   drums:{kick:[0,8],hat:[0,2,4,6,8,10,12,14],clap:[4,12]},
+ },
+ { name:'Trăng Êm', bpm:88, swing:0,
+   /* Am–F–C–G, dịu dàng, giai điệu sine mềm */
+   prog:[[45,52,57,60],[41,48,57,65],[48,55,60,64],[43,50,59,62],
+         [45,52,57,60],[41,48,57,65],[43,50,55,62],[45,52,57,60]],
+   bass:[[0,33,6],[8,40,6],[0,29,6],[8,36,6],[0,36,6],[8,43,6],[0,31,6],[8,38,6],
+         [0,33,6],[8,40,6],[0,29,6],[8,36,6],[0,31,6],[8,38,6],[0,33,8]],
+   bassBar:true,
+   mel:[
+    [0,0,69,4],[0,4,72,4],[0,8,71,3],[0,12,69,4],
+    [1,0,65,4],[1,4,69,4],[1,8,72,6],
+    [2,0,76,4],[2,4,72,4],[2,8,71,3],[2,12,67,4],
+    [3,0,62,4],[3,4,67,4],[3,8,64,6],
+    [4,0,69,3],[4,4,71,3],[4,8,72,4],[4,12,74,2],
+    [5,0,72,4],[5,4,69,4],[5,8,65,6],
+    [6,0,67,4],[6,4,62,3],[6,8,67,4],[6,12,71,2],
+    [7,0,69,8],
+   ],
+   melType:'sine',melVol:.22,
+   arp:true,arpVol:.05,
+   drums:{kick:[0],hat:[4,12],clap:[]},
+ },
+];
+let themeIdx=+store.get('caNgua.theme',0)||0;
+let musTimer=null,musStep=0,musNext=0,musLoop=0;
+function stopMusic(){if(musTimer){clearInterval(musTimer);musTimer=null}}
+function startMusic(){
+  stopMusic();
+  const ac=audio();if(!ac)return;
+  musStep=0;musLoop=0;musNext=ac.currentTime+.08;
+  const th=THEMES[themeIdx];
+  const spb=60/th.bpm/4; /* giây mỗi 16th */
+  musTimer=setInterval(()=>{try{
+    if(!AC)return;
+    while(musNext<AC.currentTime+.14){
+      const bar=(musStep>>4)%8, st=musStep&15;
+      const t=musNext+((st&1)?th.swing:0);
+      const chord=th.prog[bar];
+      /* trống */
+      if(th.drums.kick.includes(st))blip(musicBus,86,.16,'sine',.3,t,-40);
+      if(th.drums.hat.includes(st))hiss(musicBus,.035,st%4===0?.075:.05,t,6800);
+      if(th.drums.clap.includes(st))hiss(musicBus,.07,.09,t,1600);
+      /* bass theo bar */
+      for(const b of th.bass){ /* [step,midi,len] lặp mỗi 2 bar theo index chẵn/lẻ */ }
+      if(st===0||st===8){
+        const bi=bar*2+(st===8?1:0);
+        const bn=th.bass[bi%th.bass.length];
+        if(bn)blip(musicBus,N(bn[1]),bn[2]*spb*.9,'sine',.24,t);
+      }
+      /* rải hợp âm nhè nhẹ */
+      if(th.arp&&(st===2||st===6||st===10||st===14)){
+        const note=chord[(musStep>>1)%chord.length]+12;
+        blip(musicBus,N(note),spb*1.6,'triangle',th.arpVol,t);
+      }
+      /* giai điệu */
+      for(const m of th.mel){
+        if(m[0]===bar&&m[1]===st){
+          const oct=(musLoop%3===2)?12:0;
+          blip(musicBus,N(m[2]+oct),m[3]*spb*.92,th.melType,th.melVol*(oct?0.7:1),t);
+          if(oct)blip(musicBus,N(m[2]),m[3]*spb*.92,th.melType,th.melVol*.5,t);
+        }
+      }
+      musStep++;
+      if(musStep>=128){musStep=0;musLoop++}
+      musNext+=spb;
+    }
+  }catch(e){}},25);
+}
+function syncToggles(){
+  $('tMusic').classList.toggle('off',!musicOn);
+  $('tSfx').classList.toggle('off',!sfxOn);
+  if(musicBus)musicBus.gain.value=musicOn?1:0;
+  if(sfxBus)sfxBus.gain.value=sfxOn?1:0;
+}
+$('tMusic').addEventListener('click',()=>{musicOn=!musicOn;store.set('caNgua.music',musicOn?'1':'0');syncToggles();SND.click()});
+$('tSfx').addEventListener('click',()=>{sfxOn=!sfxOn;store.set('caNgua.sfx',sfxOn?'1':'0');syncToggles();SND.click()});
+$('btnMusicPick').addEventListener('click',()=>{
+  themeIdx=(themeIdx+1)%THEMES.length;store.set('caNgua.theme',themeIdx);
+  $('musName').textContent=THEMES[themeIdx].name;
+  SND.click();
+  if(musTimer)startMusic();
+});
+$('musName').textContent=THEMES[themeIdx].name;
+
+/* ================= BÀN CỜ ================= */
+/* ================= BÀN CỜ + LOGIC HIHI ================= */
+/* Giao diện Canvas giữ từ co-ca-ngua.html. Luật lượt/di chuyển/ăn quân/về đích dùng mô hình của co-ca-ngua-hihi(5).html. */
+const PATH=[];
+(function build(){
+  const seg=(x,y,dx,dy,n)=>{for(let i=0;i<n;i++){PATH.push([x,y]);x+=dx;y+=dy}};
+  seg(1,6, 1,0,5); seg(6,5, 0,-1,6); seg(7,0,0,0,1); seg(8,0,0,1,6);
+  seg(9,6, 1,0,6); seg(14,7,0,0,1); seg(14,8,-1,0,6); seg(8,9,0,1,6);
+  seg(7,14,0,0,1); seg(6,14,0,-1,6); seg(5,8,-1,0,6); seg(0,7,0,0,1); seg(0,6,0,0,1);
+})();
+const COLS=[
+  {name:'Đỏ',col:'#E8452A',dark:'#8A1F0E',start:0,home:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],stable:[1.9,9.9]},
+  {name:'Xanh Lá',col:'#3FBF74',dark:'#176A3C',start:13,home:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],stable:[1.9,1.9]},
+  {name:'Vàng',col:'#FFC72E',dark:'#9A6E00',start:26,home:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],stable:[9.9,1.9]},
+  {name:'Xanh Dương',col:'#3F9AE8',dark:'#134E86',start:39,home:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],stable:[9.9,9.9]},
+];
+const SAFE=[0,13,26,39,8,21,34,47], FINISH=56, HOME_START=51, PATH_LEN=52, MAX_SIX=3, TURN_SECONDS=10;
+let mode='ai',players=[],horses=[],turn=0,phase='menu';
+let dice=1,pendingRoll=0,legal=[],animQ=[],winners=[],notice='',sixesStreak=0;
+let boardX=0,boardY=0,cell=0,boardS=0,running=false,aiTimer=0,confetti=[];
+let turnDeadline=0,timeoutBusy=false,__forced=null,gameSession=0;
+let threeDice=null,threeResizeObs=null,threeLoadPromise=null,threeRollRaf=0,threeRollToken=0;
+function later(fn,ms,session=gameSession){return setTimeout(()=>{if(session===gameSession)fn()},ms)}
+
+function layout(){
+  /* Bàn cờ ưu tiên dùng nhiều diện tích hơn, đặc biệt trong iframe ngang thấp. */
+  const compactLandscape=W<=900&&H<=650;
+  if(compactLandscape){
+    boardS=Math.min(W-175,H-95,560);
+    boardS=Math.max(230,boardS);
+    boardX=(W-boardS)/2;
+    boardY=Math.max(46,(H-boardS)/2-2);
+  }else{
+    boardS=Math.min(W-110,H-125,760);
+    if(W<560)boardS=Math.min(W-12,H-150);
+    boardS=Math.max(220,boardS);
+    boardX=(W-boardS)/2;
+    boardY=Math.max(56,(H-boardS)/2-4);
+  }
+  cell=boardS/15;
+}
+function cxy(gx,gy){return[boardX+(gx+.5)*cell,boardY+(gy+.5)*cell]}
+function stablePos(h){
+  /* Căn chính xác 4 quân vào giữa ô nhà 6x6 ở từng góc.
+     Không dùng mốc stable 9.9 cũ vì nó làm nhà phải/dưới lệch về tâm 1 ô. */
+  const right = h.c===2 || h.c===3;
+  const bottom = h.c===0 || h.c===3;
+  const sx = right ? 9 : 0;
+  const sy = bottom ? 9 : 0;
+  const col = h.k % 2;
+  const row = (h.k / 2) | 0;
+  const ux = sx + (col ? 3.72 : 2.28);
+  const uy = sy + (row ? 3.72 : 2.28);
+  return [boardX + ux*cell, boardY + uy*cell];
+}
+function horsePosFor(c,pos,status,k){
+  if(status==='BASE'){const dummy={c,k};return stablePos(dummy)}
+  if(pos>=HOME_START){const slot=Math.max(0,Math.min(5,pos-HOME_START));const hm=COLS[c].home[slot];return cxy(hm[0],hm[1])}
+  const p=PATH[(COLS[c].start+pos)%PATH_LEN];return cxy(p[0],p[1]);
+}
+function horsePos(h){return horsePosFor(h.c,h.position,h.status,h.k)}
+function globalPos(c,pos){return pos>=0&&pos<HOME_START?(COLS[c].start+pos)%PATH_LEN:-1}
+function playerName(ci){return players[ci]?players[ci].name:COLS[ci].name}
+function progressScore(h){if(h.status==='BASE')return 0;if(h.status==='FINISHED')return 1000;return 1+h.position*8}
+function finishCount(ci){return horses.filter(h=>h.c===ci&&h.status==='FINISHED').length}
+
+function loadThreeJs(){
+  if(window.THREE)return Promise.resolve(window.THREE);
+  if(threeLoadPromise)return threeLoadPromise;
+  threeLoadPromise=new Promise((resolve,reject)=>{
+    const existed=[...document.scripts].find(sc=>(sc.src||'').includes('three.min.js'));
+    if(existed){
+      const done=()=>window.THREE?resolve(window.THREE):reject(new Error('Không tải được three.js'));
+      if(window.THREE)return resolve(window.THREE);
+      existed.addEventListener('load',done,{once:true});
+      existed.addEventListener('error',()=>reject(new Error('Không tải được three.js')),{once:true});
+      return;
+    }
+    const sc=document.createElement('script');
+    sc.src='js/three.min.js';
+    sc.onload=()=>window.THREE?resolve(window.THREE):reject(new Error('Không tải được three.js'));
+    sc.onerror=()=>reject(new Error('Không tải được three.js'));
+    document.head.appendChild(sc);
+  });
+  return threeLoadPromise;
+}
+function pipSlots(value){
+  return ({1:['c'],2:['tl','br'],3:['tl','c','br'],4:['tl','tr','bl','br'],5:['tl','tr','c','bl','br'],6:['tl','ml','bl','tr','mr','br']})[Math.min(6,Math.max(1,Number(value)||1))]||['c'];
+}
+function createDiceFaceTexture(value,color){
+  const size=384,texCanvas=document.createElement('canvas');texCanvas.width=texCanvas.height=size;
+  const xctx=texCanvas.getContext('2d');
+  const tint={
+    '#e8452a':['#fffafa','#ffe9e4','#f7d7ce'],
+    '#3fbf74':['#f8fffb','#e5f8ed','#d4eedf'],
+    '#ffc72e':['#fffdf3','#fff4c9','#f7e7a0'],
+    '#3f9ae8':['#f8fbff','#e7f1ff','#d4e5fb']
+  }[String(color).toLowerCase()]||['#ffffff','#fbfdff','#e8eef3'];
+  const base=xctx.createLinearGradient(0,0,size,size);base.addColorStop(0,tint[0]);base.addColorStop(.54,tint[1]);base.addColorStop(1,tint[2]);xctx.fillStyle=base;xctx.fillRect(0,0,size,size);
+  const shine=xctx.createRadialGradient(size*.22,size*.16,3,size*.22,size*.16,size*.58);shine.addColorStop(0,'rgba(255,255,255,1)');shine.addColorStop(.42,'rgba(255,255,255,.44)');shine.addColorStop(1,'rgba(255,255,255,0)');xctx.fillStyle=shine;xctx.fillRect(0,0,size,size);
+  xctx.strokeStyle='rgba(176,197,212,.34)';xctx.lineWidth=5;xctx.strokeRect(2.5,2.5,size-5,size-5);
+  const pos={tl:[.28,.28],tr:[.72,.28],ml:[.28,.5],c:[.5,.5],mr:[.72,.5],bl:[.28,.72],br:[.72,.72]};
+  pipSlots(value).forEach(k=>{const [px,py]=pos[k],x=size*px,y=size*py,r=size*.068;xctx.fillStyle='rgba(40,61,78,.13)';xctx.beginPath();xctx.arc(x+2,y+3,r*1.11,0,Math.PI*2);xctx.fill();const g=xctx.createRadialGradient(x-r*.28,y-r*.32,r*.08,x,y,r);g.addColorStop(0,'rgba(255,255,255,.58)');g.addColorStop(.18,color);g.addColorStop(.76,color);g.addColorStop(1,'rgba(0,0,0,.34)');xctx.fillStyle=g;xctx.beginPath();xctx.arc(x,y,r,0,Math.PI*2);xctx.fill();xctx.strokeStyle='rgba(28,48,65,.16)';xctx.lineWidth=2.2;xctx.stroke()});
+  const tx=new THREE.CanvasTexture(texCanvas);tx.anisotropy=8;tx.needsUpdate=true;return tx;
+}
+function disposeThreeDiceMaterials(){if(!threeDice||!threeDice.cube||!Array.isArray(threeDice.cube.material))return;threeDice.cube.material.forEach(m=>{if(m.map&&m.map.dispose)m.map.dispose();if(m.dispose)m.dispose()})}
+function faceColorForIndex(ci=turn){return (COLS[ci]||COLS[0]).col}
+function buildThreeDiceMaterials(ci=turn){
+  const pipColor=faceColorForIndex(ci),values={right:3,left:4,top:1,bottom:6,front:2,back:5},order=['right','left','top','bottom','front','back'];
+  return order.map(key=>new THREE.MeshPhysicalMaterial({map:createDiceFaceTexture(values[key],pipColor),roughness:.31,metalness:0,clearcoat:.78,clearcoatRoughness:.20,reflectivity:.36,color:0xffffff}));
+}
+function threeTargetEuler(face){
+  const f=Math.min(6,Math.max(1,Number(face)||1));
+  const map={1:[Math.PI/2,0,0],2:[0,0,0],3:[0,-Math.PI/2,0],4:[0,Math.PI/2,0],5:[0,Math.PI,0],6:[-Math.PI/2,0,0]},a=map[f]||map[1];
+  return new THREE.Euler(a[0],a[1],a[2],'XYZ');
+}
+function makeRoundedDiceGeometry(size=1.58,radius=.17,segments=12){
+  const g=new THREE.BoxGeometry(size,size,size,segments,segments,segments),p=g.attributes.position,half=size/2,inner=half-radius;
+  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),qx=Math.max(-inner,Math.min(inner,x)),qy=Math.max(-inner,Math.min(inner,y)),qz=Math.max(-inner,Math.min(inner,z));let dx=x-qx,dy=y-qy,dz=z-qz;const len=Math.hypot(dx,dy,dz);if(len>1e-6){dx/=len;dy/=len;dz/=len;p.setXYZ(i,qx+dx*radius,qy+dy*radius,qz+dz*radius)}}
+  p.needsUpdate=true;g.computeVertexNormals();return g;
+}
+const DICE_FINAL_RIG_X=-3*Math.PI/180,DICE_FINAL_RIG_Y=4*Math.PI/180,DICE_ROLL_RIG_X=-20*Math.PI/180,DICE_ROLL_RIG_Y=32*Math.PI/180;
+function ensureThreeDice(){
+  if(threeDice||!window.THREE)return threeDice;
+  const host=$('rollBtn');if(!host)return null;host.classList.add('has-three');
+  const mount=document.createElement('span');mount.className='three-dice-mount';mount.id='threeDiceMount';host.appendChild(mount);
+  const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setClearColor(0x000000,0);mount.appendChild(renderer.domElement);
+  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(27,1,.1,100);camera.position.set(0,0,6.75);camera.lookAt(0,0,0);
+  const hemi=new THREE.HemisphereLight(0xffffff,0xc8d8e3,1.55);scene.add(hemi);const key=new THREE.DirectionalLight(0xffffff,1.52);key.position.set(3.2,4.5,5.2);scene.add(key);const fill=new THREE.DirectionalLight(0xdcefff,.72);fill.position.set(-3.5,1.5,3.0);scene.add(fill);const rim=new THREE.DirectionalLight(0xffffff,.48);rim.position.set(-1.2,-2.5,4.8);scene.add(rim);
+  const rig=new THREE.Group();scene.add(rig);rig.rotation.x=DICE_FINAL_RIG_X;rig.rotation.y=DICE_FINAL_RIG_Y;const pivot=new THREE.Group();rig.add(pivot);const geometry=makeRoundedDiceGeometry(1.30,.15,12),cube=new THREE.Mesh(geometry,buildThreeDiceMaterials(turn));pivot.add(cube);
+  const shadowGeo=new THREE.CircleGeometry(1.08,40),shadowMat=new THREE.MeshBasicMaterial({color:0x0b1f34,transparent:true,opacity:.16,depthWrite:false}),shadow=new THREE.Mesh(shadowGeo,shadowMat);shadow.rotation.x=-Math.PI/2;shadow.position.set(0,-1.24,0);shadow.scale.set(1.02,.60,1);shadow.visible=false;scene.add(shadow);
+  threeDice={mount,renderer,scene,camera,rig,pivot,cube,shadow,currentColorIndex:turn,rolling:false,settling:false,startAt:0,fromQ:new THREE.Quaternion(),toQ:new THREE.Quaternion(),settleAt:0,settleMs:460,lastFace:1,loopRaf:0,rollSerial:0,settleRigFromX:DICE_FINAL_RIG_X,settleRigFromY:DICE_FINAL_RIG_Y};
+  const resizeThree=()=>{const r=mount.getBoundingClientRect(),w=Math.max(110,Math.round(r.width||142)),h=Math.max(110,Math.round(r.height||142));renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};resizeThree();if(window.ResizeObserver){threeResizeObs=new ResizeObserver(resizeThree);threeResizeObs.observe(mount)}else addEventListener('resize',resizeThree,{passive:true});
+  function loop(now){if(!threeDice)return;const d=threeDice;if(d.rolling){const t=(now-d.startAt)/1000;d.rig.rotation.x=DICE_ROLL_RIG_X+Math.sin(t*2.4)*.035;d.rig.rotation.y=DICE_ROLL_RIG_Y+Math.cos(t*2.1)*.04;d.rig.position.y=Math.abs(Math.sin(t*7))*0.10;const squash=1+Math.sin(t*14)*.018;d.cube.scale.set(squash,1-Math.abs(Math.sin(t*14))*.025,squash)}else if(d.settling){const p=Math.min(1,(now-d.settleAt)/d.settleMs),e=1-Math.pow(1-p,3);d.pivot.quaternion.copy(d.fromQ).slerp(d.toQ,e);d.rig.rotation.x=d.settleRigFromX+(DICE_FINAL_RIG_X-d.settleRigFromX)*e;d.rig.rotation.y=d.settleRigFromY+(DICE_FINAL_RIG_Y-d.settleRigFromY)*e;d.rig.position.y=Math.sin(p*Math.PI)*.12*(1-p);const bounce=Math.sin(Math.min(1,p*1.16)*Math.PI)*.022;d.cube.scale.set(1+bounce,1-bounce*.8,1+bounce);if(p>=1){d.settling=false;d.rig.position.y=0;d.cube.scale.set(1,1,1);d.pivot.quaternion.copy(d.toQ);d.rig.rotation.set(DICE_FINAL_RIG_X,DICE_FINAL_RIG_Y,0,'XYZ')}}else{d.rig.rotation.set(DICE_FINAL_RIG_X,DICE_FINAL_RIG_Y,0,'XYZ');d.rig.position.y=0;d.cube.scale.set(1,1,1)}d.shadow.visible=false;renderer.render(scene,camera);d.loopRaf=requestAnimationFrame(loop)}
+  threeDice.loopRaf=requestAnimationFrame(loop);setThreeDiceFace(1);return threeDice;
+}
+function setThreeDiceColor(ci=turn){if(!window.THREE)return;const d=ensureThreeDice();if(!d||d.currentColorIndex===ci)return;disposeThreeDiceMaterials();d.cube.material=buildThreeDiceMaterials(ci);d.currentColorIndex=ci}
+function setThreeDiceFace(face){if(!window.THREE)return;const d=ensureThreeDice();if(!d)return;const e=threeTargetEuler(face);d.pivot.rotation.set(e.x,e.y,e.z);d.rig.rotation.set(DICE_FINAL_RIG_X,DICE_FINAL_RIG_Y,0,'XYZ');d.lastFace=face}
+function startThreeDiceRoll(ci=turn){
+  if(!window.THREE)return;const d=ensureThreeDice();if(!d)return;setThreeDiceColor(ci);threeRollToken++;const token=threeRollToken;if(threeRollRaf){cancelAnimationFrame(threeRollRaf);threeRollRaf=0}d.rollSerial=(d.rollSerial||0)+1;d.rolling=false;d.settling=false;d.rig.position.set(0,0,0);d.rig.rotation.set(DICE_ROLL_RIG_X,DICE_ROLL_RIG_Y,0,'XYZ');d.cube.scale.set(1,1,1);d.pivot.quaternion.identity();d.pivot.rotation.set(0,0,0,'XYZ');const baseX=.35+Math.random()*.75,baseY=.42+Math.random()*.85,baseZ=Math.random()*.55,vx=9.5+Math.random()*2.8,vy=12.2+Math.random()*3.4,vz=8.4+Math.random()*2.6;d.startAt=performance.now();d.rolling=true;
+  const rollFrame=now=>{if(!threeDice||token!==threeRollToken||!d.rolling){threeRollRaf=0;return}const t=Math.max(0,(now-d.startAt)/1000),rx=baseX+t*vx+Math.sin(t*16)*.18,ry=baseY+t*vy+Math.cos(t*14)*.16,rz=baseZ+t*vz+Math.sin(t*18)*.12;d.pivot.rotation.set(rx,ry,rz,'XYZ');d.rig.rotation.x=DICE_ROLL_RIG_X+Math.sin(t*2.6)*.03;d.rig.rotation.y=DICE_ROLL_RIG_Y+Math.cos(t*2.2)*.035;d.rig.position.y=Math.abs(Math.sin(t*8))*.11;const pulse=1+Math.sin(t*18)*.018;d.cube.scale.set(pulse,1-Math.abs(Math.sin(t*18))*.022,pulse);try{d.renderer.render(d.scene,d.camera)}catch(e){}threeRollRaf=requestAnimationFrame(rollFrame)};
+  d.pivot.rotation.set(baseX,baseY,baseZ,'XYZ');try{d.renderer.render(d.scene,d.camera)}catch(e){}threeRollRaf=requestAnimationFrame(rollFrame);
+}
+function stopThreeDiceRoll(face,ci=turn){if(!window.THREE)return;const d=ensureThreeDice();if(!d)return;threeRollToken++;if(threeRollRaf){cancelAnimationFrame(threeRollRaf);threeRollRaf=0}setThreeDiceColor(ci);d.lastFace=face;d.rig.position.x=0;d.rolling=false;d.settling=true;d.settleAt=performance.now();d.settleRigFromX=d.rig.rotation.x;d.settleRigFromY=d.rig.rotation.y;d.fromQ.copy(d.pivot.quaternion);d.toQ.setFromEuler(threeTargetEuler(face))}
+function setDiceColor(ci=turn){const b=$('rollBtn'),c=COLS[ci]||COLS[0];if(!b)return;b.style.setProperty('--dice-color',c.col);b.style.setProperty('--dice-dark',c.dark);b.style.setProperty('--dice-soft',c.col+'38');try{setThreeDiceColor(ci)}catch(e){}}
+function setDiceFace(v){dice=v;const cube=$('diceCube'),poses={1:[0,0,0],6:[0,180,0],3:[0,-90,0],4:[0,90,0],2:[-90,0,0],5:[90,0,0]},p=poses[v]||poses[1];if(cube)cube.style.transform=`rotateX(${p[0]}deg) rotateY(${p[1]}deg) rotateZ(${p[2]}deg)`;if(!(threeDice&&(threeDice.rolling||threeDice.settling))){try{setThreeDiceFace(v)}catch(e){}}}
+function startDiceSpin(){const b=$('rollBtn');if(!b)return;b.classList.remove('ready','land');b.classList.add('rolling');$('diceLabel').textContent='ĐANG TUNG...';try{startThreeDiceRoll(turn)}catch(e){}}
+function stopDiceSpin(v){const b=$('rollBtn');if(!b)return;b.classList.remove('rolling');try{stopThreeDiceRoll(v,turn)}catch(e){}setDiceFace(v);void b.offsetWidth;b.classList.add('land');setTimeout(()=>b.classList.remove('land'),460)}
+function resetThreeDiceVisual(face=1,ci=turn){
+  threeRollToken++;if(threeRollRaf){cancelAnimationFrame(threeRollRaf);threeRollRaf=0}
+  if(!threeDice)return;
+  threeDice.rolling=false;threeDice.settling=false;threeDice.rig.position.set(0,0,0);threeDice.rig.rotation.set(DICE_FINAL_RIG_X,DICE_FINAL_RIG_Y,0,'XYZ');threeDice.cube.scale.set(1,1,1);threeDice.pivot.quaternion.identity();threeDice.pivot.rotation.set(0,0,0,'XYZ');setThreeDiceColor(ci);setThreeDiceFace(face);
+}
+function armTimer(){turnDeadline=performance.now()+TURN_SECONDS*1000;timeoutBusy=false;updateTimerUI(TURN_SECONDS)}
+function updateTimerUI(sec){const el=$('turnTimer');if(!el)return;const n=Math.max(0,Math.ceil(sec));el.textContent=n+'s';el.classList.toggle('warn',n<=3&&n>0)}
+function expireTurn(){if(timeoutBusy||phase==='end'||phase==='menu'||phase==='anim'||phase==='rolling'||phase==='wait')return;const session=gameSession;timeoutBusy=true;notice='HẾT GIỜ • '+playerName(turn).toUpperCase()+' BỊ BỎ LƯỢT';SND.deny();phase='wait';later(()=>{notice='';nextTurn(false)},650,session)}
+
+function newGame(m){
+  gameSession++;
+  mode=m;
+  /* Đồng bộ kích thước bàn trước khi tính tọa độ quân, tránh lệch tâm khi iframe vừa resize. */
+  layout();
+  const humans=m==='ai'?[true,false,false,false]:m==='p2'?[true,false,true,false]:m==='p3'?[true,true,true,false]:[true,true,true,true];
+  const aiNames=['Bé Na','Cu Bo','Tí Nị'];let ai=0;
+  players=COLS.map((c,i)=>({idx:i,name:humans[i]?(m==='ai'?'Bạn':c.name):'Máy '+aiNames[ai++%3],human:humans[i],active:humans[i]||m==='ai'}));
+  if(m==='p2'){players.forEach((p,i)=>p.active=(i===0||i===2))}
+  if(m==='p3'){players.forEach((p,i)=>p.active=i<3)}
+  if(m==='p4'){players.forEach(p=>p.active=true)}
+  horses=[];COLS.forEach((c,ci)=>{if(!players[ci].active)return;for(let k=0;k<4;k++)horses.push({c:ci,k,status:'BASE',position:-1,x:0,y:0,hop:0})});
+  horses.forEach(h=>{const[p,q]=horsePos(h);h.x=p;h.y=q});
+  turn=0;while(!players[turn].active)turn=(turn+1)%4;
+  phase='roll';pendingRoll=0;legal=[];animQ=[];winners=[];confetti=[];notice='';sixesStreak=0;dice=1;resetThreeDiceVisual(1,turn);setDiceFace(1);setDiceColor(turn);armTimer();updTurnTag();
+}
+function movableHorses(ci,roll){
+  if(!roll)return[];
+  return horses.filter(h=>h.c===ci&&h.status!=='FINISHED'&&((h.status==='BASE'&&roll===6)||(h.status==='ACTIVE'&&h.position+roll<=FINISH))).map(h=>({h,roll}));
+}
+function captureVictims(ci,np){
+  if(np>=HOME_START)return[];const gp=globalPos(ci,np);if(SAFE.includes(gp))return[];const victims=[];
+  players.forEach((p,oc)=>{if(!p.active||oc===ci)return;const on=horses.filter(h=>h.c===oc&&h.status==='ACTIVE'&&h.position<HOME_START&&globalPos(oc,h.position)===gp);if(on.length===1)victims.push(on[0])});
+  return victims;
+}
+function previewTarget(h,roll){if(h.status==='BASE')return roll===6?0:null;if(h.status==='ACTIVE'&&h.position+roll<=FINISH)return h.position+roll;return null}
+function resetVictim(v){v.status='BASE';v.position=-1;const[p,q]=horsePos(v);v.x=p;v.y=q;v.hop=0;for(let i=0;i<22;i++)confetti.push({x:v.x,y:v.y,vx:rnd(-130,130),vy:rnd(-210,-35),col:COLS[v.c].col,t:rnd(.45,.85),T:0,r:rnd(2,4)})}
+function checkWin(ci){if(horses.filter(h=>h.c===ci).every(h=>h.status==='FINISHED')){winners=[ci];endGame(ci);return true}return false}
+function applyMove(mv){
+  if(phase!=='choose'||!mv||!mv.h)return;const session=gameSession;phase='anim';legal=[];const h=mv.h,roll=pendingRoll,target=previewTarget(h,roll);if(target==null){phase='choose';return}
+  const seq=[];
+  if(h.status==='BASE'){seq.push(horsePosFor(h.c,0,'ACTIVE',h.k));h.status='ACTIVE';h.position=0}
+  else{for(let p=h.position+1;p<=target;p++)seq.push(horsePosFor(h.c,p,p===FINISH?'FINISHED':'ACTIVE',h.k));h.position=target;if(target===FINISH)h.status='FINISHED'}
+  animQ.push({h,seq,_i:0,_t:0,end:()=>{
+    const victims=captureVictims(h.c,h.position);victims.forEach(resetVictim);
+    if(victims.length){SND.kick();toast(COLS[h.c].name+' đá '+victims.length+' ngựa — thêm lượt!')}
+    if(h.position===FINISH){SND.climb();toast(COLS[h.c].name+' có 1 ngựa về đích!')}
+    if(checkWin(h.c))return;
+    const extra=roll===6||victims.length>0;
+    phase='wait';later(()=>{if(phase!=='end')nextTurn(extra)},260,session);
+  }});
+}
+function nextTurn(extra){
+  if(phase==='end')return;
+  if(!extra){do{turn=(turn+1)%4}while(!players[turn].active);sixesStreak=0}
+  phase='roll';pendingRoll=0;legal=[];notice='';setDiceColor(turn);armTimer();updTurnTag();if(!players[turn].human)aiTimer=.62;
+}
+function updTurnTag(){
+  const p=players[turn],c=COLS[turn],tag=$('turnTag');if(!p||!tag)return;
+  tag.querySelector('i').style.background=c.col;tag.querySelector('i').style.color=c.col;
+  let txt='Lượt: '+p.name+(p.human?'':' 🤖');if(notice)txt=notice;tag.querySelector('span').textContent=txt;
+  const can=phase==='roll'&&p.human&&!notice;$('rollBtn').disabled=!can;$('rollBtn').classList.toggle('ready',can);$('diceLabel').textContent=can?'GIEO XÚC XẮC':(phase==='choose'&&p.human?'CHỌN NGỰA':p.human?'ĐANG XỬ LÝ...':'MÁY ĐANG CHƠI');setDiceColor(turn);
+}
+function rollDice(){
+  if(phase!=='roll')return;const session=gameSession;phase='rolling';updTurnTag();SND.dice();startDiceSpin();
+  const val=__forced!=null?__forced:ri(1,6);__forced=null;
+  later(()=>{
+    stopDiceSpin(val);SND.diceStop();pendingRoll=val;
+    if(val===6){sixesStreak++;if(sixesStreak>=MAX_SIX){sixesStreak=0;notice='BA LẦN RA 6 — MẤT LƯỢT!';SND.deny();phase='wait';updTurnTag();later(()=>nextTurn(false),850,session);return}}
+    else sixesStreak=0;
+    legal=movableHorses(turn,val);
+    if(!legal.length){
+      if(val===6){notice='RA 6 NHƯNG KHÔNG CÓ NƯỚC ĐI — TUNG LẠI';phase='wait';updTurnTag();later(()=>{notice='';phase='roll';armTimer();updTurnTag();if(!players[turn].human)aiTimer=.55},720,session)}
+      else{notice='KHÔNG CÓ NƯỚC ĐI HỢP LỆ';phase='wait';SND.deny();updTurnTag();later(()=>nextTurn(false),720,session)}
+      return;
+    }
+    phase='choose';armTimer();updTurnTag();
+    if(!players[turn].human)aiTimer=.48;else if(legal.length===1)later(()=>{if(phase==='choose')applyMove(legal[0])},360,session);
+  },1450,session);
+}
+function aiScore(m){const h=m.h,target=previewTarget(h,m.roll);if(target==null)return-1e9;let sc=target*4+Math.random()*15;if(h.status==='BASE')sc+=180;if(target===FINISH)sc+=1000;const v=captureVictims(h.c,target);sc+=v.length*520;if(target<HOME_START&&SAFE.includes(globalPos(h.c,target)))sc+=110;if(h.status==='ACTIVE'&&h.position>40)sc+=90;return sc}
+function aiPick(){let best=null,bv=-1e9;for(const m of legal){const v=aiScore(m);if(v>bv){bv=v;best=m}}return best}
+
+function endGame(winnerCi){
+  phase='end';running=false;stopMusic();updateTimerUI(0);const active=players.filter(p=>p.active),rest=active.map(p=>p.idx).filter(i=>i!==winnerCi);
+  rest.sort((a,b)=>horses.filter(h=>h.c===b).reduce((s,h)=>s+progressScore(h),0)-horses.filter(h=>h.c===a).reduce((s,h)=>s+progressScore(h),0));
+  const order=[winnerCi,...rest],medals=['🥇','🥈','🥉','4️⃣'],rk=$('ranks');rk.innerHTML='';
+  order.forEach((ci,i)=>{const d=document.createElement('div');d.className='rk';d.innerHTML='<span class="medal">'+medals[i]+'</span><i style="background:'+COLS[ci].col+'"></i><span>'+players[ci].name+'</span>';rk.appendChild(d)});
+  const eventAwardEl=$('eventAward');
+  if(mode==='ai'){
+    const won=winnerCi===0,award=won?20:5;
+    eventAwardEl.textContent=(won?'🏆 Thắng':'🎯 Hoàn thành')+' · +'+award+' điểm sự kiện';
+    eventAwardEl.style.display='block';
+  }else eventAwardEl.style.display='none';
+  if(players[winnerCi].human)SND.win();else SND.lose();
+  for(let i=0;i<72;i++)confetti.push({x:W/2,y:H*.3,vx:rnd(-260,260),vy:rnd(-320,-60),col:['#FFD86B','#FF9E3D','#3FBF74','#3F9AE8','#E8452A'][ri(0,4)],t:rnd(.8,1.6),T:0,r:rnd(3,6)});
+  submitGameHiHiEnd(winnerCi);
+  const session=gameSession;later(()=>{document.body.classList.remove('playing');$('scrOver').classList.remove('hide')},1300,session);
+}
+function ludoEventContext(){
+  let cfg={},serverBest=0;
+  try{
+    const dbg=window.GameHiHiEventScoreDebug;
+    if(dbg&&dbg.config)cfg=dbg.config||{};
+    if(dbg&&typeof dbg.getBest==='function')serverBest=Math.max(0,Math.floor(Number(dbg.getBest())||0));
+    else serverBest=Math.max(0,Math.floor(Number(cfg.initialScore)||0));
+  }catch(e){}
+  const season=String(cfg.seasonKey||'default').replace(/[^a-z0-9_-]/gi,'_').slice(0,80)||'default';
+  return {key:'hihiLudo.event.'+season,serverBest};
+}
+function submitGameHiHiEnd(winnerCi){
+  // Điểm sự kiện chỉ áp dụng cho chế độ Bạn đấu 3 Máy để tránh farm điểm ở chế độ chung máy.
+  if(mode!=='ai')return;
+  const win=winnerCi===0,award=win?20:5,ctx=ludoEventContext();
+  let localTotal=0;
+  try{localTotal=Math.max(0,Math.floor(Number(localStorage.getItem(ctx.key))||0))}catch(e){}
+  const previous=Math.max(localTotal,ctx.serverBest);
+  let total=previous+award;
+  try{localStorage.setItem(ctx.key,String(total))}catch(e){}
+  const payload={
+    type:'gamehihi:event-end-game',
+    game:'co-ca-ngua-hihi',
+    score:total,
+    result:win?'win':'loss',
+    mode:'ludo-bot',
+    meta:{award,previous,total,winner:COLS[winnerCi].name,playerColor:'RED',finishCount:finishCount(0)}
+  };
+  try{
+    if(typeof window.GameHiHiEndGame==='function'){
+      window.GameHiHiEndGame(payload).then(j=>{
+        if(j&&Number(j.best_score)>=0){
+          total=Math.max(total,Math.floor(Number(j.best_score)||0));
+          try{localStorage.setItem(ctx.key,String(total))}catch(e){}
+        }
+      }).catch(()=>{});
+    }else if(window.parent&&window.parent!==window){
+      window.parent.postMessage(payload,'*');
+    }
+  }catch(e){}
+}
+
+$('cv').addEventListener('pointerdown',e=>{
+  if(phase!=='choose'||!players[turn].human)return;const mx=e.clientX,my=e.clientY;
+  for(const m of legal){const hp=horsePos(m.h);if((mx-hp[0])**2+(my-hp[1])**2<(cell*.82)**2){SND.click();applyMove(m);return}}
+});
+loadThreeJs().then(()=>{ensureThreeDice();setDiceColor(turn);setDiceFace(dice)}).catch(()=>{});
+$('rollBtn').addEventListener('click',()=>{audio();SND.click();rollDice()});
+$('quitBtn').addEventListener('click',()=>{gameSession++;threeRollToken++;if(threeRollRaf){cancelAnimationFrame(threeRollRaf);threeRollRaf=0}if(threeDice){threeDice.rolling=false;threeDice.settling=false}animQ=[];legal=[];running=false;phase='menu';stopMusic();document.body.classList.remove('playing');$('scrStart').classList.remove('hide');$('scrOver').classList.add('hide');SND.click()});
+document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.addEventListener('click',()=>{audio();SND.click();newGame(b.dataset.mode);running=true;document.body.classList.add('playing');scrollTo(0,0);$('scrStart').classList.add('hide');$('scrOver').classList.add('hide');syncToggles();startMusic();if(!players[turn].human)aiTimer=.8}));
+$('btnAgain').addEventListener('click',()=>{SND.click();newGame(mode);running=true;document.body.classList.add('playing');scrollTo(0,0);$('scrOver').classList.add('hide');startMusic();if(!players[turn].human)aiTimer=.8});
+$('btnMenu').addEventListener('click',()=>{SND.click();phase='menu';$('scrOver').classList.add('hide');$('scrStart').classList.remove('hide')});
+$('btnGuide').addEventListener('click',()=>{$('mGuide').classList.remove('hide');SND.click()});
+document.querySelectorAll('.mclose').forEach(b=>b.addEventListener('click',()=>{$(b.dataset.close).classList.add('hide');SND.click()}));
+addEventListener('keydown',e=>{if((e.code==='Space'||e.key===' ')&&document.body.classList.contains('playing')&&phase==='roll'&&players[turn].human){e.preventDefault();rollDice()}});
+let toastT=null;function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1800)}
+
+function update(dt,now){
+  layout();
+  if(running&&(phase==='roll'||phase==='choose')&&turnDeadline){const left=(turnDeadline-now)/1000;updateTimerUI(left);if(left<=0)expireTurn()}
+  if(animQ.length){const a=animQ[0],h=a.h;a._t+=dt*7.5;const s=a.seq[a._i];h.x+=(s[0]-h.x)*Math.min(1,12*dt);h.y+=(s[1]-h.y)*Math.min(1,12*dt);h.hop=Math.sin(Math.min(1,a._t)*Math.PI)*cell*.34;if(a._t>=1){h.x=s[0];h.y=s[1];h.hop=0;a._t=0;a._i++;if(a._i<a.seq.length)SND.hop();else{animQ.shift();a.end&&a.end()}}}
+  if(running&&!players[turn].human&&phase!=='end'){if(phase==='roll'){aiTimer-=dt;if(aiTimer<=0)rollDice()}else if(phase==='choose'){aiTimer-=dt;if(aiTimer<=0){const m=aiPick();if(m)applyMove(m)}}}
+  /* Quân đứng yên phải nằm CHÍNH XÁC giữa ô. Chỉ quân đang chạy mới nội suy ở animQ. */
+  for(const h of horses){
+    if(animQ.length&&animQ[0].h===h)continue;
+    const[p,q]=horsePos(h);
+    h.x=p;
+    h.y=q;
+  }
+  for(let i=confetti.length-1;i>=0;i--){const c=confetti[i];c.T+=dt;if(c.T>c.t){confetti.splice(i,1);continue}c.x+=c.vx*dt;c.y+=c.vy*dt;c.vy+=560*dt}
+}
+
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawHorseToken(x,y,r,col,dark,glow,t){
+  if(glow){ctx.fillStyle='rgba(255,240,150,'+(.3+.2*Math.sin(t*7))+')';ctx.beginPath();ctx.arc(x,y,r*1.7,0,TAU);ctx.fill()}
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x,y+r*.85,r*.85,r*.32,0,0,TAU);ctx.fill();
+  const g=ctx.createRadialGradient(x-r*.3,y-r*.4,r*.2,x,y,r*1.15);g.addColorStop(0,'#FFFFFF');g.addColorStop(.25,col);g.addColorStop(1,dark);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='rgba(30,12,4,.6)';ctx.stroke();
+  ctx.save();ctx.translate(x,y);ctx.scale(r/13,r/13);ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.moveTo(-4.5,7);ctx.quadraticCurveTo(-6.5,2,-4,-1.5);ctx.quadraticCurveTo(-2.5,-4,.5,-6.5);ctx.quadraticCurveTo(1.5,-7.6,2.6,-7);ctx.lineTo(2.2,-4.6);ctx.quadraticCurveTo(6,-3.4,7,0);ctx.quadraticCurveTo(7.4,1.4,6.2,1.6);ctx.quadraticCurveTo(4.4,1.8,3.4,.8);ctx.quadraticCurveTo(2.6,2.6,3.4,7);ctx.closePath();ctx.fill();ctx.fillStyle=dark;ctx.beginPath();ctx.arc(1.6,-2.6,1,0,TAU);ctx.fill();ctx.restore();
+}
+function draw(t){
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2A6A4C');g.addColorStop(1,'#153826');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.03)';for(let i=0;i<12;i++){ctx.beginPath();ctx.arc((i*197)%W,(i*263)%H,60+i*9,0,TAU);ctx.fill()}
+  ctx.fillStyle='#7A4A26';rr(boardX-14,boardY-14,boardS+28,boardS+28,26);ctx.fill();ctx.fillStyle='#FFF2D8';rr(boardX-4,boardY-4,boardS+8,boardS+8,18);ctx.fill();
+  COLS.forEach((c,ci)=>{const sx=ci===0||ci===1?0:9,sy=ci===1||ci===2?0:9;ctx.fillStyle=c.col;rr(boardX+sx*cell+cell*.28,boardY+sy*cell+cell*.28,cell*5.44,cell*5.44,cell*.7);ctx.fill();ctx.fillStyle='rgba(255,255,255,.85)';rr(boardX+sx*cell+cell*.95,boardY+sy*cell+cell*.95,cell*4.1,cell*4.1,cell*.55);ctx.fill();ctx.fillStyle=players[ci]&&players[ci].active?'rgba(0,0,0,.55)':'rgba(0,0,0,.25)';ctx.font='800 '+Math.max(10,cell*.42)+'px "Be Vietnam Pro",sans-serif';ctx.textAlign='center';const nm=players[ci]&&players[ci].active?players[ci].name:'—';ctx.fillText(nm,boardX+(sx+3)*cell,boardY+(sy+(sy?5.9:.75))*cell);for(let k=0;k<4;k++){const dummy={c:ci,k},[px,py]=stablePos(dummy);ctx.fillStyle='rgba(0,0,0,.09)';ctx.beginPath();ctx.arc(px,py,cell*.42,0,TAU);ctx.fill()}});
+  PATH.forEach((p,i)=>{const[x,y]=cxy(p[0],p[1]);let fill='#FFFFFF',ring='rgba(90,60,30,.25)';COLS.forEach(c=>{if(i===c.start){fill=c.col;ring=c.dark}});ctx.fillStyle='rgba(90,60,30,.16)';ctx.beginPath();ctx.arc(x,y+1.5,cell*.44,0,TAU);ctx.fill();ctx.fillStyle=fill;ctx.beginPath();ctx.arc(x,y,cell*.42,0,TAU);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=ring;ctx.stroke();if(SAFE.includes(i)){ctx.fillStyle=i===0||i===13||i===26||i===39?'#fff':'#8A9C89';ctx.font='800 '+cell*.34+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('★',x,y+1);ctx.textBaseline='alphabetic'}});
+  COLS.forEach(c=>{c.home.forEach((hm,si)=>{const[x,y]=cxy(hm[0],hm[1]);ctx.fillStyle=c.col;ctx.globalAlpha=.28+si*.12;ctx.beginPath();ctx.arc(x,y,cell*.42,0,TAU);ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=1.5;ctx.strokeStyle=c.dark;ctx.stroke();ctx.fillStyle=c.dark;ctx.font='800 '+cell*.34+'px "Baloo 2",cursive';ctx.textAlign='center';ctx.fillText(si+1,x,y+cell*.12)})});
+  const[ccx,ccy]=cxy(7,7);ctx.fillStyle='#FFE9B8';ctx.beginPath();ctx.arc(ccx,ccy,cell*.92,0,TAU);ctx.fill();ctx.strokeStyle='#C9A05A';ctx.lineWidth=3;ctx.stroke();ctx.font=cell*.85+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🏆',ccx,ccy+2);ctx.textBaseline='alphabetic';
+  const glowSet=new Set(phase==='choose'&&players[turn].human?legal.map(m=>m.h):[]),sorted=[...horses].sort((a,b)=>a.y-b.y);for(const h of sorted){const c=COLS[h.c];drawHorseToken(h.x,h.y-h.hop,cell*.4,c.col,c.dark,glowSet.has(h),t)}
+  for(const c of confetti){ctx.globalAlpha=1-c.T/c.t;ctx.fillStyle=c.col;ctx.fillRect(c.x-c.r/2,c.y-c.r/2,c.r,c.r*1.4)}ctx.globalAlpha=1;
+}
+let last=performance.now();function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(running||document.body.classList.contains('playing')){update(dt,now);draw(now/1000)}requestAnimationFrame(loop)}requestAnimationFrame(loop);
+window.__G={get horses(){return horses},get players(){return players},get turn(){return turn},get phase(){return phase},get dice(){return dice},get legal(){return legal},get winners(){return winners},get PATH(){return PATH},get running(){return running},forceRoll(v){__forced=Math.max(1,Math.min(6,Number(v)||1))},roll:rollDice,apply:applyMove,newGame,start(m){document.querySelector('.modebtn[data-mode="'+(m||'ai')+'"]').click()},nextTurn,SAFE,FINISH,HOME_START};
+})();
+</script>
+</body>
+</html>

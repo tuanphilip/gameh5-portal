@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Buộc Dây HiHi Online – Game buộc dây vượt chướng ngại vật</title>
+<meta name="description" content="Hai bạn bị buộc chung một sợi dây, vượt 80 chặng chướng ngại vật qua 8 vùng. Chơi cùng máy, với AI hoặc online nhiều người.">
+<meta name="theme-color" content="#ff6b35">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Buộc Dây HiHi">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/game.css?v=14">
+</head>
+<body>
+<div id="root">
+  <div id="stage">
+    <div id="tags"></div>
+    <div id="hud" class="hidden">
+      <div class="pill" id="hTime">⏱ 0:00</div>
+      <div class="pill" id="hFall">💦 0</div>
+      <div class="pill" id="hCp">🚩 Chặng 1/80</div>
+      <div class="pill score" id="hScore" title="Qua bao nhiêu chặng thì bấy nhiêu điểm">⭐ 0 điểm</div>
+      <div class="pill badge" id="hMode"></div>
+      <div class="pill small" id="hPing"></div>
+      <div class="pill small online-only" id="hOnline" title="Số người đang online"></div>
+    </div>
+    <div id="topbtns" class="hidden">
+      <button class="ibtn online-only" id="bChat" title="Chat (Enter)" aria-label="Chat">💬<span class="dotn hidden" id="unread">0</span></button>
+      <button class="ibtn online-only" id="bPlayersTop" title="Người đang online – mời vào đội" aria-label="Người chơi">👥</button>
+      <button class="ibtn online-only off" id="bMic" title="Mic nói chuyện với đồng đội (V)" aria-label="Mic">🎤</button>
+      <button class="ibtn online-only" id="bEmote" title="Biểu cảm & tương tác" aria-label="Biểu cảm">😀</button>
+      <button class="ibtn" id="bProfile2" title="Nhân vật & tên" aria-label="Nhân vật & tên">👤</button>
+      <button class="ibtn" id="bSettings" title="Âm thanh & cài đặt" aria-label="Cài đặt">🔊</button>
+      <button class="ibtn" id="bSkip" title="Bỏ qua chặng (chỉ luyện tập)" aria-label="Bỏ qua chặng">⏭</button>
+      <button class="ibtn" id="bCam" title="Xoay camera 3D" aria-label="Xoay camera 3D">🎥</button>
+      <button class="ibtn" id="bFull" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
+      <button class="ibtn" id="bPause" title="Menu (Esc)" aria-label="Menu">⏸</button>
+    </div>
+    <div id="hint" class="hidden"></div>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="stageToast"></div>
+    <div id="flash"></div>
+    <div id="count" class="hidden"></div>
+    <div id="lobbyPanel" class="hidden"></div>
+    <div id="netLost" class="hidden">📶 Mất kết nối – đang kết nối lại…</div>
+    <div id="chat" class="hidden collapsed">
+      <div class="chead">
+        <button class="ctab on" data-ch="room">Phòng</button><button class="ctab" data-ch="team">Đội</button>
+        <span class="cflex"></span>
+        <button class="cbtn" id="chatMute" title="Tắt/bật chat">🔔</button>
+        <button class="cbtn" id="chatClose" title="Thu gọn (Esc)">–</button>
+      </div>
+      <div class="clist" id="chatList" aria-live="polite"></div>
+      <div class="cquick">
+        <button data-q="Đợi mình!">Đợi mình!</button><button data-q="Nhảy nào!">Nhảy nào!</button><button data-q="Kéo mình lên!">Kéo mình lên!</button><button data-q="Cảm ơn!">Cảm ơn!</button>
+      </div>
+      <form class="cform" id="chatForm" autocomplete="off"><input id="chatIn" maxlength="200" placeholder="Nhập tin nhắn… (Enter gửi, Esc đóng)" enterkeyhint="send"><button type="submit">Gửi</button></form>
+    </div>
+    <div id="prompts"></div>
+  </div>
+
+  <div id="touch" class="hidden">
+    <div class="joy" id="joyL"><div class="knob"></div></div>
+    <div class="joy" id="joyR"><div class="knob"></div></div>
+    <button class="jbtn" id="jumpL">NHẢY</button>
+    <button class="jbtn" id="jumpR">NHẢY<small>/ LEO</small></button>
+    <button class="jbtn act" id="actBtn">E<small>Tương tác</small></button>
+  </div>
+  <div id="rotateHint" class="hidden">📱↻ Xoay ngang để chơi tốt hơn</div>
+
+  <div id="emotes" class="pop hidden">
+    <button data-e="wave">👋<small>Vẫy tay</small></button><button data-e="dance">💃<small>Nhảy múa</small></button><button data-e="cheer">🙌<small>Cổ vũ</small></button>
+    <button data-e="laugh">😂</button><button data-e="love">😍</button><button data-e="wow">😮</button><button data-e="thumb">👍</button><button data-e="cry">😭</button>
+    <button data-a="hi5">✋<small>Đập tay</small></button><button data-a="mark">📍<small>Đánh dấu</small></button><button data-a="players">🤝<small>Ghép đội</small></button>
+  </div>
+
+  <!-- KHỞI ĐỘNG: vào thẳng sảnh online -->
+  <div id="boot" class="screen">
+    <div class="card boot-card">
+      <h1>Buộc Dây HiHi</h1>
+      <div class="online-badge" id="onlineInfo">🟢 Đang đếm người online…</div>
+      <div class="boot-spin"><span></span><span></span><span></span></div>
+      <div class="sub" id="bootText">Đang vào sảnh khởi đầu…</div>
+      <button class="btn b5 hidden" id="bBootRetry">↻ Thử lại</button>
+      <button class="linkbtn" id="bBootMenu">Chế độ khác (chơi cùng máy, tạo phòng…)</button>
+    </div>
+  </div>
+
+  <!-- MENU -->
+  <div id="menu" class="screen hidden">
+    <div class="card menu-card">
+      <div class="mcol mleft">
+      <h1>Buộc Dây HiHi</h1>
+      <div class="online-badge" id="onlineInfo2">🟢 Đang đếm người online…</div>
+      <div class="sub">Hai bạn bị buộc chung một sợi dây. Vượt <b>80 chặng</b> qua 8 vùng – từ Đồng Cỏ tới Vũ Trụ Kẹo – để đến <b>Cúp Vàng</b>!</div>
+      <button class="profile-chip" id="bProfile"><img id="pcImg" alt=""><span class="pc-t"><b id="pcName">…</b><small>✏️ Đổi nhân vật &amp; tên</small></span></button>
+      <details class="ctrl">
+        <summary>🎮 Cách chơi & điều khiển</summary>
+        <b>Online / 1 người:</b> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> di chuyển · <kbd>Space</kbd> nhảy (giữ khi treo dây để leo) · <kbd>E</kbd> tương tác (giữ dây, đập tay, nhận lời mời) · <kbd>Enter</kbd> chat · <kbd>Esc</kbd> đóng/menu · <kbd>1</kbd>–<kbd>4</kbd> biểu cảm · <kbd>G</kbd> đánh dấu vị trí · <kbd>V</kbd> bật/tắt mic nói chuyện với đồng đội.<br>
+        <b>2 người cùng máy:</b> Người 1 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>Space</kbd> (<kbd>E</kbd> giữ dây) · Người 2 <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> + <kbd>Enter</kbd>/<kbd>Shift phải</kbd> (<kbd>'</kbd> giữ dây).<br>
+        <b>Điện thoại:</b> joystick bên trái, nút NHẢY/LEO và E bên phải; chạm lên mặt đất để tự đi tới đó.<br>
+        <b>Mẹo:</b> Rơi khỏi mép thì bị treo lơ lửng – <b>giữ NHẢY</b> để leo dây. Người đứng trên giữ <kbd>E</kbd> hoặc đi ra xa để kéo bạn lên. Một người rơi xuống nước là <b>cả đội</b> quay về cờ gần nhất.<br>
+        <b>Điểm:</b> qua bao nhiêu chặng thì bấy nhiêu điểm (tối đa 80). Bằng điểm thì ai nhanh hơn xếp trên. Chỉ lượt online hợp lệ mới vào bảng xếp hạng.
+      </details>
+      <div class="foot"><span id="meInfo"></span> · <a href="/embed.html" target="_blank" rel="noopener">Mã nhúng iframe</a> · <a href="/api/public/v1/leaderboard?game=buoc-day-hihi&period=week&limit=20" target="_blank" rel="noopener">API BXH</a></div>
+      </div>
+      <div class="mcol mright">
+      <button class="btn b0 hidden" id="bJoinLink">🔗 Vào phòng được mời</button>
+      <button class="btn b1" id="bQuick">⚡ Chơi nhanh online</button>
+      <div class="row">
+        <button class="btn b2" id="bCreate">➕ Tạo phòng</button>
+        <form class="codebox" id="codeForm"><input id="codeIn" maxlength="6" placeholder="MÃ PHÒNG" autocomplete="off" autocapitalize="characters"><button class="btn b2" type="submit">Vào</button></form>
+      </div>
+      <div class="sep">Chơi trên máy này (luyện tập)</div>
+      <button class="btn b3 hidden" id="bCont">▶ Chơi tiếp</button>
+      <div class="row">
+        <button class="btn b4" id="bPlay2">👫 2 người cùng máy</button>
+        <button class="btn b4" id="bPlay1">🤖 1 người + AI</button>
+      </div>
+      <div class="row">
+        <button class="btn b5" id="bBoard">🏆 Bảng xếp hạng</button>
+        <button class="btn b5" id="bSet2">⚙ Cài đặt</button>
+      </div>
+      <button class="btn b0 touch-only" id="bFull2">⛶ Toàn màn hình (ẩn thanh trình duyệt)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="createRoom" class="screen hidden">
+    <div class="card">
+      <h2>Tạo phòng</h2>
+      <label class="chk"><input type="checkbox" id="crBots" checked><span>Thêm BOT làm đồng đội / đội đua khi phòng vắng</span></label>
+      <label class="chk"><input type="checkbox" id="crPractice"><span>Phòng luyện tập (cho phép bỏ qua chặng, <b>không xếp hạng</b>)</span></label>
+      <button class="btn b1" id="crGo">➕ Tạo phòng</button>
+      <button class="btn b5" data-close>Huỷ</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen hidden">
+    <div class="card">
+      <h1>Menu</h1>
+      <div class="sub online-only">Phòng vẫn tiếp tục chơi – chỉ màn hình của bạn mở menu.</div>
+      <button class="btn b1" id="bResume">▶ Tiếp tục</button>
+      <button class="btn b2 online-only" id="bPlayers">👥 Người online · mời / tách đội</button>
+      <button class="btn b2 online-only" id="bInvite">📋 Mời bạn (copy liên kết)</button>
+      <button class="btn b2 online-only hidden" id="bAreas">🔀 Đổi khu vực</button>
+      <button class="btn b4" id="bProfile3">👤 Nhân vật &amp; tên</button>
+      <button class="btn b5" id="bBoard2">🏆 Bảng xếp hạng</button>
+      <button class="btn b3" id="bRestart">↺ Chơi lại từ đầu</button>
+      <button class="btn b4 hidden" id="bSkip2">⏭ Bỏ qua chặng (luyện tập)</button>
+      <button class="btn b5" id="bSet3">⚙ Âm thanh & cài đặt</button>
+      <button class="btn b6" id="bMenu">☰ Chế độ khác / Rời khu</button>
+    </div>
+  </div>
+
+  <div id="players" class="screen hidden">
+    <div class="card wide">
+      <h2 id="plTitle">Người chơi trong phòng</h2>
+      <div id="plTop" class="pltop"></div>
+      <div id="plist" class="plist"></div>
+      <div class="sub small" id="plHint"></div>
+      <button class="btn b5" data-close>Đóng</button>
+    </div>
+  </div>
+
+  <div id="win" class="screen hidden">
+    <div class="card">
+      <h1>Về đích! 🏆</h1>
+      <div class="stars" id="wStars">⭐⭐⭐</div>
+      <div class="big" id="wTime">Thời gian: 0:00</div>
+      <div class="big" id="wFall">Số lần rơi: 0</div>
+      <div class="big hidden" id="wScore"></div>
+      <div class="sub" id="wMsg"></div>
+      <button class="btn b1" id="bAgain">↺ Chơi lại</button>
+      <button class="btn b5 hidden" id="bWinBoard">🏆 Xem bảng xếp hạng</button>
+      <button class="btn b3" id="bShare">📋 Copy kết quả để khoe</button>
+      <button class="btn b2" id="bMenu2">☰ Về menu</button>
+    </div>
+  </div>
+
+  <div id="board" class="screen hidden">
+    <div class="card wide">
+      <h2>🏆 Bảng xếp hạng</h2>
+      <div class="filters">
+        <select id="fPeriod" aria-label="Kỳ"><option value="day">Hôm nay</option><option value="week" selected>Tuần này</option><option value="month">Tháng này</option></select>
+        <select id="fLevel" aria-label="Bảng"></select>
+        <select id="fMode" aria-label="Chế độ"><option value="human">👤 Người thật</option><option value="assisted">🤖 Có BOT</option></select>
+      </div>
+      <div class="sub small" id="bInfo"></div>
+      <div id="bList" class="blist"></div>
+      <div id="bMe" class="bme"></div>
+      <button class="btn b5" data-close>Đóng</button>
+    </div>
+  </div>
+
+  <div id="micAsk" class="screen hidden">
+    <div class="card mic-card">
+      <button class="mic-x" id="micX" aria-label="Đóng">✕</button>
+      <div class="mic-hero"><div class="mic-orb" id="micOrb">🎤</div></div>
+      <h2 id="micTitle">Bật mic để nói chuyện với đồng đội</h2>
+      <div class="mic-sub" id="micText"></div>
+      <div id="micDemo" class="micdemo"></div>
+      <ol id="micSteps" class="micsteps"></ol>
+      <button class="btn mic-go" id="micGo">🎤 Cho phép mic</button>
+      <button class="btn b2 hidden" id="micAlt">↗ Mở game ở tab mới</button>
+      <button class="mic-skip" id="micSkip">Để sau</button>
+      <div class="mic-chips"><span>🔒 Chỉ đồng đội nghe</span><span>🚫 Không ghi âm</span><span>🔇 Tắt bất cứ lúc nào</span></div>
+    </div>
+  </div>
+
+  <div id="charSel" class="screen hidden">
+    <div class="card wide char-card">
+      <h2>👤 Nhân vật của bạn</h2>
+      <div class="char-top">
+        <div class="char-prev"><img id="cPrev" alt=""><div id="cCharName"></div></div>
+        <div class="char-name">
+          <label for="cName">Tên hiển thị</label>
+          <div class="nrow"><input id="cName" maxlength="20" autocomplete="nickname" enterkeyhint="done"><button class="dice" id="cRand" title="Tên ngẫu nhiên" aria-label="Tên ngẫu nhiên">🎲</button></div>
+          <div class="sub small">2–20 ký tự · đổi được bất cứ lúc nào, kể cả khi đang chơi</div>
+        </div>
+      </div>
+      <div id="cGrid" class="char-grid" role="listbox" aria-label="Chọn nhân vật"></div>
+      <div class="row"><button class="btn b5" data-close>Huỷ</button><button class="btn b1" id="cSave">✔ Lưu</button></div>
+    </div>
+  </div>
+
+  <div id="areas" class="screen hidden">
+    <div class="card">
+      <h2>🔀 Đổi khu vực</h2>
+      <div class="sub small">Mỗi khu tối đa 14 người (7 đội). Chỉ đổi được khi đang chờ ở sảnh khởi đầu.</div>
+      <div id="areaList" class="area-list"></div>
+      <button class="btn b2" id="bAreaNew">➕ Mở khu mới</button>
+      <button class="btn b5" data-close>Đóng</button>
+    </div>
+  </div>
+
+  <div id="settings" class="screen hidden">
+    <div class="card">
+      <h2>⚙ Cài đặt</h2>
+      <label class="slider">🎵 Nhạc nền <input type="range" id="sMusic" min="0" max="1" step="0.05"></label>
+      <label class="slider">🔔 Hiệu ứng <input type="range" id="sSfx" min="0" max="1" step="0.05"></label>
+      <label class="chk"><input type="checkbox" id="sMute"><span>🔇 Tắt toàn bộ âm thanh</span></label>
+      <label class="chk"><input type="checkbox" id="sChat"><span>💬 Hiện chat &amp; bong bóng hội thoại</span></label>
+      <label class="chk"><input type="checkbox" id="sListen"><span>🔈 Nghe đồng đội nói (mic)</span></label>
+      <label class="slider">🗣 Giọng đồng đội <input type="range" id="sVoice" min="0" max="1" step="0.05"></label>
+      <label class="chk"><input type="checkbox" id="sNames"><span>🏷 Hiện tên người chơi</span></label>
+      <button class="btn b1" data-close>Xong</button>
+    </div>
+  </div>
+</div>
+<script src="js/three.min.js" crossorigin="anonymous"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

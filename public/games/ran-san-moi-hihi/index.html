@@ -1,0 +1,2789 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#062a30">
+<title>Rắn Săn Mồi HIHI</title>
+<meta name="description" content="Chơi Rắn Săn Mồi miễn phí trên trình duyệt: điều khiển rắn ăn mồi, tăng tốc, hạ gục 30+ rắn AI, mở khóa 24 skin. Hỗ trợ PC và điện thoại, không cần tải về.">
+<style>
+:root{
+  --bg0:#04191f; --bg1:#0a3a41; --panel:rgba(5,26,32,.72);
+  --lime:#b5f542; --lime2:#6fce16; --orange:#ffb02e; --coral:#ff5d73;
+  --ink:#eafff2; --dim:#8fb8ad;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--bg0);
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  color:var(--ink);-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+#game{position:fixed;inset:0;display:block;touch-action:none}
+button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px 16px 40px;
+  background:radial-gradient(120% 90% at 50% 0%,rgba(12,64,72,.92),rgba(4,20,26,.96));}
+.hidden{display:none!important}
+.card{width:100%;max-width:520px;background:var(--panel);border:2px solid rgba(181,245,66,.25);
+  border-radius:22px;padding:20px 18px;margin-top:14px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+
+h1.logo{margin:6px 0 2px;font-size:clamp(34px,9vw,58px);line-height:1;text-align:center;letter-spacing:1px;
+  font-weight:900;color:var(--lime);
+  text-shadow:0 3px 0 #2e6b06,0 6px 0 #1d4506,0 10px 22px rgba(0,0,0,.6)}
+h1.logo span{color:var(--orange);text-shadow:0 3px 0 #8a4d00,0 6px 0 #5c3300,0 10px 22px rgba(0,0,0,.6)}
+.tag{margin:2px 0 10px;color:var(--dim);text-align:center;font-size:14px}
+
+.row{display:flex;gap:10px;align-items:center}
+#nameInput{flex:1;min-width:0;padding:13px 14px;border-radius:14px;border:2px solid rgba(181,245,66,.35);
+  background:rgba(255,255,255,.07);color:var(--ink);font-size:17px;font-weight:600;outline:none}
+#nameInput:focus{border-color:var(--lime)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;color:#12320a;
+  background:linear-gradient(180deg,var(--lime),var(--lime2));border-radius:16px;
+  padding:14px 20px;font-size:18px;box-shadow:0 5px 0 #2e6b06,0 10px 18px rgba(0,0,0,.4);
+  transition:transform .06s ease}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #2e6b06}
+.btn.big{width:100%;font-size:22px;padding:16px;margin-top:12px;letter-spacing:1px}
+.btn.ghost{background:rgba(255,255,255,.1);color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.btn.orange{background:linear-gradient(180deg,#ffc35c,var(--orange));color:#4a2a00;box-shadow:0 5px 0 #8a4d00,0 10px 18px rgba(0,0,0,.4)}
+
+.sectionTitle{margin:14px 0 8px;font-size:15px;font-weight:800;color:var(--lime)}
+#skinList{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.skinBtn{width:58px;height:58px;border-radius:14px;background:rgba(255,255,255,.06);
+  border:2px solid rgba(255,255,255,.12);padding:3px;display:flex;align-items:center;justify-content:center}
+.skinBtn.sel{border-color:var(--lime);background:rgba(181,245,66,.15);box-shadow:0 0 12px rgba(181,245,66,.45)}
+.skinBtn canvas{width:100%;height:100%}
+.menuRow{display:flex;gap:10px;margin-top:12px}
+.menuRow .btn{flex:1;font-size:15px;padding:12px 6px}
+.bestLine{margin-top:10px;text-align:center;color:var(--orange);font-weight:700;font-size:14px}
+.serverPulse{margin:10px auto 0;display:flex;align-items:center;justify-content:center;gap:7px;max-width:100%;color:#dfffe9;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.serverPulse .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 0 rgba(181,245,66,.55);animation:svPulse 1.5s infinite}
+.serverPulse .sep{opacity:.45}.serverPulse .ping{color:#a8d5c8;font-weight:600}
+@keyframes svPulse{0%{box-shadow:0 0 0 0 rgba(181,245,66,.55)}70%{box-shadow:0 0 0 7px rgba(181,245,66,0)}100%{box-shadow:0 0 0 0 rgba(181,245,66,0)}}
+
+/* ---------- modal ---------- */
+#howModal{z-index:40;justify-content:center;background:rgba(3,14,18,.9)}
+#howModal .card{max-width:440px}
+#howModal li{margin:7px 0;line-height:1.5}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
+#hud.on{display:block}
+.panel{position:absolute;background:var(--panel);border:1px solid rgba(181,245,66,.22);border-radius:14px;
+  padding:8px 12px;font-size:13px;line-height:1.45;backdrop-filter:blur(3px)}
+#statPanel{top:calc(10px + env(safe-area-inset-top));left:10px;min-width:130px}
+#statPanel b{color:var(--lime);font-size:17px}
+#buffV{display:none;margin-top:3px;max-width:150px;color:#ffe58a;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mini{display:block;margin-top:6px;border-radius:10px;background:rgba(0,0,0,.35)}
+#lbPanel{top:calc(10px + env(safe-area-inset-top));right:10px;min-width:168px;max-width:210px}
+#lbPanel h3{margin:0 0 4px;font-size:13px;color:var(--orange)}
+#lb{margin:0;padding:0;list-style:none;font-size:12px}
+#lb li{display:flex;gap:6px;white-space:nowrap;overflow:hidden}
+#lb li .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+#lb li.me{color:var(--lime);font-weight:800}
+#sndBtn,#sndBtn2{pointer-events:auto}
+#sndBtn{position:absolute;top:calc(10px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  width:44px;height:44px;border-radius:50%;background:var(--panel);border:1px solid rgba(181,245,66,.3);
+  color:var(--ink);font-size:20px}
+#boostBtn{position:absolute;right:22px;bottom:calc(26px + env(safe-area-inset-bottom));width:96px;height:96px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ffd98a,var(--orange) 70%);color:#4a2a00;font-weight:900;font-size:15px;
+  border:4px solid rgba(255,255,255,.35);box-shadow:0 8px 22px rgba(0,0,0,.5);pointer-events:auto;display:none}
+#boostBtn.on{display:block}
+#boostBtn:active{transform:scale(.93)}
+#joy{position:fixed;width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.06);z-index:11;pointer-events:none;display:none;transform:translate(-50%,-50%)}
+#joyKnob{position:absolute;left:50%;top:50%;width:52px;height:52px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#e0ffb0,var(--lime) 70%);transform:translate(-50%,-50%);
+  box-shadow:0 4px 12px rgba(0,0,0,.5)}
+
+/* ---------- game over ---------- */
+#gameover{z-index:30;justify-content:center;background:rgba(3,14,18,.82)}
+#gameover .card{max-width:420px;text-align:center}
+#goTitle{font-size:34px;font-weight:900;color:var(--coral);margin:0 0 4px;text-shadow:0 3px 0 #5c0f1c}
+#goScore{font-size:52px;font-weight:900;color:var(--lime);text-shadow:0 4px 0 #2e6b06;margin:4px 0}
+.goStats{display:flex;justify-content:center;gap:16px;margin:8px 0 4px;flex-wrap:wrap}
+.goStats div{background:rgba(255,255,255,.07);border-radius:12px;padding:8px 14px;font-size:13px;color:var(--dim)}
+.goStats b{display:block;font-size:19px;color:var(--ink)}
+#goBest{color:var(--orange);font-weight:700;margin:6px 0 2px;font-size:14px}
+
+/* ===== Responsive khi game chạy trong iframe thấp ===== */
+@media (max-height:650px){
+  #menu.overlay{
+    padding:6px 10px 8px;
+    overflow:hidden;
+    justify-content:flex-start;
+  }
+  #menu h1.logo{
+    margin:0 0 1px;
+    font-size:clamp(28px,5.5vh,38px);
+    line-height:1;
+  }
+  #menu .tag{
+    margin:0 0 3px;
+    font-size:12px;
+    line-height:1.15;
+  }
+  #menu .serverPulse{
+    margin:3px auto 0;
+    min-height:14px;
+    font-size:11px;
+    line-height:1.1;
+  }
+  #menu .serverPulse .dot{width:6px;height:6px}
+  #menu .card{
+    max-width:520px;
+    margin-top:5px;
+    padding:9px 12px 10px;
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  #menu .row{gap:7px}
+  #menu #nameInput{
+    height:42px;
+    padding:8px 12px;
+    border-radius:12px;
+    font-size:15px;
+  }
+  #menu #sndBtn2{
+    width:42px!important;
+    height:42px!important;
+    border-radius:12px!important;
+    font-size:17px!important;
+  }
+  #menu .btn.big{
+    min-height:42px;
+    margin-top:7px;
+    padding:9px 14px;
+    border-radius:13px;
+    font-size:18px;
+    line-height:1.05;
+    box-shadow:0 4px 0 #2e6b06,0 7px 12px rgba(0,0,0,.3);
+  }
+  #menu .sectionTitle{
+    margin:8px 0 5px;
+    font-size:14px;
+    line-height:1.1;
+  }
+  #menu #skinList{display:grid;grid-template-columns:repeat(8,46px);gap:5px;justify-content:center}
+  #menu .skinBtn{
+    width:46px;
+    height:46px;
+    padding:2px;
+    border-radius:11px;
+  }
+  #menu .menuRow{
+    gap:7px;
+    margin-top:7px;
+  }
+  #menu .menuRow .btn{
+    min-height:34px;
+    padding:7px 5px;
+    border-radius:11px;
+    font-size:13px;
+    line-height:1;
+  }
+  #menu .bestLine{
+    margin-top:5px;
+    font-size:12px;
+    line-height:1.15;
+  }
+}
+
+@media (max-height:500px){
+  #menu.overlay{padding:4px 8px 6px}
+  #menu h1.logo{font-size:28px}
+  #menu .tag{font-size:11px;margin-bottom:2px}
+  #menu .serverPulse{display:none}
+  #menu .card{margin-top:3px;padding:7px 10px 8px}
+  #menu #nameInput{height:38px;font-size:14px}
+  #menu #sndBtn2{width:38px!important;height:38px!important}
+  #menu .btn.big{min-height:38px;padding:7px 12px;font-size:17px;margin-top:5px}
+  #menu .sectionTitle{margin:6px 0 4px;font-size:13px}
+  #menu #skinList{grid-template-columns:repeat(8,42px);gap:4px}
+  #menu .skinBtn{width:42px;height:42px;border-radius:10px}
+  #menu .menuRow{margin-top:5px}
+  #menu .menuRow .btn{min-height:31px;padding:6px 4px;font-size:12px}
+  #menu .bestLine{margin-top:3px;font-size:11px}
+}
+
+
+
+/* ===== Mobile HUD gọn hơn: minimap + TOP ===== */
+@media (max-width:700px){
+  #statPanel{
+    top:calc(6px + env(safe-area-inset-top));
+    left:6px;
+    min-width:88px;
+    padding:5px 7px;
+    border-radius:10px;
+    font-size:10px;
+    line-height:1.28;
+  }
+  #statPanel b{font-size:13px}
+  #mini{
+    width:64px;
+    height:64px;
+    margin-top:4px;
+    border-radius:7px;
+  }
+  #lbPanel{
+    top:calc(6px + env(safe-area-inset-top));
+    right:6px;
+    min-width:112px;
+    max-width:126px;
+    padding:5px 6px;
+    border-radius:10px;
+    font-size:9px;
+    line-height:1.22;
+  }
+  #lbPanel h3{margin:0 0 2px;font-size:10px}
+  #lb{font-size:9px}
+  #lb li{gap:3px;line-height:1.22}
+  #sndBtn{
+    top:calc(6px + env(safe-area-inset-top));
+    width:34px;
+    height:34px;
+    font-size:15px;
+  }
+}
+
+@media (max-width:540px){
+  #menu.overlay{padding-left:7px;padding-right:7px}
+  #menu .card{max-width:100%}
+  #menu #skinList{
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    justify-items:center;
+  }
+  #menu .skinBtn{
+    width:min(13vw,48px);
+    height:min(13vw,48px);
+  }
+}
+
+@media (max-width:380px){
+  #lbPanel{min-width:104px;max-width:116px;font-size:8.5px;padding:4px 5px}
+  #lbPanel h3{font-size:9px}
+  #lb{font-size:8.5px}
+  #statPanel{min-width:82px;font-size:9px;padding:4px 6px}
+  #statPanel b{font-size:12px}
+  #mini{width:56px;height:56px}
+  #menu #skinList{grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+  #menu .skinBtn{width:min(12.5vw,43px);height:min(12.5vw,43px)}
+}
+</style>
+<script>window.GameHiHiDirectEventScoreConfig={"enabled":true,"loggedIn":false,"restUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/score","restNonce":"","guestNonce":"3db642a448d8c589d918fdbb9484b6faa2853b3525d391cf01ab71ee87912fec","ajaxUrl":"https:\/\/gamehihi.com\/wp-admin\/admin-ajax.php","ajaxNonce":"5caf1c3107","contextNonce":"3db642a448d8c589d918fdbb9484b6faa2853b3525d391cf01ab71ee87912fec","gameId":2274,"seasonKey":"block-puzzle-01","initialScore":0,"initialTotalScore":0,"scoreLabel":"\u0110i\u1ec3m s\u1ef1 ki\u1ec7n","currentUserName":"GameHiHi-Play-17205","currentUserAvatar":"","caroMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/matchmake","caroRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/create","caroRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/join","caroStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/state","caroMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/move","caroLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/leave","caroRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/rematch","ludoMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/matchmake","ludoRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/create","ludoRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/join","ludoStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/state","ludoRollUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/roll","ludoMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/move","ludoLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/leave","ludoRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/rematch","analyticsUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/track","analyticsEventUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/event","analyticsNonce":"","analyticsUserId":0,"analyticsPlayerRef":"GameHiHi-Play-17205","analyticsUserScore":0,"analyticsUserAgeGroup":"","analyticsRegisteredSource":"","analyticsProfileComplete":0,"analyticsHasEmail":0,"analyticsHasPhone":0,"analyticsHasName":0,"gameSlug":"ran-san-moi-hihi","gameName":"R\u1eafn S\u0103n M\u1ed3i HIHI","ga4MeasurementId":"G-ETVSQ257CL","ga4MasterEnabled":1,"ga4MasterMeasurementId":"G-5CDYMXDTW0","analyticsSourceSite":"https:\/\/gamehihi.com\/gamehihi-play\/","analyticsSchemaVersion":"2.0.56"};(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  var best=Number(cfg.initialScore||0), total=Number(cfg.initialTotalScore||0), pending=-1, pendingMode='', busy=false, timer=0;
+  function parseResponse(r){return r.json().then(function(j){if(!r.ok||j&&j.success===false)throw j;return j&&j.data?j.data:j;});}
+  function viaAjax(score,mode){
+    if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+    var body=new URLSearchParams();
+    body.set('action','gamehihi_event_save_score'); body.set('_ajax_nonce',cfg.ajaxNonce);
+    body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score)); body.set('mode',mode||'');
+    body.set('context_nonce',cfg.contextNonce||cfg.guestNonce||'');
+    return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+  }
+  function viaRest(score,mode){
+    if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+    return fetch(cfg.restUrl,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,context_nonce:cfg.contextNonce||cfg.guestNonce})}).then(parseResponse);
+  }
+  function flush(){
+    if(busy||pending<0||!cfg.enabled)return;
+    var score=pending, mode=pendingMode; pending=-1; busy=true;
+    viaAjax(score,mode).catch(function(){return viaRest(score,mode);})
+      .then(function(j){best=Math.max(best,Number(j.best_score||0));if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);try{window.dispatchEvent(new CustomEvent('gamehihi:event-score-saved',{detail:{score:best,totalScore:total,gameId:Number(cfg.gameId)||0}}));}catch(e){} if(window.console&&console.info)console.info('[GameHiHi Event Score] saved',j);})
+      .catch(function(e){if(window.console&&console.error)console.error('[GameHiHi Event Score] save failed',e);})
+      .finally(function(){busy=false;if(pending>=0)flush();});
+  }
+  window.GameHiHiDirectEventScore=function(payload){
+    if(!payload||payload.type!=='gamehihi:event-score'||!cfg.enabled)return;
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    if(!payload.final&&score<=best)return;
+    pending=Math.max(pending,score); pendingMode=String(payload.mode||'').slice(0,50);
+    clearTimeout(timer); timer=setTimeout(flush,payload.final?0:250);
+  };
+  // v1.3.0: Mỗi lần game kết thúc gọi API ngay và tạo 1 bản ghi lịch sử.
+  window.GameHiHiEndGame=function(payload){
+    payload=payload||{};
+    if(!cfg.enabled) return Promise.reject({message:'Event disabled'});
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    var mode=String(payload.mode||'').slice(0,50);
+    var result=String(payload.result||'').slice(0,20);
+    var meta=payload.meta&&typeof payload.meta==='object'?payload.meta:{};
+    function ajax(){
+      if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+      var body=new URLSearchParams();
+      body.set('action','gamehihi_event_end_game'); body.set('_ajax_nonce',cfg.ajaxNonce);
+      body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score));
+      body.set('mode',mode); body.set('result',result); body.set('meta',JSON.stringify(meta));
+      body.set('guest_nonce',cfg.guestNonce||'');
+      return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+    }
+    function rest(){
+      if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+      var url=String(cfg.restUrl).replace(/\/score\/?$/,'/end-game');
+      return fetch(url,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,result:result,meta:meta,guest_nonce:cfg.guestNonce})}).then(parseResponse);
+    }
+    return ajax().catch(function(){return rest();}).then(function(j){
+      best=Math.max(best,Number(j.best_score||0));
+      if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);
+      try{window.dispatchEvent(new CustomEvent('gamehihi:end-game-saved',{detail:j}));}catch(e){}
+      if(window.console&&console.info)console.info('[GameHiHi EndGame] saved',j);
+      return j;
+    }).catch(function(e){if(window.console&&console.error)console.error('[GameHiHi EndGame] save failed',e);throw e;});
+  };
+  window.GameHiHiEventScoreDebug={config:cfg,getBest:function(){return best;},getTotal:function(){return total;},flush:flush};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  if(!cfg.analyticsUrl||!cfg.gameId) return;
+  function randomKey(prefix){
+    var a=new Uint8Array(16); try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    var h=''; for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2); return prefix+h;
+  }
+  function getVisitor(){
+    var k='gh_visitor_v1',v='';
+    try{v=localStorage.getItem(k)||''; if(!v){v=randomKey('v_');localStorage.setItem(k,v);}}catch(e){v=randomKey('v_');}
+    return v.slice(0,64);
+  }
+  function acquisition(){
+    var landing=location.href, ref=document.referrer||'';
+    try{
+      if(window.top!==window.self && window.top.location.origin===location.origin){
+        landing=window.top.location.href;
+        ref=window.top.document.referrer||ref;
+        var saved=window.top.sessionStorage.getItem('gh_acq_v1');
+        if(saved){var o=JSON.parse(saved); if(o&&o.landing)landing=String(o.landing); if(o&&typeof o.referrer==='string')ref=o.referrer;}
+      }
+    }catch(e){}
+    return {landing:String(landing||'').slice(0,1000),referrer:String(ref||'').slice(0,1000)};
+  }
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua) || (/android/i.test(ua)&&!/mobile/i.test(ua))) return 'Tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'Mobile';
+    return 'Desktop';
+  }
+  var visitor=getVisitor(), session=randomKey('s_'), acq=acquisition();
+  var activeMs=0,playMs=0,last=performance.now(),started=false,lastSent={a:-1,p:-1,s:-1},sending=false,pending=false;
+  function accrue(){
+    var now=performance.now(),delta=Math.max(0,Math.min(5000,now-last)); last=now;
+    if(!document.hidden){activeMs+=delta;if(started)playMs+=delta;}
+  }
+  function markStarted(){accrue();started=true;}
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',markStarted,{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,markStarted,{passive:true,once:true});});
+  }
+  document.addEventListener('visibilitychange',function(){accrue(); if(document.hidden)flush(true);},{passive:true});
+  window.addEventListener('blur',accrue,{passive:true}); window.addEventListener('focus',function(){last=performance.now();},{passive:true});
+  function payload(){
+    accrue();
+    return {session_key:session,visitor_key:visitor,game_id:Number(cfg.gameId)||0,active_seconds:Math.min(28800,Math.floor(activeMs/1000)),play_seconds:Math.min(28800,Math.floor(playMs/1000)),started:started?1:0,landing_url:acq.landing,referrer:acq.referrer,language:String(navigator.language||'').slice(0,16),platform:platform(),logged_in:cfg.loggedIn?1:0};
+  }
+  function changed(d){return d.active_seconds!==lastSent.a||d.play_seconds!==lastSent.p||d.started!==lastSent.s;}
+  function remember(d){lastSent={a:d.active_seconds,p:d.play_seconds,s:d.started};}
+  function flush(beacon){
+    var d=payload(); if(!changed(d))return;
+    if(sending){pending=true;return;}
+    if(beacon && navigator.sendBeacon){
+      try{var blob=new Blob([JSON.stringify(d)],{type:'application/json'}); if(navigator.sendBeacon(cfg.analyticsUrl,blob)){remember(d);return;}}catch(e){}
+    }
+    sending=true;
+    var headers={'Content-Type':'application/json'}; if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    fetch(cfg.analyticsUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:JSON.stringify(d)})
+      .then(function(r){if(r.ok)remember(d);})
+      .catch(function(){})
+      .finally(function(){sending=false;if(pending){pending=false;flush(false);}});
+  }
+  setTimeout(function(){flush(false);},2500);
+  setInterval(function(){flush(false);},30000);
+  window.addEventListener('pagehide',function(){flush(true);},{passive:true});
+  window.addEventListener('beforeunload',function(){flush(true);},{passive:true});
+  window.GameHiHiAnalyticsDebug={flush:flush,visitor:visitor,session:session};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  function validMid(v){v=String(v||'').trim().toUpperCase();return /^G-[A-Z0-9]{4,20}$/.test(v)?v:'';}
+  var gameMid=validMid(cfg.ga4MeasurementId), masterMid=Number(cfg.ga4MasterEnabled)?validMid(cfg.ga4MasterMeasurementId):'';
+  var targets=[];
+  [gameMid,masterMid].forEach(function(id){if(id&&targets.indexOf(id)<0)targets.push(id);});
+  if(!targets.length) return;
+
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+  var script=document.createElement('script');
+  script.async=true;
+  script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(targets[0]);
+  document.head.appendChild(script);
+
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua)||(/android/i.test(ua)&&!/mobile/i.test(ua))) return 'tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  function visitorId(){
+    var key='gh_visitor_v1',v='';
+    try{
+      v=localStorage.getItem(key)||'';
+      if(!v){v='v_'+sessionId().replace(/^gs_/,'');localStorage.setItem(key,v);}
+    }catch(e){v='v_'+sessionId().replace(/^gs_/,'');}
+    return String(v||'').slice(0,64);
+  }
+  function sessionId(){
+    var a=new Uint8Array(12),h='';
+    try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2);
+    return 'gs_'+h;
+  }
+  function cleanMeta(meta){
+    var out={},count=0;
+    if(!meta||typeof meta!=='object')return out;
+    Object.keys(meta).forEach(function(raw){
+      if(count>=20)return;
+      var key=String(raw||'').toLowerCase().replace(/[^a-z0-9_]/g,'_').replace(/^_+|_+$/g,'').slice(0,30);
+      if(!key)return;
+      var val=meta[raw];
+      if(typeof val==='number'&&isFinite(val)){out['game_'+key]=val;count++;return;}
+      if(typeof val==='boolean'){out['game_'+key]=val?1:0;count++;return;}
+      if(typeof val==='string'){out['game_'+key]=val.slice(0,100);count++;}
+    });
+    return out;
+  }
+  function merge(a,b){var o={},k;for(k in a)if(Object.prototype.hasOwnProperty.call(a,k))o[k]=a[k];for(k in b)if(Object.prototype.hasOwnProperty.call(b,k))o[k]=b[k];return o;}
+
+  var uid=Math.max(0,Math.floor(Number(cfg.analyticsUserId)||0));
+  var userScore=Math.max(0,Math.floor(Number(cfg.analyticsUserScore)||0));
+  var ageGroup=String(cfg.analyticsUserAgeGroup||'').slice(0,20);
+  var registeredSource=String(cfg.analyticsRegisteredSource||'').slice(0,40);
+  var gameSession=sessionId();
+  var common={
+    game_id:String(Number(cfg.gameId)||0),
+    game_slug:String(cfg.gameSlug||''),
+    game_name:String(cfg.gameName||document.title||''),
+    player_type:cfg.loggedIn?'logged_in':'guest',
+    player_ref:String(cfg.analyticsPlayerRef||''),
+    user_total_score:userScore,
+    source_site:String(cfg.analyticsSourceSite||location.hostname||'').slice(0,80),
+    platform:platform(),
+    language:String(navigator.language||'').slice(0,16),
+    game_session_id:gameSession,
+    game_url:String(location.pathname||'').slice(0,200),
+    page_path:String((location.pathname||'')+(location.search||'')).slice(0,300),
+    analytics_schema_version:String(cfg.analyticsSchemaVersion||'2.0.56')
+  };
+  var vid=visitorId(); if(vid)common.game_visitor_id=vid;
+  if(uid>0){
+    common.wp_user_id=String(uid);
+    if(ageGroup) common.user_age_group=ageGroup;
+    if(registeredSource) common.user_registered_source=registeredSource;
+    common.user_profile_complete=Number(cfg.analyticsProfileComplete)?1:0;
+    common.user_has_email=Number(cfg.analyticsHasEmail)?1:0;
+    common.user_has_phone=Number(cfg.analyticsHasPhone)?1:0;
+    common.user_has_name=Number(cfg.analyticsHasName)?1:0;
+  }
+
+  gtag('js',new Date());
+  gtag('set',common);
+  targets.forEach(function(id){
+    var c={send_page_view:false};
+    if(uid>0)c.user_id=String(uid);
+    gtag('config',id,c);
+  });
+
+  var localSeq=0;
+  var localEventNames={page_view:1,game_view:1,game_start:1,game_score:1,score_submit:1,game_end:1,game_engaged_60s:1,game_exit:1};
+  function logLocal(name,data){
+    if(!cfg.analyticsEventUrl||!localEventNames[name])return;
+    localSeq++;
+    var payload={
+      event_key:(gameSession+'_'+localSeq+'_'+name).slice(0,96),
+      event_name:name,
+      session_key:gameSession,
+      visitor_key:String(common.game_visitor_id||''),
+      game_id:Number(cfg.gameId)||0,
+      game_slug:String(common.game_slug||''),
+      game_name:String(common.game_name||''),
+      player_type:String(common.player_type||''),
+      source_site:String(common.source_site||''),
+      platform:String(common.platform||''),
+      language:String(common.language||''),
+      game_url:String(common.game_url||''),
+      page_path:String(common.page_path||''),
+      score:Math.max(0,Math.floor(Number(data.score)||0)),
+      play_time_seconds:Math.max(0,Math.floor(Number(data.play_time_seconds)||0)),
+      meta:data
+    };
+    var body=JSON.stringify(payload),headers={'Content-Type':'application/json'};
+    if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    if(name==='game_exit'&&navigator.sendBeacon){
+      try{if(navigator.sendBeacon(cfg.analyticsEventUrl,new Blob([body],{type:'application/json'})))return;}catch(e){}
+    }
+    try{fetch(cfg.analyticsEventUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:body}).catch(function(){});}catch(e){}
+  }
+  function send(name,params){
+    params=params&&typeof params==='object'?params:{};
+    var data=merge(common,params);
+    targets.forEach(function(id){
+      var d=merge(data,{send_to:id});
+      try{gtag('event',name,d);}catch(e){}
+    });
+    logLocal(name,data);
+  }
+
+  send('page_view',{page_location:location.href,page_title:document.title,page_referrer:document.referrer||''});
+  send('game_view',{page_location:location.href,page_title:document.title});
+
+  var started=false,startAt=0,exitSent=false,lastSubmitScore=null,lastSubmitAt=0;
+  function playSeconds(){return startAt?Math.max(0,Math.floor((Date.now()-startAt)/1000)):0;}
+  function start(source){
+    if(started) return;
+    started=true; startAt=Date.now();
+    send('game_start',{start_source:String(source||'interaction'),play_time_seconds:0});
+    setTimeout(function(){if(started)send('game_engaged_60s',{play_time_seconds:60});},60000);
+  }
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',function(){start('game_started');},{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){
+    window.addEventListener(ev,function(){start(ev);},{passive:true,once:true});
+  });
+  }
+
+  function submitScore(score,mode,meta,source){
+    score=Math.max(0,Math.floor(Number(score)||0));
+    var now=Date.now();
+    if(lastSubmitScore===score && now-lastSubmitAt<3000)return;
+    lastSubmitScore=score;lastSubmitAt=now;
+    var data=merge({score:score,mode:String(mode||'').slice(0,50),play_time_seconds:playSeconds(),submit_source:String(source||'game')},cleanMeta(meta));
+    send('score_submit',data);
+  }
+
+  var originalScore=window.GameHiHiDirectEventScore;
+  if(typeof originalScore==='function'){
+    window.GameHiHiDirectEventScore=function(payload){
+      payload=payload||{}; start('score');
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      var data=merge({score:score,mode:String(payload.mode||'').slice(0,50),final:payload.final?1:0,play_time_seconds:playSeconds()},cleanMeta(payload.meta));
+      send('game_score',data); // giữ event cũ để không gãy report hiện tại
+      if(payload.final)submitScore(score,payload.mode,payload.meta,'final_score');
+      return originalScore.apply(this,arguments);
+    };
+  }
+
+  var originalEnd=window.GameHiHiEndGame;
+  if(typeof originalEnd==='function'){
+    window.GameHiHiEndGame=function(payload){
+      payload=payload||{}; start('end_game');
+      if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='oc-dem-hihi'||cfg.gameSlug==='net-co-hihi'||cfg.gameSlug==='1-ngay-lam-cho-hihi'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let'||cfg.gameSlug==='mot-ngay-lam-thu-ky'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+        return Promise.resolve(originalEnd.apply(this,arguments)).then(function(j){
+          if(j&&j.saved){
+            var actual=Math.max(0,Math.floor(Number(j.score)||0));
+            var data=merge({score:actual,mode:String(payload.mode||'').slice(0,50),result:String(payload.result||'').slice(0,40),play_time_seconds:playSeconds(),submit_source:((cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let')?'level_saved':(cfg.gameSlug==='o-to-bay'?'round_saved':'day_saved'))},cleanMeta(payload.meta));
+            send('game_score',data);
+            send('score_submit',data);
+            send('game_end',data);
+          }
+          return j;
+        });
+      }
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      submitScore(score,payload.mode,payload.meta,'end_game');
+      var data=merge({
+        score:score,
+        mode:String(payload.mode||'').slice(0,50),
+        result:String(payload.result||'').slice(0,40),
+        play_time_seconds:playSeconds()
+      },cleanMeta(payload.meta));
+      send('game_end',data);
+      return originalEnd.apply(this,arguments);
+    };
+  }
+
+  function sendExit(){
+    if(exitSent) return; exitSent=true;
+    send('game_exit',{started:started?1:0,play_time_seconds:playSeconds(),transport_type:'beacon'});
+  }
+  window.addEventListener('pagehide',sendExit,{passive:true});
+  window.addEventListener('beforeunload',sendExit,{passive:true});
+
+  window.GameHiHiGA4={measurementId:gameMid,masterMeasurementId:masterMid,targets:targets.slice(),userId:uid,sessionId:gameSession,send:send,start:start,submitScore:submitScore};
+})();</script>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<!-- ================= HUD ================= -->
+<div id="hud">
+  <div class="panel" id="statPanel">
+    Điểm: <b id="scoreV">0</b><br>
+    Dài: <span id="lenV">0</span> · Hạng: <span id="rankV">-</span><br>
+    Hạ gục: <span id="killV">0</span> · Tốc độ: <span id="speedV">x1.0</span>
+    <div id="buffV"></div>
+    <canvas id="mini" width="108" height="108"></canvas>
+  </div>
+  <div class="panel" id="lbPanel">
+    <h3>🏆 TOP 10</h3>
+    <ol id="lb"></ol>
+  </div>
+  <button id="sndBtn" aria-label="Âm thanh">🔊</button>
+  <button id="boostBtn">⚡<br>BOOST</button>
+</div>
+<div id="joy"><div id="joyKnob"></div></div>
+
+<!-- ================= MENU ================= -->
+<div id="menu" class="overlay">
+  <h1 class="logo">RẮN <span>SĂN MỒI</span></h1>
+  <p class="tag">Đấu trường rắn khổng lồ · Năng lượng & item đặc biệt</p>
+  <div class="serverPulse" id="serverPulse"><span class="dot"></span><span id="serverName">Đấu trường #01</span><span class="sep">•</span><span id="serverPlayers">-- đang chơi</span><span class="sep">•</span><span class="ping" id="serverPing">-- ms</span></div>
+
+  <div class="card">
+    <div class="row">
+      <input id="nameInput" maxlength="12" placeholder="Nhập tên của bạn..." autocomplete="off">
+      <button id="sndBtn2" class="btn ghost" style="width:52px;height:52px;padding:0;font-size:20px">🔊</button>
+    </div>
+    <button id="btnPlay" class="btn big">🐍 CHƠI NGAY</button>
+
+    <div class="sectionTitle">🎨 Chọn skin rắn</div>
+    <div id="skinList"></div>
+
+    <div class="menuRow">
+      <button id="btnHow" class="btn ghost">📖 Hướng dẫn</button>
+      <button id="btnRank" class="btn orange">🏆 Kỷ lục</button>
+    </div>
+    <div class="bestLine" id="bestLine"></div>
+  </div>
+
+  
+</div>
+
+<!-- ================= HOW MODAL ================= -->
+<div id="howModal" class="overlay hidden">
+  <div class="card">
+    <h2 style="margin:0 0 8px;color:var(--lime)">📖 Hướng dẫn chơi</h2>
+    <ul style="padding-left:18px;margin:0">
+      <li>🖱️ <b>PC:</b> rê chuột để lái · giữ <b>chuột trái</b> hoặc <b>SPACE</b> để BOOST.</li>
+      <li>📱 <b>Mobile:</b> kéo joystick bên trái để lái · nhấn giữ nút <b>⚡BOOST</b>.</li>
+      <li>✨ Thu thập viên năng lượng phát sáng để dài ra: nhỏ → trung bình → lớn → <b>đặc biệt</b> (lấp lánh, điểm cao nhất)!</li>
+      <li>⚡ BOOST giúp chạy nhanh gấp đôi nhưng tiêu hao chiều dài.</li>
+      <li>💥 Đầu bạn chạm thân rắn khác → bạn thua. Dụ đối thủ đâm vào thân bạn để hạ gục.</li>
+      <li>💎 Rắn bị hạ sẽ nổ thành hàng loạt viên năng lượng lớn văng khắp nơi — nhanh tay gom sạch!</li>
+      <li>🧱 Tránh xa vòng tường đỏ ở rìa bản đồ.</li>
+    </ul>
+    <button id="btnCloseHow" class="btn big" style="margin-top:14px">Đã hiểu!</button>
+  </div>
+</div>
+
+<!-- ================= GAME OVER ================= -->
+<div id="gameover" class="overlay hidden">
+  <div class="card">
+    <p id="goTitle">💀 GAME OVER</p>
+    <div id="goScore">0</div>
+    <div class="goStats">
+      <div><b id="goLen">0</b>chiều dài</div>
+      <div><b id="goRank">-</b>hạng cao nhất</div>
+      <div><b id="goKills">0</b>hạ gục</div>
+    </div>
+    <div id="goBest"></div>
+    <button id="btnAgain" class="btn big">🔄 CHƠI LẠI</button>
+    <button id="btnMenu" class="btn ghost big">🏠 Về màn hình chính</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   RẮN SĂN MỒI V6 — BIG MAP + ULTRA AI — single-file HTML5 arcade snake battle
+   ============================================================ */
+(function(){
+
+/* ---------------- helpers ---------------- */
+const $=id=>document.getElementById(id);
+const TAU=Math.PI*2, HALF_PI=Math.PI/2;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+function normAng(a){while(a>Math.PI)a-=TAU;while(a<-Math.PI)a+=TAU;return a;}
+function shade(hex,f){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  r=clamp(Math.round(r*f),0,255);g=clamp(Math.round(g*f),0,255);b=clamp(Math.round(b*f),0,255);
+  return 'rgb('+r+','+g+','+b+')';
+}
+let LS;
+try{LS=window.localStorage;LS.getItem('__t');}catch(e){LS={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};}
+
+/* ---------------- canvas ---------------- */
+const canvas=$('game'),ctx=canvas.getContext('2d');
+let W=window.innerWidth,H=window.innerHeight,DPR=Math.min(window.devicePixelRatio||1,2);
+let bgGrad=null;
+function resize(){
+  W=window.innerWidth;H=window.innerHeight;
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  bgGrad=ctx.createRadialGradient(W*0.5,H*0.35,60,W*0.5,H*0.5,Math.max(W,H)*0.85);
+  bgGrad.addColorStop(0,'#0d4750');bgGrad.addColorStop(0.6,'#083038');bgGrad.addColorStop(1,'#04181f');
+}
+window.addEventListener('resize',resize);
+resize();
+
+/* ---------------- constants ---------------- */
+// Bản đồ V6: tăng mạnh diện tích để các bot điểm rất cao có không gian xoay trở.
+// Bán kính 11.000px = diện tích lớn hơn ~6.9 lần bản 4.200px trước.
+const WORLD_R=11000;
+/* ===== CẤU HÌNH TỐC ĐỘ (chỉnh các số này để cân bằng game) ===== */
+const SPEED_CFG={
+  start:   2.70, // rắn nhỏ vẫn dễ điều khiển
+  max:     6.85, // rắn càng lớn càng có tốc độ nền cao hơn rõ rệt
+  rampLen: 90000,// dùng thang log để tốc độ tiếp tục tăng ở rắn điểm rất lớn
+  boostMul:2.05, // BOOST cơ bản
+  boostCap:14.50 // trần BOOST mới cho rắn khổng lồ
+};
+/* V7: tốc độ tăng theo kích thước/điểm trên thang log.
+   Rắn lớn không còn "to nhưng ì": tốc độ nền tiếp tục tăng, và BOOST còn được cộng
+   thêm theo kích thước trong Snake.update(). */
+function speedFor(len){
+  const raw=Math.max(0,Number(len)||0);
+  const t=clamp(Math.log1p(Math.max(0,raw-26)/55)/Math.log1p(SPEED_CFG.rampLen/55),0,1);
+  const smooth=t*t*(3-2*t);
+  return SPEED_CFG.start+(SPEED_CFG.max-SPEED_CFG.start)*smooth;
+}
+let AI_TARGET=36; // tự thay đổi theo nhịp server mô phỏng
+// Bot xuất hiện với điểm/chiều dài lớn hơn 20–50 lần để BXH cạnh tranh hơn.
+const BOT_SCORE_MULT_MIN=20, BOT_SCORE_MULT_MAX=50;
+// Tăng số mồi theo bản đồ mới nhưng vẫn giữ mật độ thoáng để rắn lớn ít va chạm dây chuyền.
+const FOOD_BASE=1900, FOOD_MAX=5600;
+const MIN_BOOST_LEN=20;
+// Mồi rơi từ xác rắn: số frame đầu không bị hút từ xa và bot không nhắm tới,
+// để người chơi thấy rõ rắn chết biến thành mồi thay vì bị hút sạch tức thì.
+const DROP_GRACE=60;
+// Bot mới sinh hiện dần trong số frame này thay vì xuất hiện đột ngột.
+const SPAWN_FADE=30;
+
+/* ---------------- skins (24) ---------------- */
+const SKINS=[
+ {n:'Xanh Ngọc',c:['#2dd4bf','#0d9488']},
+ {n:'Hổ Lửa',c:['#ff6b35','#ffd166']},
+ {n:'Rồng Đỏ',c:['#ef4444','#7f1d1d']},
+ {n:'Bầu Trời',c:['#38bdf8','#1d4ed8']},
+ {n:'Tím Mộng',c:['#a78bfa','#6d28d9']},
+ {n:'Chanh Dây',c:['#a3e635','#4d7c0f']},
+ {n:'Hoàng Kim',c:['#fbbf24','#b45309']},
+ {n:'Băng Giá',c:['#e0f2fe','#7dd3fc','#38bdf8']},
+ {n:'Cầu Vồng',c:['#ff0000'],rb:true},
+ {n:'Dưa Hấu',c:['#22c55e','#22c55e','#ef4444']},
+ {n:'Ong Vàng',c:['#facc15','#facc15','#292524']},
+ {n:'San Hô',c:['#fb7185','#fda4af']},
+ {n:'Bóng Đêm',c:['#475569','#0f172a']},
+ {n:'Neon Hồng',c:['#f0abfc','#d946ef']},
+ {n:'Rừng Sâu',c:['#65a30d','#3f6212','#1a2e05']},
+ {n:'Kẹo Ngọt',c:['#f9a8d4','#93c5fd','#fde68a']},
+ {n:'Đại Dương',c:['#06b6d4','#0e7490']},
+ {n:'Cam Sữa',c:['#fdba74','#fff7ed']},
+ {n:'Đỏ Vàng',c:['#dc2626','#facc15']},
+ {n:'Lục Bảo',c:['#10b981','#064e3b']},
+ {n:'Tia Chớp',c:['#fde047','#eab308']},
+ {n:'Nham Thạch',c:['#f97316','#450a0a']},
+ {n:'Bạc Hà',c:['#99f6e4','#2dd4bf']},
+ {n:'Vũ Trụ',c:['#818cf8','#312e81','#c084fc']},
+];
+for(const s of SKINS){s.dark=shade(s.c[0],0.45);s.head=s.c[0];}
+function skinColor(skin,i,t){
+  // Cầu vồng đổi màu chậm và liên tục để tránh cảm giác bot bị nhấp nháy.
+  if(skin.rb)return 'hsl('+(((i*11+t*0.22)%360+360)%360)+',95%,60%)';
+  return skin.c[((i/5)|0)%skin.c.length];
+}
+
+/* ---------------- audio ---------------- */
+const Snd={
+  ctx:null,master:null,on:LS.getItem('rsm_snd')!=='0',boostOsc:null,boostGain:null,
+  init(){
+    if(this.ctx)return;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    try{
+      this.ctx=new AC();
+      this.master=this.ctx.createGain();
+      this.master.gain.value=0.5;
+      this.master.connect(this.ctx.destination);
+    }catch(e){this.ctx=null;}
+  },
+  resume(){if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume().catch(()=>{});},
+  tone(f0,f1,dur,type,vol){
+    if(!this.on||!this.ctx)return;
+    try{
+      const t=this.ctx.currentTime;
+      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type=type;
+      o.frequency.setValueAtTime(f0,t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+      g.gain.setValueAtTime(vol,t);
+      g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+      o.connect(g);g.connect(this.master);
+      o.start(t);o.stop(t+dur+0.02);
+    }catch(e){}
+  },
+  eat(){this.tone(460+Math.random()*240,980,0.09,'sine',0.14);},
+  big(){this.tone(280,820,0.2,'triangle',0.22);this.tone(560,1120,0.14,'sine',0.1);},
+  kill(){this.tone(180,560,0.28,'square',0.13);},
+  die(){this.tone(440,55,0.8,'sawtooth',0.25);},
+  click(){this.tone(720,980,0.06,'square',0.09);},
+  boostStart(){
+    if(!this.on||!this.ctx||this.boostOsc)return;
+    try{
+      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type='sawtooth';o.frequency.value=68;
+      g.gain.value=0.0001;
+      g.gain.linearRampToValueAtTime(0.045,this.ctx.currentTime+0.12);
+      o.connect(g);g.connect(this.master);o.start();
+      this.boostOsc=o;this.boostGain=g;
+    }catch(e){}
+  },
+  boostStop(){
+    if(!this.boostOsc)return;
+    try{
+      const o=this.boostOsc,g=this.boostGain,t=this.ctx.currentTime;
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(g.gain.value,t);
+      g.gain.linearRampToValueAtTime(0.0001,t+0.12);
+      o.stop(t+0.16);
+    }catch(e){}
+    this.boostOsc=null;this.boostGain=null;
+  },
+  setOn(v){
+    this.on=v;LS.setItem('rsm_snd',v?'1':'0');
+    if(!v)this.boostStop();
+    updateSndBtns();
+  }
+};
+function updateSndBtns(){
+  const t=Snd.on?'🔊':'🔇';
+  $('sndBtn').textContent=t;$('sndBtn2').textContent=t;
+}
+
+/* ---------------- spatial grid ---------------- */
+const CELL=150;
+const segGrid=new Map(), foodGrid=new Map();
+function gridInsert(map,x,y,item){
+  const k=Math.floor(x/CELL)+Math.floor(y/CELL)*100003;
+  let a=map.get(k);
+  if(!a){a=[];map.set(k,a);}
+  a.push(item);
+}
+function gridQuery(map,x,y,r,out){
+  out.length=0;
+  const c0=Math.floor((x-r)/CELL),c1=Math.floor((x+r)/CELL);
+  const r0=Math.floor((y-r)/CELL),r1=Math.floor((y+r)/CELL);
+  for(let cy=r0;cy<=r1;cy++)for(let cx=c0;cx<=c1;cx++){
+    const a=map.get(cx+cy*100003);
+    if(a)for(let i=0;i<a.length;i++)out.push(a[i]);
+  }
+}
+const QA=[],QB=[];
+
+/* ---------------- particles (pooled) ---------------- */
+const P_MAX=520;
+const parts=new Array(P_MAX);
+for(let i=0;i<P_MAX;i++)parts[i]={a:false,x:0,y:0,vx:0,vy:0,life:0,max:1,r:2,c:'#fff'};
+let pIdx=0;
+function spawnPart(x,y,vx,vy,life,r,c){
+  const p=parts[pIdx];pIdx=(pIdx+1)%P_MAX;
+  p.a=true;p.x=x;p.y=y;p.vx=vx;p.vy=vy;p.life=life;p.max=life;p.r=r;p.c=c;
+}
+function burst(x,y,n,c,sp,r){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*TAU,s=rand(sp*0.3,sp);
+    spawnPart(x,y,Math.cos(a)*s,Math.sin(a)*s,rand(20,45),rand(r*0.5,r),c);
+  }
+}
+function updateParts(dtf){
+  for(let i=0;i<P_MAX;i++){
+    const p=parts[i];
+    if(!p.a)continue;
+    p.x+=p.vx*dtf;p.y+=p.vy*dtf;
+    p.vx*=0.94;p.vy*=0.94;
+    p.life-=dtf;
+    if(p.life<=0)p.a=false;
+  }
+}
+
+/* ---------------- energy pellets ---------------- */
+const FOOD_COLORS=['#ffd166','#ef476f','#06d6a0','#7ae7ff','#f78cff','#c0ff66','#ffa94d'];
+function lighten(hex,f){
+  // Chỉ xử lý mã #rrggbb; màu hsl()/rgb() (skin cầu vồng) giữ nguyên thay vì thành NaN.
+  if(typeof hex!=='string'||hex.length!==7||hex.charCodeAt(0)!==35)return hex;
+  const n=parseInt(hex.slice(1),16);
+  const r=Math.round((n>>16)+(255-(n>>16))*f);
+  const g=Math.round(((n>>8)&255)+(255-((n>>8)&255))*f);
+  const b=Math.round((n&255)+(255-(n&255))*f);
+  return '#'+((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+}
+/* Mồi lấy màu skin rắn chết: skin tối (Bóng Đêm, Rừng Sâu, Nham Thạch...) cho viên gần như đen
+   trên nền đấu trường, nhìn như "không có mồi". Làm sáng màu quá tối trước khi dùng cho mồi. */
+function foodTint(c){
+  if(typeof c!=='string'||c.length!==7||c.charCodeAt(0)!==35)return c;
+  const n=parseInt(c.slice(1),16);
+  const r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  const lum=(r*299+g*587+b*114)/1000;
+  if(lum>=110)return c;
+  return lighten(c,clamp((110-lum)/110*0.85,0.3,0.8));
+}
+const FOOD_CORES=FOOD_COLORS.map(c=>lighten(c,0.6));
+/* kind: 0 nhỏ · 1 trung bình · 2 lớn · 3 đặc biệt */
+const FOOD_KINDS=[
+  {v0:1,  v1:2.2, r0:4,   r1:6},
+  {v0:3,  v1:5,   r0:7,   r1:9},
+  {v0:7,  v1:10,  r0:10,  r1:12.5},
+  {v0:16, v1:28,  r0:13.5,r1:17}
+];
+
+/* ===== ITEM ĐẶC BIỆT =====
+   Ngoài viên năng lượng, đấu trường còn có vật phẩm hiếm với hiệu ứng riêng.
+   Bot cũng biết nhặt và sử dụng item. */
+const SPECIAL_ITEMS={
+  diamond:{icon:'💎',name:'Kim cương',c:'#67e8f9',ai:240},
+  magnet:{icon:'🧲',name:'Nam châm',c:'#fb7185',ai:180},
+  lightning:{icon:'⚡',name:'Tia sét',c:'#fde047',ai:210},
+  shield:{icon:'🛡️',name:'Khiên',c:'#60a5fa',ai:260},
+  crown:{icon:'👑',name:'Vương miện',c:'#fbbf24',ai:230},
+  blackhole:{icon:'🌀',name:'Hố đen',c:'#c084fc',ai:250},
+  mystery:{icon:'🎁',name:'Hộp bí ẩn',c:'#f472b6',ai:200}
+};
+const SPECIAL_TYPES=['diamond','magnet','lightning','shield','crown','blackhole','mystery'];
+let foods=[];
+function randInWorld(m){
+  const a=Math.random()*TAU,r=(WORLD_R-m)*Math.sqrt(Math.random());
+  return {x:Math.cos(a)*r,y:Math.sin(a)*r};
+}
+function spawnFood(x,y,kind,c,vx,vy,vMul){
+  if(foods.length>=FOOD_MAX)return null;
+  // Mồi sinh ngoài tường (rắn chết sát biên) sẽ bị clip vô hình và không ai ăn được: kéo vào trong.
+  const dcw=x*x+y*y,limw=WORLD_R-40;
+  if(dcw>limw*limw){const dw=Math.sqrt(dcw)||1;x*=limw/dw;y*=limw/dw;}
+  const K=FOOD_KINDS[kind];
+  const ci=(Math.random()*FOOD_COLORS.length)|0;
+  const f={x:x,y:y,kind:kind,
+    v:rand(K.v0,K.v1)*(vMul||1),
+    r:rand(K.r0,K.r1),
+    c:c||FOOD_COLORS[ci],
+    c2:c?lighten(c,0.6):FOOD_CORES[ci],
+    ph:Math.random()*TAU,
+    spin:rand(0.03,0.06)*(Math.random()<0.5?-1:1),
+    // top=true: vẽ TRÊN thân rắn (mồi rơi từ xác rắn, item). Mồi nền vẽ dưới thân.
+    vx:vx||0,vy:vy||0,fly:null,dead:false,deathDropUntil:0,graceUntil:0,top:false};
+  foods.push(f);
+  return f;
+}
+
+/* ===== ƯU TIÊN SLOT CHO MỒI KHI RẮN CHẾT =====
+   FOOD_MAX là trần hiệu năng. Trước đây khi foods.length chạm trần,
+   spawnFood()/spawnSpecialItem() trả null nên có lúc rắn chết mà không nhả điểm.
+   Trước mỗi lần xử lý death-drop, dọn bớt mồi nền cũ để luôn còn đủ slot cho xác rắn.
+   Mồi vừa rơi từ rắn chết được bảo vệ ngắn hạn để nhiều rắn chết cùng lúc không "ăn" mất drop của nhau. */
+function reserveDeathDropSlots(count,x,y){
+  count=Math.max(0,Math.min(FOOD_MAX,Math.ceil(Number(count)||0)));
+  let need=Math.max(0,foods.length+count-FOOD_MAX);
+  if(need<=0)return 0;
+
+  let removed=0;
+  const now=frame||0;
+  const far2=900*900;
+  const protectedDrop=f=>Number(f&&f.deathDropUntil||0)>now;
+
+  function removePass(test){
+    for(let i=foods.length-1;i>=0&&removed<need;i--){
+      const f=foods[i];
+      if(!test(f))continue;
+      foods[i]=foods[foods.length-1];
+      foods.pop();
+      removed++;
+    }
+  }
+
+  // 1) Xóa phần tử đã chết còn sót trong mảng trước.
+  removePass(f=>!f||f.dead);
+  // 2) Ưu tiên dọn mồi thường ở xa điểm chết, không đụng item/mồi đang bay về rắn.
+  removePass(f=>!f.item&&!f.fly&&!protectedDrop(f)&&((f.x-x)*(f.x-x)+(f.y-y)*(f.y-y)>far2));
+  // 3) Nếu vẫn thiếu, dọn mồi thường cũ ở bất kỳ đâu.
+  removePass(f=>!f.item&&!f.fly&&!protectedDrop(f));
+  // 4) Sau đó mới dọn item/drop cũ không còn trong thời gian bảo vệ.
+  removePass(f=>!f.fly&&!protectedDrop(f));
+  // 5) Trường hợp cực đoan: vẫn ưu tiên drop của rắn vừa chết hơn đồ cũ trên bản đồ.
+  removePass(f=>!f.fly);
+
+  return removed;
+}
+function randomSpecialType(){
+  const r=Math.random();
+  if(r<0.23)return 'diamond';
+  if(r<0.40)return 'magnet';
+  if(r<0.56)return 'lightning';
+  if(r<0.70)return 'shield';
+  if(r<0.82)return 'crown';
+  if(r<0.91)return 'blackhole';
+  return 'mystery';
+}
+function spawnSpecialItem(x,y,type,vx,vy){
+  if(foods.length>=FOOD_MAX)return null;
+  type=type||randomSpecialType();
+  const dcw=x*x+y*y,limw=WORLD_R-40;
+  if(dcw>limw*limw){const dw=Math.sqrt(dcw)||1;x*=limw/dw;y*=limw/dw;}
+  const I=SPECIAL_ITEMS[type]||SPECIAL_ITEMS.mystery;
+  const f={x:x,y:y,kind:4,item:type,v:0,aiValue:I.ai,r:16,
+    c:I.c,c2:'#ffffff',ph:Math.random()*TAU,
+    spin:rand(0.025,0.055)*(Math.random()<0.5?-1:1),
+    vx:vx||0,vy:vy||0,fly:null,dead:false,deathDropUntil:0,graceUntil:0,top:true};
+  foods.push(f);
+  return f;
+}
+function spawnFoodRandom(){
+  const p=randInWorld(80);
+  // Khoảng 1.6% vật thể sinh tự nhiên là item đặc biệt.
+  // Giới hạn mềm để bản đồ vẫn chủ yếu là năng lượng, không biến thành màn hình power-up.
+  if(Math.random()<0.016){
+    let specialN=0;
+    for(let i=0;i<foods.length;i++)if(!foods[i].dead&&foods[i].item)specialN++;
+    if(specialN<22){spawnSpecialItem(p.x,p.y,randomSpecialType());return;}
+  }
+  const r=Math.random();
+  spawnFood(p.x,p.y, r<0.70?0 : r<0.90?1 : r<0.98?2 : 3);
+}
+function applySpecialItem(s,f){
+  let type=f.item||'mystery';
+  // Hộp bí ẩn đổi thành một trong 6 hiệu ứng thật.
+  if(type==='mystery')type=SPECIAL_TYPES[(Math.random()*6)|0];
+  const I=SPECIAL_ITEMS[type]||SPECIAL_ITEMS.mystery;
+  let msg=I.icon+' '+I.name;
+
+  if(type==='diamond'){
+    const growthMul=s.isPlayer?1:Math.max(1,Number(s.growthMul)||1);
+    const gain=rand(140,340)*(s.crownT>0?2.5:1)*growthMul;
+    if(s.isPlayer)s.length+=gain;
+    else s.grow=(s.grow||0)+gain; // bot lớn dần theo nhịp tiêu hóa trong Snake.update
+    msg='💎 +'+Math.round(gain);
+  }else if(type==='magnet'){
+    s.magnetT=Math.max(s.magnetT||0,60*9);
+    msg='🧲 HÚT MỒI 9s';
+  }else if(type==='lightning'){
+    s.turboT=Math.max(s.turboT||0,60*7);
+    msg='⚡ SIÊU TỐC 7s';
+  }else if(type==='shield'){
+    s.shieldT=Math.max(s.shieldT||0,60*14);
+    s.shieldHits=Math.max(1,s.shieldHits||0);
+    msg='🛡️ KHIÊN 1 LẦN';
+  }else if(type==='crown'){
+    s.crownT=Math.max(s.crownT||0,60*11);
+    msg='👑 x2.5 ĐIỂM 11s';
+  }else if(type==='blackhole'){
+    // Hút tức thì một vùng rộng; số lượng có trần để không gây spike CPU.
+    let pulled=0;
+    for(let i=0;i<foods.length&&pulled<95;i++){
+      const q=foods[i];
+      if(q===f||q.dead||q.fly||q.item)continue;
+      const dx=q.x-s.hx,dy=q.y-s.hy;
+      if(dx*dx+dy*dy<920*920){q.fly=s;pulled++;}
+    }
+    msg='🌀 HÚT '+pulled+' MỒI';
+  }
+
+  s.eatPulse=Math.max(s.eatPulse||0,1);
+  if(inView(f.x,f.y,80)){
+    spawnRing(f.x,f.y,f.r*1.4,I.c);
+    burst(f.x,f.y,18,I.c,4.6,4.2);
+    spawnPop(f.x,f.y,msg,I.c,14);
+  }
+  if(s.isPlayer){Snd.big();}
+}
+
+function updateFoods(dtf){
+  for(let i=0;i<foods.length;i++){
+    const f=foods[i];
+    if(f.dead)continue;
+    if(f.fly){
+      const s=f.fly;
+      if(!s.alive){f.fly=null;continue;}
+      const dx=s.hx-f.x,dy=s.hy-f.y;
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      const sp=(12+s.r*0.4)*dtf;
+      if(d<=sp+s.r*0.55){
+        f.dead=true;
+        if(f.item){
+          applySpecialItem(s,f);
+          continue;
+        }
+        const scoreMul=s.crownT>0?2.5:1;
+        // Bot hồi sinh luôn bắt đầu nhỏ, nhưng giữ hệ số điểm 20–50x bằng tốc độ tăng trưởng.
+        const growthMul=s.isPlayer?1:Math.max(1,Number(s.growthMul)||1);
+        const gain=f.v*scoreMul*growthMul;
+        if(s.isPlayer)s.length+=gain;
+        else s.grow=(s.grow||0)+gain; // bot lớn dần theo nhịp tiêu hóa trong Snake.update
+        const big=f.kind>=2;
+        // Nhịp ăn dùng để mở miệng rõ hơn; mồi lớn làm miệng mở lâu hơn.
+        s.eatPulse=Math.max(s.eatPulse||0,big?1:0.62);
+        if(inView(f.x,f.y,30)){
+          burst(f.x,f.y,big?10:4,f.c,big?3.6:2.4,big?4:3);
+          if(big)spawnRing(f.x,f.y,f.r,f.c);
+        }
+        if(s.isPlayer){
+          if(big){Snd.big();spawnRing(s.hx,s.hy,s.r*0.8,'#ffffff');}
+          else Snd.eat();
+          spawnPop(f.x,f.y,'+'+Math.round(gain),f.c,big?16:11);
+          eatCount++;
+        }
+      }else{
+        f.x+=dx/d*sp;f.y+=dy/d*sp;
+      }
+    }else if(f.vx!==0||f.vy!==0){
+      f.x+=f.vx*dtf;f.y+=f.vy*dtf;
+      f.vx*=0.92;f.vy*=0.92;
+      if(f.vx*f.vx+f.vy*f.vy<0.01){f.vx=0;f.vy=0;}
+      const dc=f.x*f.x+f.y*f.y,lim=WORLD_R-40;
+      if(dc>lim*lim){const d=Math.sqrt(dc);f.x*=lim/d;f.y*=lim/d;f.vx=0;f.vy=0;}
+    }
+  }
+}
+
+/* ---------------- fx: score popups & flash rings ---------------- */
+const POP_MAX=36;
+const pops=new Array(POP_MAX);
+for(let i=0;i<POP_MAX;i++)pops[i]={a:false,x:0,y:0,life:0,max:1,txt:'',c:'#fff',sz:12};
+let popIdx=0;
+function spawnPop(x,y,txt,c,sz){
+  const p=pops[popIdx];popIdx=(popIdx+1)%POP_MAX;
+  p.a=true;p.x=x;p.y=y;p.life=46;p.max=46;p.txt=txt;p.c=c;p.sz=sz;
+}
+const RING_MAX=20;
+const rings=new Array(RING_MAX);
+for(let i=0;i<RING_MAX;i++)rings[i]={a:false,x:0,y:0,r:0,vr:0,life:0,max:1,c:'#fff'};
+let ringIdx=0;
+function spawnRing(x,y,r0,c){
+  const g=rings[ringIdx];ringIdx=(ringIdx+1)%RING_MAX;
+  g.a=true;g.x=x;g.y=y;g.r=r0;g.vr=2.8;g.life=18;g.max=18;g.c=c;
+}
+function updateFx(dtf){
+  for(let i=0;i<POP_MAX;i++){
+    const p=pops[i];
+    if(!p.a)continue;
+    p.y-=0.85*dtf;p.life-=dtf;
+    if(p.life<=0)p.a=false;
+  }
+  for(let i=0;i<RING_MAX;i++){
+    const g=rings[i];
+    if(!g.a)continue;
+    g.r+=g.vr*dtf;g.life-=dtf;
+    if(g.life<=0)g.a=false;
+  }
+}
+function drawFx(){
+  for(let i=0;i<RING_MAX;i++){
+    const g=rings[i];
+    if(!g.a||!inView(g.x,g.y,g.r+10))continue;
+    ctx.globalAlpha=(g.life/g.max)*0.8;
+    ctx.strokeStyle=g.c;ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(g.x,g.y,g.r,0,TAU);ctx.stroke();
+  }
+  ctx.textAlign='center';
+  for(let i=0;i<POP_MAX;i++){
+    const p=pops[i];
+    if(!p.a||!inView(p.x,p.y,30))continue;
+    ctx.globalAlpha=Math.min(1,p.life/14);
+    ctx.font='800 '+p.sz+'px system-ui,sans-serif';
+    ctx.strokeStyle='rgba(4,25,31,0.85)';ctx.lineWidth=3;ctx.strokeText(p.txt,p.x,p.y);
+    ctx.fillStyle=p.c;ctx.fillText(p.txt,p.x,p.y);
+  }
+  ctx.globalAlpha=1;
+}
+
+/* ---------------- decorations ---------------- */
+const DECOR_COLORS={leaf:['#2f9e44','#40c057','#94d82d'],flower:['#ff8787','#faa2c1','#ffd43b','#b197fc'],stone:['#495057','#5c636a'],lily:['#37b24d','#66d9a0'],shroom:['#ff6b6b','#ffa94d'],shell:['#ffe8cc','#ffd8a8']};
+let decors=[];
+function makeDecors(){
+  decors=[];
+  const types=['leaf','flower','stone','lily','shroom','shell','grass'];
+  for(let i=0;i<170;i++){
+    const p=randInWorld(120);
+    const t=types[(Math.random()*types.length)|0];
+    decors.push({t:t,x:p.x,y:p.y,s:rand(0.7,1.6),a:Math.random()*TAU,
+      c1:pick(DECOR_COLORS[t==='grass'?'leaf':t]),c2:pick(DECOR_COLORS.flower),ph:Math.random()*TAU});
+  }
+}
+function pick(a){return a[(Math.random()*a.length)|0];}
+
+/* ---------------- snake ---------------- */
+const BOT_NAMES=['Xà Vương','Trăn Gấm','Rắn Lục','Mãng Xà','Hổ Mang','Cạp Nong','Bé Na','Anaconda','Rồng Đất','Titanoboa','Lươn Điện','Xì Trum','Săn Đêm','Tia Chớp','Bão Tố','Cuồng Phong','Vảy Vàng','Nọc Độc','Vua Đầm Lầy','Sấm Sét','Bóng Ma','Kẹo Dẻo','Mì Tôm','Bún Bò','Trứng Rán','Cua Càng','Ốc Bươu','Sói Xám','Cá Mập','Đại Bàng','Mèo Máy','Gấu Trúc','Thỏ Ngọc','Cú Đêm','Sư Tử','Phượng Hoàng'];
+const BOT_PREFIX=['Anh','Bé','Boss','Captain','Chú','Cô','Đại Ca','Em','King','Mr','Ms','Pro','Siêu','Thánh','Vua','Xạ Thủ'];
+const BOT_CORE=['Bão','Bắp','Bơ','Cá','Chanh','Cọp','Cú','Đậu','Gấu','Hổ','Khoai','Lửa','Mây','Mèo','Mít','Na','Nắng','Nấm','Rồng','Sói','Sấm','Tôm','Trà','Trăng','Xoài'];
+const BOT_SUFFIX=['01','07','09','12','18','22','27','36','47','66','77','88','99','2K','VN','GG','HD','VIP','YT','ツ','亗','★'];
+function botName(){
+  const r=Math.random();
+  if(r<0.25)return BOT_NAMES[(Math.random()*BOT_NAMES.length)|0];
+  const a=BOT_PREFIX[(Math.random()*BOT_PREFIX.length)|0];
+  const b=BOT_CORE[(Math.random()*BOT_CORE.length)|0];
+  const c=BOT_SUFFIX[(Math.random()*BOT_SUFFIX.length)|0];
+  if(r<0.55)return a+' '+b;
+  if(r<0.78)return b+c;
+  return a+b+c;
+}
+
+/* ---------------- simulated server presence ----------------
+   Dùng đồng hồ thật trên thiết bị để tạo nhịp đông/vắng tự nhiên.
+   Đây chỉ là mô phỏng cục bộ, không phải kết nối người chơi thật. */
+const SERVER_POOLS=[
+  'Sài Gòn','Hà Nội','Đà Nẵng','Cần Thơ','Hải Phòng','Nha Trang',
+  'Bangkok','Singapore','Jakarta','Tokyo','Seoul','Hong Kong'
+];
+let serverState={name:'Đấu trường #01',players:96,ping:38,slot:0};
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
+function minuteSeed(d){return Math.floor(d.getTime()/60000);}
+function crowdByHour(h){
+  if(h>=19&&h<24)return 1.00;
+  if(h>=11&&h<14)return 0.86;
+  if(h>=16&&h<19)return 0.92;
+  if(h>=7&&h<11)return 0.72;
+  if(h>=0&&h<2)return 0.66;
+  if(h>=2&&h<6)return 0.38;
+  return 0.58;
+}
+function updateServerPresence(force){
+  const now=new Date(), seed=minuteSeed(now);
+  const rng=mulberry32(seed*9973+now.getDate()*131);
+  const bucket=Math.floor(now.getTime()/18000); // đổi server khoảng 18 giây
+  const srng=mulberry32(bucket*7919);
+  const idx=Math.floor(srng()*SERVER_POOLS.length);
+  const no=1+Math.floor(srng()*18);
+  const base=Math.round(42+crowdByHour(now.getHours())*112);
+  const jitter=Math.round((rng()-.5)*28);
+  const players=Math.max(24,base+jitter);
+  const ping=Math.max(18,Math.min(96,Math.round(22+srng()*51+(players>130?5:0))));
+  serverState={name:SERVER_POOLS[idx]+' #'+String(no).padStart(2,'0'),players,ping,slot:bucket};
+  AI_TARGET=Math.max(28,Math.min(46,Math.round(26+players/8)));
+  const n=$('serverName'),p=$('serverPlayers'),g=$('serverPing');
+  if(n)n.textContent=serverState.name;
+  if(p)p.textContent=serverState.players+' đang chơi';
+  if(g)g.textContent=serverState.ping+' ms';
+}
+setInterval(()=>updateServerPresence(false),3000);
+
+
+let snakeUid=1;
+class Snake{
+  constructor(name,skin,x,y,angle,length,isPlayer){
+    this.id=snakeUid++;
+    this.name=name;this.skin=skin;this.isPlayer=!!isPlayer;
+    this.alive=true;this.kills=0;
+    this.length=length;
+    this.r=this.radiusFor(length);
+    this.angle=angle;this.target=angle;
+    this.hx=x;this.hy=y;
+    this.prevHx=x;this.prevHy=y; // dùng cho va chạm liên tục, tránh rắn nhỏ xuyên qua thân rắn lớn
+    this.wantBoost=false;this.boosting=false;this.speedNow=speedFor(length);
+    this.eatPulse=0;
+    this.mouthPhase=Math.random()*TAU;
+    // buff từ item đặc biệt (đếm theo dtf, 60 ~= 1 giây)
+    this.magnetT=0;this.turboT=0;this.crownT=0;this.shieldT=0;this.shieldHits=0;this.invulnT=0;
+    // V8: mọi rắn vừa sinh/hồi sinh được bảo hộ 3 giây. Trong thời gian này
+    // rắn không gây/nhận va chạm thân để tránh chết oan ngay điểm spawn.
+    this.spawnShieldT=60*3;
+    this.spawnFadeT=0;
+    this.growthMul=1;
+    this.isRespawn=false;
+    // Điểm bot đã ăn nhưng chưa "tiêu hóa" thành chiều dài (xem Snake.update).
+    this.grow=0;
+    this.baseSkill=isPlayer?0:rand(0.93,0.985);
+    this.baseAggro=isPlayer?0:rand(0.64,0.82);
+    this.dropT=0;this.wt=0;this.mode='wander';
+    this.phase=(Math.random()*1000)|0;
+    this.orbitDir=Math.random()<0.5?-1:1;
+    this.segs=[];
+    // Không dựng sẵn một thân rắn khổng lồ xuyên qua bản đồ khi bot vừa spawn.
+    // Bot điểm rất cao sẽ kéo dài thân tự nhiên theo quãng đường nó đã di chuyển.
+    const fullReq=this.segCount()*this.spacing()+60;
+    const req=this.isPlayer?fullReq:Math.min(fullReq,1250);
+    const bx=x-Math.cos(angle)*req, by=y-Math.sin(angle)*req;
+    this.pts=[{x:bx,y:by,d:0}];
+    this.totalLen=0;
+    for(let d=req-7;d>0;d-=7)this.pushPt(x-Math.cos(angle)*d,y-Math.sin(angle)*d);
+    this.pushPt(x,y);
+    this.updateSegs();
+  }
+  radiusFor(len){
+    // V8: chiều RỘNG tiếp tục tăng rất lâu thay vì chạm trần sớm ở 44px.
+    // Giữ kích thước đầu ván gần bản cũ, nhưng rắn 10k/50k+ sẽ dày rõ rệt.
+    const n=Math.max(0,Number(len)||0);
+    return Math.min(88,8.5+Math.pow(n,0.42)*0.72);
+  }
+  spacing(){return this.r*0.60;}
+  segCount(){
+    // V8: chiều DÀI thân cũng tăng tiếp theo điểm, nhưng có trần để giữ FPS ổn định.
+    const n=Math.max(0,Number(this.length)||0);
+    if(n<=1200)return Math.min(350,7+Math.floor(n/3.5));
+    return Math.min(620,350+Math.floor(Math.sqrt(n-1200)*1.10));
+  }
+  pushPt(x,y){
+    const pts=this.pts,last=pts[pts.length-1];
+    const dx=x-last.x,dy=y-last.y;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<0.4)return;
+    pts.push({x:x,y:y,d:d});
+    this.totalLen+=d;
+  }
+  trim(){
+    const req=this.segCount()*this.spacing()+50;
+    const pts=this.pts;
+    while(this.totalLen>req&&pts.length>2){
+      this.totalLen-=pts[1].d;
+      pts.shift();
+      pts[0].d=0;
+    }
+  }
+  aiSizeT(){
+    // 0 = rắn nhỏ, 1 = rắn khổng lồ. Điểm bot có thể rất cao nên dùng log tới 120k.
+    return clamp(Math.log1p(Math.max(0,this.length-26)/26)/Math.log1p(120000/26),0,1);
+  }
+  aiSkillNow(){
+    const t=this.aiSizeT();
+    // V8 GENIUS AI: bot nhỏ đã rất mạnh, rắn lớn gần như tối đa về phản xạ/đánh giá rủi ro.
+    return clamp((this.baseSkill||0.94)+t*0.075+Math.min(0.018,this.kills*0.0035),0.92,0.9999);
+  }
+  aiDecisionEvery(){
+    // Tất cả bot đều suy nghĩ mỗi frame. Không còn stagger 2 frame ở bot nhỏ.
+    return 1;
+  }
+  aiPathRisk(angle,distance,samples){
+    // Ước lượng rủi ro của một hướng đi trước khi bot quyết định rẽ/boost/săn.
+    // 0 = rất thoáng, 1 = gần như chắc chắn va chạm/đâm biên.
+    const sizeT=this.aiSizeT();
+    const n=Math.max(2,samples||3);
+    let risk=0;
+    for(let k=1;k<=n;k++){
+      const d=distance*(k/n);
+      const x=this.hx+Math.cos(angle)*d;
+      const y=this.hy+Math.sin(angle)*d;
+      const edge=WORLD_R-Math.hypot(x,y);
+      const edgeNeed=300+this.r*3.0+sizeT*420;
+      if(edge<edgeNeed){
+        risk=Math.max(risk,clamp(1-edge/Math.max(1,edgeNeed),0,1));
+      }
+      const qR=this.r+125+sizeT*150;
+      gridQuery(segGrid,x,y,qR,QB);
+      for(let i=0;i<QB.length;i++){
+        const g=QB[i];
+        if(g.s===this||!g.s.alive)continue;
+        const sep=Math.hypot(g.x-x,g.y-y);
+        const need=this.r+g.s.r+34+sizeT*52;
+        if(sep<=need)return 1;
+        const warn=need+140+sizeT*130;
+        if(sep<warn)risk=Math.max(risk,(warn-sep)/(warn-need)*0.72);
+      }
+    }
+    return clamp(risk,0,1);
+  }
+  turnRate(){
+    // Rắn lớn vẫn nặng hơn rắn nhỏ, nhưng không bị ì đến mức không né kịp khi tốc độ tăng.
+    return 0.098*Math.max(0.50,1-(this.r-9)/145);
+  }
+  update(dtf){
+    // lái nhạy hơn khi chạy nhanh: bù góc rẽ theo căn bậc hai của tốc độ
+    const turn=this.turnRate()*Math.sqrt(this.speedNow/SPEED_CFG.start)*dtf;
+    const diff=normAng(this.target-this.angle);
+    this.angle=normAng(this.angle+clamp(diff,-turn,turn));
+    const canBoost=this.length>MIN_BOOST_LEN;
+    const was=this.boosting;
+    this.boosting=this.wantBoost&&canBoost;
+    if(this.isPlayer){
+      if(this.boosting&&!was)Snd.boostStart();
+      if(!this.boosting&&was)Snd.boostStop();
+    }
+    this.magnetT=Math.max(0,this.magnetT-dtf);
+    this.turboT=Math.max(0,this.turboT-dtf);
+    this.crownT=Math.max(0,this.crownT-dtf);
+    this.shieldT=Math.max(0,this.shieldT-dtf);
+    this.invulnT=Math.max(0,this.invulnT-dtf);
+    this.spawnShieldT=Math.max(0,(this.spawnShieldT||0)-dtf);
+    this.spawnFadeT=Math.max(0,(this.spawnFadeT||0)-dtf);
+    if(this.shieldT<=0)this.shieldHits=0;
+
+    const baseSp=speedFor(this.length);
+    const sizeSpeedT=this.aiSizeT(); // dùng được cho cả người chơi và bot
+    const turboMul=this.turboT>0?1.30:1;
+    const normalSp=baseSp*turboMul;
+    // V7: càng to thì khi nhấn BOOST càng bứt tốc mạnh hơn, thay vì chỉ tăng kích thước.
+    const sizeBoostMul=SPEED_CFG.boostMul+sizeSpeedT*0.42;
+    const dynamicCap=SPEED_CFG.boostCap*(1+sizeSpeedT*0.18)*(this.turboT>0?1.12:1);
+    this.speedNow=this.boosting?Math.min(dynamicCap,normalSp*sizeBoostMul):normalSp;
+    // Miệng chuyển động theo tốc độ; khi vừa ăn sẽ mở lớn rồi khép dần.
+    this.mouthPhase+=dtf*(0.12+this.speedNow*0.055);
+    this.eatPulse=Math.max(0,this.eatPulse-0.055*dtf);
+    this.prevHx=this.hx;this.prevHy=this.hy;
+    this.hx+=Math.cos(this.angle)*this.speedNow*dtf;
+    this.hy+=Math.sin(this.angle)*this.speedNow*dtf;
+    this.pushPt(this.hx,this.hy);
+    if(this.boosting){
+      if(this.turboT<=0)this.length=Math.max(MIN_BOOST_LEN*0.6,this.length-0.11*dtf);
+      this.dropT-=dtf;
+      if(this.dropT<=0){
+        this.dropT=7;
+        const tail=this.segs.length?this.segs[this.segs.length-1]:{x:this.hx,y:this.hy};
+        spawnFood(tail.x+rand(-6,6),tail.y+rand(-6,6),0,skinColor(this.skin,0,frame));
+      }
+      if(inView(this.hx,this.hy,60)&&(frame%3===0)){
+        const a=this.angle+Math.PI;
+        spawnPart(this.hx+Math.cos(a)*this.r,this.hy+Math.sin(a)*this.r,
+          Math.cos(a+rand(-0.6,0.6))*2.4,Math.sin(a+rand(-0.6,0.6))*2.4,
+          16,3.5,this.skin.rb?'#fff':this.skin.c[0]);
+      }
+    }
+    // Bot "tiêu hóa" dần điểm đã ăn: mỗi giây chỉ lớn thêm tối đa 25% chiều dài + 10.
+    // Nhờ vậy bot hồi sinh (hệ số 20–50x) thật sự bắt đầu từ bé và lớn dần từng chút
+    // trước mắt người chơi, thay vì nuốt vài viên xác rắn rồi phình to tức thì.
+    if(!this.isPlayer&&this.grow>0){
+      const step=Math.min(this.grow,(this.length*0.25+10)*dtf/60);
+      this.length+=step;this.grow-=step;
+    }
+    this.r=this.radiusFor(this.length);
+    this.trim();
+    this.updateSegs();
+  }
+  updateSegs(){
+    const spacing=this.spacing(),n=this.segCount(),pts=this.pts,segs=this.segs;
+    let k=0;
+    let i=pts.length-1;
+    let ax=pts[i].x,ay=pts[i].y;
+    // head seg
+    let o=segs[k];if(!o){o={x:0,y:0,s:this};segs.push(o);}o.x=ax;o.y=ay;o.s=this;k++;
+    let need=spacing;
+    while(i>0&&k<n){
+      const bx=pts[i-1].x,by=pts[i-1].y;
+      const dx=bx-ax,dy=by-ay;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d>=need&&d>0){
+        const t=need/d;
+        ax+=dx*t;ay+=dy*t;
+        o=segs[k];if(!o){o={x:0,y:0,s:this};segs.push(o);}
+        o.x=ax;o.y=ay;o.s=this;k++;
+        need=spacing;
+      }else{
+        need-=d;ax=bx;ay=by;i--;
+      }
+    }
+    segs.length=k;
+  }
+  eat(dtf){
+    const R=this.r;
+    const magnetMul=this.magnetT>0?3.25:1;
+    gridQuery(foodGrid,this.hx,this.hy,(R*2.6+30)*magnetMul,QA);
+    for(let i=0;i<QA.length;i++){
+      const f=QA[i];
+      if(f.dead||f.fly)continue;
+      let dx=this.hx-f.x,dy=this.hy-f.y;
+      const d2=dx*dx+dy*dy;
+      if(f.graceUntil>frame){
+        // Xác rắn vừa chết: chỉ ăn khi đầu chạm trực tiếp, không hút từ xa.
+        const touch=R*1.05+f.r;
+        if(d2<touch*touch){f.fly=this;f.vx=0;f.vy=0;}
+        continue;
+      }
+      const suck=(R*2.4+f.r+18)*magnetMul;
+      if(d2>suck*suck)continue;
+      const d=Math.sqrt(d2)||1;
+      if(d<R*1.15+f.r+8){
+        f.fly=this; // viên năng lượng bay nhanh vào đầu rắn
+        f.vx=0;f.vy=0;
+      }else{
+        const pull=Math.min(d,(5.5+R*0.18)*(this.magnetT>0?2.8:1)*dtf); // nam châm hút mạnh hơn
+        f.x+=dx/d*pull;f.y+=dy/d*pull;
+      }
+    }
+  }
+  aiThink(){
+    const myLen=this.length;
+    const hx=this.hx,hy=this.hy;
+    const sizeBrain=this.aiSizeT();
+    const skill=this.aiSkillNow();
+    this.skill=skill;
+
+    // Rắn càng lớn càng coi trọng sống sót: ít lao liều, né sớm và giữ khoảng trống lớn hơn.
+    const survival=0.84+sizeBrain*0.155;
+    this.aggro=clamp((this.baseAggro||0.72)+sizeBrain*0.15+Math.min(0.02,this.kills*0.003),0.64,0.97);
+    const distC=Math.hypot(hx,hy);
+
+    // 1) Quản lý biên bản đồ: bot lớn quay vào trong rất sớm, không chờ sát tường.
+    const borderGuard=1050+this.r*3.8+sizeBrain*1050;
+    if(distC>WORLD_R-borderGuard){
+      const toCenter=Math.atan2(-hy,-hx);
+      const tangent=toCenter+this.orbitDir*(0.10+0.16*(1-skill));
+      this.target=normAng(tangent);
+      this.wantBoost=false;this.mode='border';return;
+    }
+
+    // 2) Radar V7: 7 / 9 / 13 tia. Rắn lớn nhìn đa hướng và xa hơn rất nhiều.
+    const rayAngles=sizeBrain>0.70
+      ?[-1.32,-1.08,-0.84,-0.62,-0.42,-0.22,0,0.22,0.42,0.62,0.84,1.08,1.32]
+      :(sizeBrain>0.28?[-1.00,-0.75,-0.50,-0.25,0,0.25,0.50,0.75,1.00]:[-0.78,-0.50,-0.25,0,0.25,0.50,0.78]);
+    const probeDist=260+this.r*3.2+this.speedNow*(24+sizeBrain*28)+sizeBrain*520;
+    let bestRay=0,bestScore=-1e9,frontRisk=1;
+    for(let ri=0;ri<rayAngles.length;ri++){
+      const off=rayAngles[ri],a=normAng(this.angle+off);
+      const risk=this.aiPathRisk(a,probeDist,sizeBrain>0.55?4:3);
+      if(Math.abs(off)<0.01)frontRisk=risk;
+
+      // Ưu tiên hướng thoáng, ít đổi hướng, và hơi hướng về trung tâm khi đang ở nửa ngoài bản đồ.
+      const x=hx+Math.cos(a)*probeDist,y=hy+Math.sin(a)*probeDist;
+      const centerGain=(distC>WORLD_R*0.50)
+        ? Math.cos(normAng(Math.atan2(-hy,-hx)-a))*0.16
+        : 0;
+      const turnCost=Math.abs(off)*(0.10+sizeBrain*0.05);
+      const score=(1-risk)*1.25+centerGain-turnCost;
+      if(score>bestScore){bestScore=score;bestRay=off;}
+    }
+
+    // Nguy hiểm ngay trước mặt: chọn hành lang an toàn nhất, tuyệt đối không boost.
+    if(frontRisk>0.24){
+      this.target=normAng(this.angle+bestRay*(1.18+skill*0.34));
+      this.wantBoost=false;this.mode='avoid';return;
+    }
+
+    // 3) Dự đoán va chạm đầu-đầu trước vài chục frame.
+    // Bot lớn nhìn xa hơn và né cả các cuộc giao cắt quỹ đạo chứ không chỉ thân hiện tại.
+    let headThreat=null,headThreatD=1e18;
+    const headScan=1050+sizeBrain*1750;
+    const predictT=28+sizeBrain*44;
+    for(let i=0;i<snakes.length;i++){
+      const s=snakes[i];
+      if(s===this||!s.alive)continue;
+      const dx=s.hx-hx,dy=s.hy-hy,d2=dx*dx+dy*dy;
+      if(d2>headScan*headScan)continue;
+      const myFx=hx+Math.cos(this.angle)*this.speedNow*predictT;
+      const myFy=hy+Math.sin(this.angle)*this.speedNow*predictT;
+      const hisFx=s.hx+Math.cos(s.angle)*s.speedNow*predictT;
+      const hisFy=s.hy+Math.sin(s.angle)*s.speedNow*predictT;
+      const fd2=(hisFx-myFx)*(hisFx-myFx)+(hisFy-myFy)*(hisFy-myFy);
+      const collideR=this.r+s.r+95+sizeBrain*90;
+      // Nếu đối thủ đủ lớn để nguy hiểm hoặc quỹ đạo cắt nhau rất sát thì né chủ động.
+      if(fd2<collideR*collideR && (s.length>myLen*0.72 || fd2<(collideR*0.62)**2)){
+        if(d2<headThreatD){headThreatD=d2;headThreat=s;}
+      }
+    }
+    if(headThreat){
+      const away=Math.atan2(hy-headThreat.hy,hx-headThreat.hx);
+      const left=normAng(away+0.92),right=normAng(away-0.92);
+      const lr=this.aiPathRisk(left,probeDist*1.45,4);
+      const rr=this.aiPathRisk(right,probeDist*1.45,4);
+      this.target=lr<=rr?left:right;
+      this.wantBoost=false;this.mode='head-avoid';return;
+    }
+
+    // 4) Phân loại đối thủ: rắn lớn ưu tiên tránh nguy hiểm trước, chỉ săn khi đường cắt an toàn.
+    let threat=null,tD=1e18,victim=null,vScore=1e18;
+    const scanR=1450+sizeBrain*2450,scanR2=scanR*scanR;
+    for(let i=0;i<snakes.length;i++){
+      const s=snakes[i];
+      if(s===this||!s.alive)continue;
+      const dx=s.hx-hx,dy=s.hy-hy,d2=dx*dx+dy*dy;
+      if(d2>scanR2)continue;
+
+      if(s.length>myLen*(1.04-sizeBrain*0.02)){
+        if(d2<tD){tD=d2;threat=s;}
+      }else if(myLen>s.length*(1.03+sizeBrain*0.03)){
+        // Chọn ứng viên săn theo khoảng cách + lợi thế kích thước trước.
+        // Kiểm tra an toàn đường đi chỉ thực hiện với ứng viên tốt nhất ở bước săn,
+        // tránh hàng nghìn grid-query mỗi frame khi có nhiều bot.
+        const sizeAdv=clamp(myLen/Math.max(1,s.length),1,8);
+        const score=d2/sizeAdv;
+        if(score<vScore){vScore=score;victim=s;}
+      }
+    }
+
+    if(threat){
+      const dx=threat.hx-hx,dy=threat.hy-hy,realD=Math.hypot(dx,dy);
+      const fleeR=650+sizeBrain*720;
+      if(realD<fleeR){
+        const away=Math.atan2(hy-threat.hy,hx-threat.hx);
+        const cands=[away,away+0.34,away-0.34,away+0.68,away-0.68];
+        let ba=away,br=2;
+        for(let c=0;c<cands.length;c++){
+          const a=normAng(cands[c]);
+          const r=this.aiPathRisk(a,probeDist*1.70,4);
+          if(r<br){br=r;ba=a;}
+        }
+        this.target=ba;
+        // Chỉ boost nếu đường chạy rất thoáng; bot lớn không tự sát vì panic boost.
+        this.wantBoost=myLen>55&&realD<fleeR*0.78&&br<0.11;
+        this.mode='flee';return;
+      }
+    }
+
+    // 5) Săn có điều kiện. Bot khổng lồ giảm độ liều: chỉ cắt đầu khi quỹ đạo thực sự an toàn.
+    if(victim){
+      const dx=victim.hx-hx,dy=victim.hy-hy,d=Math.hypot(dx,dy)||1;
+      const huntChance=clamp(0.78+skill*0.18-sizeBrain*0.05,0.80,0.97);
+      if(Math.random()<huntChance && d<1150+sizeBrain*1050){
+        const lead=Math.min(780+sizeBrain*520,d*(0.62+skill*0.30));
+        const ax=victim.hx+Math.cos(victim.angle)*lead;
+        const ay=victim.hy+Math.sin(victim.angle)*lead;
+        let attack=Math.atan2(ay-hy,ax-hx);
+
+        if(myLen>victim.length*(2.2-sizeBrain*0.35) && d<420+sizeBrain*180){
+          // Ép góc thay vì lao thẳng vào đầu đối thủ.
+          const base=Math.atan2(victim.hy-hy,victim.hx-hx);
+          attack=normAng(base+this.orbitDir*(0.78+skill*0.28));
+        }
+
+        const risk=this.aiPathRisk(attack,Math.min(d,900+sizeBrain*520),4);
+        if(risk<0.15+0.06*(1-survival)){
+          this.target=attack;
+          const boostRisk=this.aiPathRisk(attack,520+sizeBrain*420,4);
+          this.wantBoost=myLen>75&&d<900&&boostRisk<0.075&&Math.random()<(0.72+skill*0.24);
+          this.mode='hunt';return;
+        }
+      }
+    }
+
+    // 6) Tìm item/mồi với đánh giá cả giá trị lẫn độ an toàn đường đi.
+    let bf=null,bestFood=1e18;
+    const foodScan=900+sizeBrain*1350;
+    gridQuery(foodGrid,hx,hy,foodScan,QB);
+    for(let i=0;i<QB.length;i++){
+      const f=QB[i];
+      if(f.dead||f.fly||f.graceUntil>frame)continue;
+      const dx=f.x-hx,dy=f.y-hy,d2=dx*dx+dy*dy;
+      const ang=Math.atan2(dy,dx);
+      const turnPenalty=1+Math.abs(normAng(ang-this.angle))*0.10;
+      const value=Math.max(1,f.aiValue||f.v)*(f.item?(1.8+sizeBrain*0.8):1);
+      // Chọn mục tiêu giá trị nhất trước; kiểm tra rủi ro một lần ở mục tiêu cuối.
+      const score=(d2/value)*turnPenalty;
+      if(score<bestFood){bestFood=score;bf=f;}
+    }
+    if(bf){
+      const a=Math.atan2(bf.y-hy,bf.x-hx);
+      const risk=this.aiPathRisk(a,520+sizeBrain*420,3);
+      if(risk<0.30){
+        this.target=a;
+        this.wantBoost=false;this.mode=bf.item?'item':'eat';return;
+      }
+    }
+
+    // 7) Tuần tra: rắn lớn đi theo đường cong rộng, ưu tiên vùng trống và trung tâm.
+    this.wt-=2.0+skill*2.8+sizeBrain*1.8;
+    if(this.wt<=0){
+      this.wt=12+Math.random()*(42-sizeBrain*18);
+      if(Math.random()<0.08)this.orbitDir*=-1;
+      const toCenter=Math.atan2(-hy,-hx);
+      const candidates=distC>WORLD_R*0.46
+        ? [toCenter,toCenter+0.30,toCenter-0.30,toCenter+0.62,toCenter-0.62,this.angle+0.42*this.orbitDir]
+        : [this.angle,this.angle+0.30,this.angle-0.30,this.angle+0.62,this.angle-0.62,this.angle+0.98*this.orbitDir];
+      let ba=this.angle,br=2;
+      for(let i=0;i<candidates.length;i++){
+        const a=normAng(candidates[i]);
+        const r=this.aiPathRisk(a,probeDist*1.55,4);
+        if(r<br){br=r;ba=a;}
+      }
+      this.target=ba;
+    }
+    this.wantBoost=false;this.mode='wander';
+  }
+}
+
+/* ---------------- world state ---------------- */
+let snakes=[],player=null;
+let state='menu'; // menu | play | over
+let frame=0,lastT=0;
+let bestRank=999,eatCount=0,eventSubmitted=false;
+const cam={x:0,y:0,z:0.9,shake:0};
+let viewL=0,viewT=0,viewR=0,viewB=0;
+function inView(x,y,m){return x>viewL-m&&x<viewR+m&&y>viewT-m&&y<viewB+m;}
+
+function safeSpawnPos(minDist,edgeMargin,bodyReach){
+  // Không chỉ né đầu rắn: phải né toàn bộ thân rắn đang tồn tại.
+  // edgeMargin giữ điểm sinh đủ sâu trong bản đồ để thân của bot lớn không vắt qua tường.
+  let best=null,bestMargin=-Infinity;
+  const bodyPad=78;
+  const marginFromEdge=Math.max(400,Number(edgeMargin)||400);
+  // Không sinh rắn ngay trong khung hình người chơi (kể cả phần thân dựng sẵn phía sau đầu):
+  // trước đây chỉ né đầu rắn 760px nên trên màn hình rộng/zoom xa bot "hiện ra" giữa màn hình.
+  const avoidCam=(state==='play'||state==='over')&&!!player;
+  const reach=Math.max(0,Number(bodyReach)||0);
+  const vz=Math.max(0.05,cam.z||1);
+  const camHW=(W/vz)*0.5+320+reach,camHH=(H/vz)*0.5+320+reach;
+  const inCam=q=>avoidCam&&Math.abs(q.x-cam.x)<camHW&&Math.abs(q.y-cam.y)<camHH;
+  for(let t=0;t<90;t++){
+    const p=randInWorld(marginFromEdge);
+    if(inCam(p))continue;
+    let margin=Infinity;
+    for(let i=0;i<snakes.length;i++){
+      const s=snakes[i];
+      if(!s.alive)continue;
+      let dx=s.hx-p.x,dy=s.hy-p.y;
+      margin=Math.min(margin,Math.sqrt(dx*dx+dy*dy)-minDist);
+      const need=s.r+bodyPad;
+      const segs=s.segs;
+      const step=segs.length>180?2:1;
+      for(let j=0;j<segs.length;j+=step){
+        dx=segs[j].x-p.x;dy=segs[j].y-p.y;
+        margin=Math.min(margin,Math.sqrt(dx*dx+dy*dy)-need);
+        if(margin<0)break;
+      }
+      if(margin<0)break;
+    }
+    if(margin>=0)return p;
+    if(margin>bestMargin){bestMargin=margin;best=p;}
+  }
+  // Nếu bản đồ quá đông, dùng vị trí an toàn nhất đã thử thay vì random lại và có thể chui vào thân rắn.
+  if(best)return best;
+  for(let t=0;t<40;t++){const p=randInWorld(400);if(!inCam(p))return p;}
+  return randInWorld(400);
+}
+function spawnBot(bigChance){
+  const isRespawn=bigChance===false;
+  let len;
+
+  // V8: bot HỒI SINH luôn quay về kích thước nhỏ, sau đó phải ăn để lớn dần.
+  // Bot có sẵn khi mở ván vẫn giữ phân bố kích thước/điểm cao để đấu trường không bị trống top.
+  if(isRespawn){
+    len=rand(26,42);
+  }else{
+    const r=Math.random();
+    if(r<0.55)len=rand(22,120);
+    else if(r<0.85)len=rand(120,600);
+    else len=rand(600,1500);
+  }
+
+  // Hệ số bot 20–50x: bot đầu ván dùng để tạo mức điểm cao ngay;
+  // bot hồi sinh không được spawn to mà dùng hệ số này để TĂNG TRƯỞNG nhanh sau khi ăn.
+  // Phần tăng trưởng được "tiêu hóa" dần trong Snake.update nên bot vẫn lớn từ từ, không phình tức thì.
+  const scoreMul=BOT_SCORE_MULT_MIN+Math.floor(Math.random()*(BOT_SCORE_MULT_MAX-BOT_SCORE_MULT_MIN+1));
+  if(!isRespawn)len*=scoreMul;
+
+  // Bot đầu ván có thể rất dài, vì vậy sinh sâu hơn trong bản đồ.
+  // Bot hồi sinh nhỏ hơn nên dùng khoảng đệm thấp hơn.
+  const spawnEdgeMargin=isRespawn?900:1850;
+  const p=safeSpawnPos(isRespawn?760:550,spawnEdgeMargin,isRespawn?260:1300);
+  const angle=Math.random()*TAU;
+  const s=new Snake(botName(),
+    SKINS[(Math.random()*SKINS.length)|0],p.x,p.y,angle,len,false);
+  s.scoreMul=scoreMul;
+  s.isRespawn=isRespawn;
+  s.growthMul=isRespawn?scoreMul:1;
+  s.spawnShieldT=60*3;
+  // Bot hồi sinh giữa ván hiện dần; bot có sẵn lúc mở ván không cần.
+  s.spawnFadeT=isRespawn?SPAWN_FADE:0;
+  // Trí thông minh nền khác nhau; phần cộng chính đến từ kích thước hiện tại.
+  s.baseSkill=rand(0.94,0.992);
+  s.baseAggro=rand(0.66,0.84);
+  s.skill=s.aiSkillNow();
+  s.aggro=clamp(s.baseAggro+s.aiSizeT()*0.16,0.66,0.98);
+  snakes.push(s);
+  return s;
+}
+
+function initWorld(){
+  snakes=[];foods=[];
+  for(let i=0;i<P_MAX;i++)parts[i].a=false;
+  for(let i=0;i<POP_MAX;i++)pops[i].a=false;
+  for(let i=0;i<RING_MAX;i++)rings[i].a=false;
+  makeDecors();
+  for(let i=0;i<FOOD_BASE;i++)spawnFoodRandom();
+  player=null;
+  for(let i=0;i<AI_TARGET;i++)spawnBot(true);
+}
+
+function startGame(){
+  initWorld();
+  const nm=($('nameInput').value||'').trim()||'Bạn';
+  LS.setItem('rsm_name',nm);
+  const p=safeSpawnPos(700,760);
+  player=new Snake(nm,SKINS[selSkin],p.x,p.y,Math.random()*TAU,26,true);
+  // Người chơi cũng bắt đầu nhỏ và có 3 giây bảo hộ đầu ván/chơi lại.
+  player.spawnShieldT=60*3;
+  snakes.push(player);
+  cam.x=player.hx;cam.y=player.hy;cam.z=cameraZoomFor(player);
+  bestRank=999;eatCount=0;eventSubmitted=false;
+  state='play';frame=0;
+  $('menu').classList.add('hidden');
+  $('gameover').classList.add('hidden');
+  $('hud').classList.add('on');
+  if(isTouch)$('boostBtn').classList.add('on');
+  updateHud(true);
+}
+
+function killSnake(s,killer){
+  if(!s.alive)return;
+  s.alive=false;
+  s.wantBoost=false;
+  if(s.isPlayer)Snd.boostStop();
+  if(killer&&killer.alive&&killer!==s){
+    killer.kills++;
+    if(killer.isPlayer)Snd.kill();
+  }
+
+  /* ===== RẮN CHẾT -> THỨC ĂN TỈ LỆ THEO KÍCH THƯỚC =====
+     Áp dụng CHUNG cho người chơi và bot.
+     Rắn càng lớn: số viên nhiều hơn, tỉ lệ viên lớn/đặc biệt cao hơn,
+     vùng nổ rộng hơn và tổng giá trị trả lại cao hơn.
+     Mọi viên rơi từ xác rắn được đánh dấu top=true để vẽ TRÊN thân rắn:
+     rắn luôn chết ngay trên thân con rắn đã giết nó, nếu vẽ dưới thì cả cụm mồi
+     bị thân rắn to che khuất và nhìn như "chết mà không ra mồi". */
+  const segs=s.segs&&s.segs.length?s.segs:[{x:s.hx,y:s.hy}];
+  // Cộng cả phần bot đã ăn nhưng chưa kịp tiêu hóa để điểm không biến mất khỏi đấu trường.
+  const sizeScore=Math.max(26,(Number(s.length)||26)+Math.max(0,Number(s.grow)||0));
+  const radiusT=clamp((s.r-8.5)/(88-8.5),0,1);
+  const scoreT=clamp(Math.log1p(sizeScore/26)/Math.log1p(3000),0,1);
+  const sizeT=clamp(radiusT*0.62+scoreT*0.38,0,1);
+
+  // 22 viên ở rắn rất nhỏ -> tối đa khoảng 260 viên ở rắn khổng lồ.
+  const dropCount=Math.round(clamp(14+Math.sqrt(sizeScore)*1.55+sizeT*58,22,260));
+  // Cụm mồi đặc biệt quanh đầu + item hiếm cũng cần được giữ slot trước khi spawn.
+  const nSpec=Math.round(2+sizeT*14);
+  const itemDropN=Math.min(5,Math.floor(sizeT*4)+(Math.random()<0.12+sizeT*0.55?1:0));
+  reserveDeathDropSlots(dropCount+nSpec+itemDropN,s.hx,s.hy);
+
+  // Giá trị mỗi viên cũng tăng nhưng có trần để tránh phá cân bằng ngay lập tức.
+  const valueMul=clamp(0.62+Math.sqrt(sizeScore/26)*0.12,0.65,4.5);
+  const bodySpread=s.r*(0.35+sizeT*1.25);
+
+  for(let i=0;i<dropCount;i++){
+    // Rải dọc toàn thân; khi số viên > số segment thì thêm nhiễu quanh thân.
+    const idx=Math.min(segs.length-1,Math.floor(i*segs.length/dropCount));
+    const g=segs[idx]||segs[(Math.random()*segs.length)|0]||{x:s.hx,y:s.hy};
+    const a=Math.random()*TAU;
+    const spread=rand(0,bodySpread);
+    const q=Math.random();
+    let kind;
+    const pSpecial=0.025+sizeT*0.16;
+    const pLarge=0.22+sizeT*0.38;
+    if(q<pSpecial)kind=3;
+    else if(q<pSpecial+pLarge)kind=2;
+    else if(q<0.88)kind=1;
+    else kind=0;
+
+    const sp=rand(1.2,3.6+sizeT*4.0);
+    const f=spawnFood(
+      g.x+Math.cos(a)*spread,
+      g.y+Math.sin(a)*spread,
+      kind,
+      foodTint(skinColor(s.skin,i,frame)),
+      Math.cos(a)*sp,
+      Math.sin(a)*sp,
+      valueMul
+    );
+    // Rắn to trả ra các viên nhìn cũng lớn hơn một chút.
+    if(f){
+      f.r*=1+sizeT*0.34;
+      f.top=true;
+      f.deathDropUntil=frame+60*3;
+      f.graceUntil=frame+DROP_GRACE;
+    }
+  }
+
+  // Cụm mồi đặc biệt quanh đầu tăng theo kích thước.
+  for(let i=0;i<nSpec;i++){
+    const a=Math.random()*TAU,sp=rand(2.5,5.2+sizeT*4.2);
+    const rr=rand(0,s.r*(0.5+sizeT));
+    const f=spawnFood(
+      s.hx+Math.cos(a)*rr,
+      s.hy+Math.sin(a)*rr,
+      3,null,Math.cos(a)*sp,Math.sin(a)*sp,
+      clamp(valueMul*0.9,0.7,4.2)
+    );
+    if(f){
+      f.r*=1+sizeT*0.42;
+      f.top=true;
+      f.deathDropUntil=frame+60*3;
+      f.graceUntil=frame+DROP_GRACE;
+    }
+  }
+
+  // Rắn lớn có cơ hội làm rơi item hiếm, số lượng tăng theo kích thước nhưng có trần.
+  for(let i=0;i<itemDropN;i++){
+    const g=segs[(Math.random()*segs.length)|0]||{x:s.hx,y:s.hy};
+    const a=Math.random()*TAU,sp=rand(1.6,4.8+sizeT*2.4);
+    const it=spawnSpecialItem(g.x,g.y,randomSpecialType(),Math.cos(a)*sp,Math.sin(a)*sp);
+    if(it){it.deathDropUntil=frame+60*3;it.graceUntil=frame+DROP_GRACE;}
+  }
+
+  if(inView(s.hx,s.hy,180+s.r*3)){
+    const fxN=Math.round(26+sizeT*28);
+    burst(s.hx,s.hy,fxN,'#ffffff',5+sizeT*3,5+sizeT*2);
+    burst(s.hx,s.hy,Math.round(20+sizeT*30),s.skin.rb?'#ff5d73':s.skin.c[0],4+sizeT*3,4+sizeT*2);
+  }
+  if(s.isPlayer){
+    Snd.die();
+    cam.shake=14;
+    // Giữ cảnh xác rắn thành mồi lâu hơn một chút trước khi hiện bảng Game Over.
+    setTimeout(showGameOver,1400);
+  }
+}
+
+function submitGameHiHiEndGame(score){
+  if(eventSubmitted)return;
+  eventSubmitted=true;
+  const payload={
+    type:'gamehihi:event-end-game',
+    game:'ran-san-moi-hihi',
+    score:Math.max(0,Math.floor(Number(score)||0)),
+    result:'loss',
+    mode:'arcade',
+    meta:{
+      length:player?Math.floor(player.length):0,
+      segments:player&&player.segs?player.segs.length:0,
+      kills:player?player.kills:0,
+      bestRank:bestRank===999?0:bestRank,
+      foodEaten:eatCount
+    }
+  };
+  if(typeof window.GameHiHiEndGame==='function'){
+    window.GameHiHiEndGame(payload).then(j=>{
+      if(j&&Number(j.best_score)>=0){
+        const serverBest=Math.max(0,Number(j.best_score)||0);
+        const localBest=parseInt(LS.getItem('rsm_best')||'0',10)||0;
+        if(serverBest>localBest)LS.setItem('rsm_best',String(serverBest));
+        $('goBest').textContent='Kỷ lục Rắn Săn Mồi: '+Math.max(serverBest,localBest,score);
+      }
+    }).catch(()=>{});
+  }else if(window.parent&&window.parent!==window){
+    try{window.parent.postMessage(payload,'*');}catch(e){}
+  }
+}
+
+function showGameOver(){
+  if(state!=='play')return;
+  state='over';
+  const score=Math.floor(player.length);
+  const serverBest=(window.GameHiHiEventScoreDebug&&typeof window.GameHiHiEventScoreDebug.getBest==='function')?Math.max(0,Number(window.GameHiHiEventScoreDebug.getBest())||0):0;
+  const localBest=parseInt(LS.getItem('rsm_best')||'0',10)||0;
+  const best=Math.max(localBest,serverBest);
+  const isNew=score>best;
+  if(isNew)LS.setItem('rsm_best',String(score));
+  $('goScore').textContent=String(score);
+  $('goLen').textContent=String(player.segs.length);
+  $('goRank').textContent=bestRank===999?'-':('#'+bestRank);
+  $('goKills').textContent=String(player.kills);
+  $('goBest').textContent=isNew?'🎉 KỶ LỤC MỚI!':('Kỷ lục của bạn: '+Math.max(best,score));
+  $('gameover').classList.remove('hidden');
+  $('boostBtn').classList.remove('on');
+  submitGameHiHiEndGame(score);
+}
+
+/* ---------------- camera: zoom động theo kích thước thực của rắn ---------------- */
+function cameraZoomFor(s){
+  if(!s)return 1;
+
+  // Không chia mốc và không chuẩn hóa vào một kích thước tối đa cố định.
+  // Zoom được tính trực tiếp từ chiều dài hiện tại: ăn thêm một ít thì camera cũng
+  // thay đổi một ít. Hàm log giúp rắn nhỏ thay đổi vừa phải, còn rắn càng lớn thì
+  // góc nhìn tiếp tục rộng dần nhưng không tụt quá gắt.
+  const len=Math.max(26,Number(s.length)||26);
+  const growth=Math.log1p(Math.max(0,len-26)/65);
+
+  // 1.08 ở kích thước khởi đầu; sau đó giảm liên tục theo kích thước.
+  // Không còn giới hạn "giảm đúng 1/3" hay mốc 90.000 điểm như bản trước.
+  return 1.08/(1+growth*0.11);
+}
+
+/* ---------------- main update ---------------- */
+function update(dtf){
+  frame++;
+  // player steering
+  if(player&&player.alive){
+    if(joyActive&&joyVX*joyVX+joyVY*joyVY>90){
+      player.target=Math.atan2(joyVY,joyVX);
+    }else if(!isTouch){
+      const dx=mouseX-W/2,dy=mouseY-H/2;
+      if(dx*dx+dy*dy>64)player.target=Math.atan2(dy,dx);
+    }
+    player.wantBoost=boostInput;
+  }
+  // rebuild food grid
+  foodGrid.clear();
+  for(let i=0;i<foods.length;i++){
+    const f=foods[i];
+    if(!f.dead)gridInsert(foodGrid,f.x,f.y,f);
+  }
+  // move + eat
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(!s.alive)continue;
+    s.update(dtf);
+    s.eat(dtf);
+  }
+  updateFoods(dtf);
+  // compact eaten foods
+  for(let i=foods.length-1;i>=0;i--){
+    if(foods[i].dead){foods[i]=foods[foods.length-1];foods.pop();}
+  }
+  // rebuild segment grid
+  segGrid.clear();
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(!s.alive)continue;
+    // Trong 3 giây bảo hộ, rắn là "ghost": không dùng thân để giết rắn khác.
+    if((s.spawnShieldT||0)>0)continue;
+    const segs=s.segs;
+    // Segment nằm ngoài tường không được tham gia va chạm. Phần này cũng khớp
+    // với clipping khi render, tránh tình trạng đụng phải một đoạn thân vô hình ngoài biên.
+    const bodyLim=Math.max(0,WORLD_R-s.r*0.92);
+    const bodyLim2=bodyLim*bodyLim;
+    for(let j=0;j<segs.length;j++){
+      const g=segs[j];
+      if(g.x*g.x+g.y*g.y>bodyLim2)continue;
+      gridInsert(segGrid,g.x,g.y,g);
+    }
+  }
+  // AI think (staggered)
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(!s.alive||s.isPlayer)continue;
+    if((frame+s.phase)%s.aiDecisionEvery()===0)s.aiThink();
+  }
+  // collisions — dùng quét liên tục từ vị trí đầu cũ -> mới.
+  // Trước đây chỉ kiểm tra tâm đầu ở frame hiện tại và chỉ lấy 82% bán kính,
+  // nên rắn nhỏ có thể lọt sâu vào phần hiển thị của rắn lớn hoặc xuyên qua khi frame chậm.
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(!s.alive)continue;
+    const dc2=s.hx*s.hx+s.hy*s.hy,lim=WORLD_R-s.r;
+    if(dc2>lim*lim){
+      if((s.spawnShieldT||0)>0){
+        // Bảo hộ đầu ván cũng không để chết vì mép bản đồ: kéo nhẹ trở lại bên trong.
+        const d=Math.sqrt(dc2)||1;
+        const safeLim=Math.max(0,lim-12);
+        s.hx=s.hx/d*safeLim;s.hy=s.hy/d*safeLim;
+        s.prevHx=s.hx;s.prevHy=s.hy;
+        s.target=Math.atan2(-s.hy,-s.hx);
+      }else{
+        killSnake(s,null);
+      }
+      continue;
+    }
+    // 3 giây đầu: không nhận va chạm thân.
+    if((s.spawnShieldT||0)>0){
+      // Sắp hết bảo hộ mà đầu vẫn nằm trong thân rắn khác: kéo dài thêm vài frame
+      // để không chết oan đúng khoảnh khắc "hiện hình" (cảm giác rắn xuất hiện bất thình lình).
+      if(s.spawnShieldT<=dtf*1.5){
+        gridQuery(segGrid,s.hx,s.hy,s.r+98,QA);
+        for(let j=0;j<QA.length;j++){
+          const g=QA[j];
+          if(g.s===s||!g.s.alive)continue;
+          const dx=g.x-s.hx,dy=g.y-s.hy,rr=s.r*1.04+g.s.r+14;
+          if(dx*dx+dy*dy<rr*rr){s.spawnShieldT=Math.max(s.spawnShieldT,8);break;}
+        }
+      }
+      continue;
+    }
+
+    const ax=Number.isFinite(s.prevHx)?s.prevHx:s.hx;
+    const ay=Number.isFinite(s.prevHy)?s.prevHy:s.hy;
+    const bx=s.hx,by=s.hy;
+    const mx=(ax+bx)*0.5,my=(ay+by)*0.5;
+    const travel=Math.hypot(bx-ax,by-ay);
+    // V7 rắn lớn nhất có r=88; cộng dư theo thân lớn để không bỏ sót segment gần đường quét.
+    gridQuery(segGrid,mx,my,travel*0.5+s.r+98,QA);
+
+    for(let j=0;j<QA.length;j++){
+      const g=QA[j];
+      if(g.s===s||!g.s.alive)continue;
+
+      const abx=bx-ax,aby=by-ay;
+      const ab2=abx*abx+aby*aby;
+      let u=0;
+      if(ab2>0.0001)u=clamp(((g.x-ax)*abx+(g.y-ay)*aby)/ab2,0,1);
+      const qx=ax+abx*u,qy=ay+aby*u;
+      const dx=g.x-qx,dy=g.y-qy;
+      // Khớp gần sát kích thước đang vẽ: đầu ~1.06r, thân ~r.
+      const rr=s.r*1.04+g.s.r+1.5;
+      if(dx*dx+dy*dy<rr*rr){
+        if(s.invulnT>0)break;
+        if(s.shieldT>0&&s.shieldHits>0){
+          s.shieldHits=0;s.shieldT=0;s.invulnT=28;
+          const away=Math.atan2(s.hy-g.y,s.hx-g.x);
+          s.target=away;
+          s.hx+=Math.cos(away)*(s.r+g.s.r+8);
+          s.hy+=Math.sin(away)*(s.r+g.s.r+8);
+          s.prevHx=s.hx;s.prevHy=s.hy;
+          spawnRing(s.hx,s.hy,s.r*1.5,'#60a5fa');
+          if(s.isPlayer)spawnPop(s.hx,s.hy,'🛡️ CHẶN VA CHẠM','#93c5fd',14);
+          break;
+        }
+        killSnake(s,g.s);break;
+      }
+    }
+  }
+  // remove dead
+  for(let i=snakes.length-1;i>=0;i--){
+    if(!snakes[i].alive&&!snakes[i].isPlayer){
+      snakes[i]=snakes[snakes.length-1];snakes.pop();
+    }
+  }
+  // respawn bots
+  if(frame%75===0){
+    let ai=0;
+    for(let i=0;i<snakes.length;i++)if(!snakes[i].isPlayer&&snakes[i].alive)ai++;
+    if(ai<AI_TARGET)spawnBot(false);
+  }
+  // replenish food
+  if(foods.length<FOOD_BASE&&frame%2===0){spawnFoodRandom();spawnFoodRandom();}
+  updateParts(dtf);
+  updateFx(dtf);
+  // Camera zoom liên tục theo kích thước thực; rắn càng lớn thì tỉ lệ zoom càng nhỏ.
+  if(player){
+    cam.x+=(player.hx-cam.x)*Math.min(1,0.12*dtf);
+    cam.y+=(player.hy-cam.y)*Math.min(1,0.12*dtf);
+    const tz=cameraZoomFor(player);
+    cam.z+=(tz-cam.z)*Math.min(1,0.065*dtf);
+  }
+  if(cam.shake>0)cam.shake=Math.max(0,cam.shake-1.2*dtf);
+  // HUD refresh
+  if(frame%12===0)updateHud(false);
+  if(frame%10===0)drawMini();
+}
+
+/* ---------------- HUD / leaderboard ---------------- */
+const lbEl=$('lb');
+function updateHud(force){
+  if(!player)return;
+  $('scoreV').textContent=String(Math.floor(player.length));
+  $('lenV').textContent=String(player.segs.length);
+  $('killV').textContent=String(player.kills);
+  const speedEl=$('speedV');
+  if(speedEl)speedEl.textContent='x'+(player.speedNow/SPEED_CFG.start).toFixed(1);
+  const buffEl=$('buffV');
+  if(buffEl){
+    const buffs=[];
+    if(player.magnetT>0)buffs.push('🧲'+Math.ceil(player.magnetT/60)+'s');
+    if(player.turboT>0)buffs.push('⚡'+Math.ceil(player.turboT/60)+'s');
+    if(player.crownT>0)buffs.push('👑'+Math.ceil(player.crownT/60)+'s');
+    if(player.shieldT>0&&player.shieldHits>0)buffs.push('🛡️');
+    buffEl.textContent=buffs.join(' · ');
+    buffEl.style.display=buffs.length?'block':'none';
+  }
+  const sorted=snakes.filter(s=>s.alive).sort((a,b)=>b.length-a.length);
+  let rank=0;
+  for(let i=0;i<sorted.length;i++)if(sorted[i]===player){rank=i+1;break;}
+  if(player.alive&&rank>0){
+    $('rankV').textContent='#'+rank;
+    if(rank<bestRank)bestRank=rank;
+  }
+  let html='';
+  const topLimit=window.innerWidth<=700?5:10;
+  const topTitle=document.querySelector('#lbPanel h3');
+  if(topTitle)topTitle.textContent='🏆 TOP '+topLimit;
+  const n=Math.min(topLimit,sorted.length);
+  for(let i=0;i<n;i++){
+    const s=sorted[i];
+    const cls=s===player?' class="me"':'';
+    html+='<li'+cls+'><span>'+(i+1)+'.</span><span class="nm">'+esc(s.name)+'</span><span>'+Math.floor(s.length)+'</span></li>';
+  }
+  lbEl.innerHTML=html;
+}
+function esc(t){return String(t).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+
+const mini=$('mini'),mctx=mini.getContext('2d');
+function drawMini(){
+  if(!mctx)return;
+  mctx.clearRect(0,0,108,108);
+  mctx.save();
+  mctx.translate(54,54);
+  mctx.strokeStyle='rgba(255,93,115,.8)';
+  mctx.lineWidth=2;
+  mctx.beginPath();mctx.arc(0,0,50,0,TAU);mctx.stroke();
+  mctx.fillStyle='rgba(255,255,255,.45)';
+  const sc=50/WORLD_R;
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(!s.alive||s.isPlayer)continue;
+    mctx.fillRect(s.hx*sc-1,s.hy*sc-1,2,2);
+  }
+  if(player&&player.alive){
+    mctx.fillStyle='#b5f542';
+    mctx.beginPath();mctx.arc(player.hx*sc,player.hy*sc,3,0,TAU);mctx.fill();
+  }
+  mctx.restore();
+}
+
+/* ---------------- rendering ---------------- */
+function render(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle=bgGrad;
+  ctx.fillRect(0,0,W,H);
+  const z=cam.z;
+  let sx=0,sy=0;
+  if(cam.shake>0){sx=rand(-cam.shake,cam.shake);sy=rand(-cam.shake,cam.shake);}
+  ctx.setTransform(DPR*z,0,0,DPR*z,DPR*(W/2-(cam.x+sx)*z),DPR*(H/2-(cam.y+sy)*z));
+  const vw=W/z,vh=H/z;
+  viewL=cam.x-vw/2-90;viewT=cam.y-vh/2-90;
+  viewR=cam.x+vw/2+90;viewB=cam.y+vh/2+90;
+  // Mọi vật thể trong đấu trường được clip theo vòng biên. Nhờ vậy thân của
+  // rắn lớn không thể vẽ xuyên qua tường đỏ kể cả khi đuôi còn nằm ngoài biên.
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0,0,WORLD_R-4,0,TAU);
+  ctx.clip();
+  drawGridDots(z);
+  drawDecors();
+  drawFoods(false);
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(s.alive&&!s.isPlayer)drawSnake(s);
+  }
+  if(player&&player.alive)drawSnake(player);
+  // Mồi từ xác rắn và item vẽ sau thân rắn để không bị rắn to che mất.
+  drawFoods(true);
+  drawParts();
+  drawFx();
+  drawNames(z);
+  ctx.restore();
+
+  // Vẽ tường sau cùng để viền đỏ luôn nằm trên các vật thể, không bị thân rắn đè lên.
+  drawBorder();
+}
+
+function drawGridDots(z){
+  const step=z<0.55?240:120;
+  ctx.fillStyle='rgba(140,220,210,0.08)';
+  ctx.beginPath();
+  const x0=Math.floor(viewL/step)*step,y0=Math.floor(viewT/step)*step;
+  const R2=WORLD_R*WORLD_R;
+  for(let y=y0;y<viewB;y+=step){
+    for(let x=x0;x<viewR;x+=step){
+      if(x*x+y*y<R2){ctx.moveTo(x+3,y);ctx.arc(x,y,3,0,TAU);}
+    }
+  }
+  ctx.fill();
+}
+function drawBorder(){
+  ctx.lineWidth=26;
+  ctx.strokeStyle='rgba(255,60,80,0.25)';
+  ctx.beginPath();ctx.arc(0,0,WORLD_R+13,0,TAU);ctx.stroke();
+  ctx.lineWidth=8;
+  ctx.strokeStyle='#ff3c50';
+  ctx.beginPath();ctx.arc(0,0,WORLD_R,0,TAU);ctx.stroke();
+}
+function drawDecors(){
+  for(let i=0;i<decors.length;i++){
+    const d=decors[i];
+    if(!inView(d.x,d.y,60))continue;
+    ctx.save();
+    ctx.translate(d.x,d.y);
+    ctx.rotate(d.a);
+    ctx.scale(d.s,d.s);
+    ctx.globalAlpha=0.85;
+    switch(d.t){
+      case 'leaf':
+        ctx.fillStyle=d.c1;
+        ctx.beginPath();ctx.ellipse(0,0,26,11,0,0,TAU);ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(-22,0);ctx.lineTo(22,0);ctx.stroke();
+        break;
+      case 'grass':
+        ctx.strokeStyle=d.c1;ctx.lineWidth=4;ctx.lineCap='round';
+        for(let k=-1;k<=1;k++){
+          ctx.beginPath();ctx.moveTo(k*8,10);
+          ctx.quadraticCurveTo(k*10,-8,k*16,-20);ctx.stroke();
+        }
+        break;
+      case 'flower':
+        ctx.fillStyle=d.c2;
+        for(let k=0;k<6;k++){
+          const a=k/6*TAU;
+          ctx.beginPath();ctx.ellipse(Math.cos(a)*11,Math.sin(a)*11,9,6,a,0,TAU);ctx.fill();
+        }
+        ctx.fillStyle='#ffd43b';
+        ctx.beginPath();ctx.arc(0,0,7,0,TAU);ctx.fill();
+        break;
+      case 'stone':
+        ctx.fillStyle=d.c1;
+        ctx.beginPath();ctx.ellipse(0,0,20,14,0,0,TAU);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.12)';
+        ctx.beginPath();ctx.ellipse(-5,-4,9,5,0,0,TAU);ctx.fill();
+        break;
+      case 'lily':
+        ctx.fillStyle=d.c1;
+        ctx.beginPath();ctx.arc(0,0,22,0.3,TAU-0.3);ctx.lineTo(0,0);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.15)';
+        ctx.beginPath();ctx.arc(-6,-6,8,0,TAU);ctx.fill();
+        break;
+      case 'shroom':
+        ctx.fillStyle='#f1e2c8';
+        ctx.fillRect(-4,0,8,14);
+        ctx.fillStyle=d.c1;
+        ctx.beginPath();ctx.arc(0,0,15,Math.PI,0);ctx.closePath();ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.8)';
+        ctx.beginPath();ctx.arc(-6,-6,3,0,TAU);ctx.arc(5,-4,2.5,0,TAU);ctx.fill();
+        break;
+      case 'shell':
+        ctx.fillStyle=d.c1;
+        ctx.beginPath();ctx.arc(0,0,13,Math.PI*0.9,Math.PI*2.1);ctx.closePath();ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(-8,-8);ctx.moveTo(0,4);ctx.lineTo(0,-11);ctx.moveTo(0,4);ctx.lineTo(8,-8);ctx.stroke();
+        break;
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+function drawSpecialItem(f,t){
+  const I=SPECIAL_ITEMS[f.item]||SPECIAL_ITEMS.mystery;
+  const bob=Math.sin(t*0.9+f.ph)*3;
+  const x=f.x,y=f.y+bob;
+  const pulse=1+Math.sin(t*1.9+f.ph)*0.09;
+  const r=f.r*pulse;
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(frame*f.spin);
+  ctx.globalAlpha=0.18;
+  ctx.fillStyle=I.c;
+  ctx.beginPath();ctx.arc(0,0,r*2.45,0,TAU);ctx.fill();
+  ctx.globalAlpha=0.82;
+  ctx.strokeStyle=I.c;ctx.lineWidth=2.2;
+  ctx.beginPath();ctx.arc(0,0,r*1.35,0,TAU);ctx.stroke();
+  ctx.rotate(-frame*f.spin);
+  ctx.globalAlpha=1;
+  ctx.font='900 '+Math.round(r*1.55)+'px "Segoe UI Emoji","Apple Color Emoji",system-ui,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(I.icon,0,1);
+  ctx.restore();
+}
+/* top=false: mồi nền, vẽ trước (dưới) thân rắn.
+   top=true : mồi rơi từ xác rắn + item, vẽ sau (trên) thân rắn để luôn nhìn thấy. */
+function drawFoods(top){
+  const t=frame*0.06;
+  for(let i=0;i<foods.length;i++){
+    const f=foods[i];
+    if(f.dead||!!f.top!==top||!inView(f.x,f.y,40))continue;
+    if(f.item){drawSpecialItem(f,t);continue;}
+    const bob=f.fly?0:Math.sin(t*0.85+f.ph)*2.4; // lơ lửng nhẹ
+    const x=f.x,y=f.y+bob;
+    const pulse=1+Math.sin(t+f.ph)*0.14;
+    const r=f.r*pulse;
+    const tw=f.kind===3?0.72+0.28*Math.sin(t*2.6+f.ph):1; // nhấp nháy
+    // glow
+    ctx.globalAlpha=0.3*tw;
+    ctx.fillStyle=f.c;
+    ctx.beginPath();ctx.arc(x,y,r*1.9,0,TAU);ctx.fill();
+    if(f.kind>=2){
+      ctx.globalAlpha=0.13*tw;
+      ctx.beginPath();ctx.arc(x,y,r*2.9,0,TAU);ctx.fill();
+    }
+    // thân viên
+    ctx.globalAlpha=tw;
+    ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();
+    // lõi sáng (giả gradient)
+    ctx.fillStyle=f.c2;
+    ctx.beginPath();ctx.arc(x,y,r*0.55,0,TAU);ctx.fill();
+    // chấm highlight
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.beginPath();ctx.arc(x-r*0.3,y-r*0.34,Math.max(1.2,r*0.2),0,TAU);ctx.fill();
+    // viên đặc biệt: tia sáng xoay
+    if(f.kind===3){
+      const a=frame*f.spin+f.ph;
+      ctx.strokeStyle='rgba(255,255,255,'+(0.55*tw).toFixed(2)+')';
+      ctx.lineWidth=1.6;
+      ctx.beginPath();
+      for(let k=0;k<4;k++){
+        const ang=a+k*HALF_PI;
+        const ca=Math.cos(ang),sa=Math.sin(ang);
+        ctx.moveTo(x+ca*r*1.15,y+sa*r*1.15);
+        ctx.lineTo(x+ca*r*1.75,y+sa*r*1.75);
+      }
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha=1;
+}
+function drawSnake(s){
+  const segs=s.segs;
+  if(!segs.length)return;
+  const r=s.r,skin=s.skin;
+  // Bot vừa hồi sinh hiện dần (alpha tăng từ 0.1 lên 1) thay vì xuất hiện đột ngột.
+  const FA=(s.spawnFadeT||0)>0?clamp(1-(s.spawnFadeT||0)/SPAWN_FADE,0.1,1):1;
+  ctx.globalAlpha=FA;
+  // Không cull cả con rắn bằng vài segment lấy mẫu. Cách cũ có thể làm bot
+  // biến mất 1 frame khi đang đi qua mép camera, tạo cảm giác nhấp nháy.
+  // Từng segment phía dưới vẫn được inView() cull riêng nên chi phí vẽ vẫn được giới hạn.
+  // boost glow
+  if(s.boosting){
+    // Bot dùng glow ổn định; chỉ người chơi giữ nhịp pulse nhẹ.
+    ctx.globalAlpha=(s.isPlayer?(0.28+0.08*Math.sin(frame*0.32)):0.30)*FA;
+    ctx.fillStyle=skin.rb?'#ffffff':skin.c[skin.c.length-1];
+    ctx.beginPath();
+    for(let i=segs.length-1;i>=0;i-=2){
+      const g=segs[i];
+      if(!inView(g.x,g.y,r*2))continue;
+      ctx.moveTo(g.x+r*1.55,g.y);ctx.arc(g.x,g.y,r*1.55,0,TAU);
+    }
+    ctx.fill();
+    ctx.globalAlpha=FA;
+  }
+  // outline pass (single dark batch)
+  ctx.fillStyle=skin.dark;
+  ctx.beginPath();
+  for(let i=segs.length-1;i>=0;i--){
+    const g=segs[i];
+    if(!inView(g.x,g.y,r+6))continue;
+    ctx.moveTo(g.x+r+2.5,g.y);ctx.arc(g.x,g.y,r+2.5,0,TAU);
+  }
+  ctx.fill();
+  // color pass
+  if(skin.rb){
+    for(let i=segs.length-1;i>=0;i--){
+      const g=segs[i];
+      if(!inView(g.x,g.y,r+4))continue;
+      ctx.fillStyle=skinColor(skin,i,frame);
+      ctx.beginPath();ctx.arc(g.x,g.y,r,0,TAU);ctx.fill();
+    }
+  }else{
+    for(let ci=0;ci<skin.c.length;ci++){
+      ctx.fillStyle=skin.c[ci];
+      ctx.beginPath();
+      for(let i=segs.length-1;i>=0;i--){
+        if(((i/5)|0)%skin.c.length!==ci)continue;
+        const g=segs[i];
+        if(!inView(g.x,g.y,r+4))continue;
+        ctx.moveTo(g.x+r,g.y);ctx.arc(g.x,g.y,r,0,TAU);
+      }
+      ctx.fill();
+    }
+  }
+  // belly highlight on head-half
+  ctx.globalAlpha=0.18*FA;
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();
+  const hl=Math.min(segs.length,14);
+  for(let i=hl-1;i>=0;i--){
+    const g=segs[i];
+    if(!inView(g.x,g.y,r))continue;
+    ctx.moveTo(g.x+r*0.45,g.y-r*0.28);ctx.arc(g.x,g.y-r*0.28,r*0.45,0,TAU);
+  }
+  ctx.fill();
+  ctx.globalAlpha=FA;
+  // Bảo hộ hồi sinh 3 giây: vòng sáng nhấp nháy để người chơi nhận biết rõ.
+  if((s.spawnShieldT||0)>0){
+    const p=clamp((s.spawnShieldT||0)/(60*3),0,1);
+    // Bot không pulse alpha để tránh bị nhìn thành nhấp nháy khi vừa hồi sinh.
+    ctx.globalAlpha=(s.isPlayer?(0.34+0.12*Math.sin(frame*0.18+s.phase)):0.24)*FA;
+    ctx.strokeStyle='#ffffff';
+    ctx.lineWidth=Math.max(2.2,r*0.10);
+    ctx.beginPath();ctx.arc(s.hx,s.hy,r*(1.72+0.10*(1-p)),0,TAU);ctx.stroke();
+    ctx.globalAlpha=FA;
+  }
+  // Item buff nhìn trực tiếp trên rắn.
+  if(s.shieldT>0&&s.shieldHits>0){
+    ctx.globalAlpha=(0.20+0.08*Math.sin(frame*0.18+s.phase))*FA;
+    ctx.strokeStyle='#93c5fd';ctx.lineWidth=Math.max(2,r*0.12);
+    ctx.beginPath();ctx.arc(s.hx,s.hy,r*1.62,0,TAU);ctx.stroke();
+    ctx.globalAlpha=FA;
+  }
+  if(s.turboT>0){
+    ctx.globalAlpha=0.35*FA;
+    ctx.strokeStyle='#fde047';ctx.lineWidth=Math.max(1.5,r*0.08);
+    ctx.beginPath();ctx.arc(s.hx,s.hy,r*1.28,0,TAU);ctx.stroke();
+    ctx.globalAlpha=FA;
+  }
+  // head + eyes
+  const h=segs[0];
+  if(inView(h.x,h.y,r+20)){
+    ctx.fillStyle=skin.rb?skinColor(skin,0,frame):skin.head;
+    ctx.beginPath();ctx.arc(h.x,h.y,r*1.06,0,TAU);ctx.fill();
+    const ea=s.angle,eo=r*0.55,er=Math.max(2.6,r*0.34);
+    const e1x=h.x+Math.cos(ea-0.62)*eo,e1y=h.y+Math.sin(ea-0.62)*eo;
+    const e2x=h.x+Math.cos(ea+0.62)*eo,e2y=h.y+Math.sin(ea+0.62)*eo;
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.arc(e1x,e1y,er,0,TAU);ctx.arc(e2x,e2y,er,0,TAU);ctx.fill();
+    ctx.fillStyle='#111';
+    const pr=er*0.52,po=er*0.36;
+    ctx.beginPath();
+    ctx.arc(e1x+Math.cos(ea)*po,e1y+Math.sin(ea)*po,pr,0,TAU);
+    ctx.arc(e2x+Math.cos(ea)*po,e2y+Math.sin(ea)*po,pr,0,TAU);
+    ctx.fill();
+
+    // Miệng động: nhịp mở theo tốc độ, mở mạnh khi ăn và khi BOOST.
+    const pace=clamp((s.speedNow-SPEED_CFG.start)/(SPEED_CFG.boostCap-SPEED_CFG.start),0,1);
+    const chew=(Math.sin(s.mouthPhase)+1)*0.5;
+    const open=clamp(0.10+pace*0.18+chew*0.07+(s.eatPulse||0)*0.48+(s.boosting?0.08:0),0.08,0.72);
+    ctx.save();
+    ctx.translate(h.x,h.y);
+    ctx.rotate(ea);
+    ctx.fillStyle='rgba(38,7,13,.94)';
+    ctx.beginPath();
+    ctx.ellipse(r*0.78,0,r*(0.31+open*0.10),r*(0.08+open*0.26),0,0,TAU);
+    ctx.fill();
+    // Lưỡi ló ra rất ngắn khi vừa ăn/BOOST để cảm giác đầu rắn sống động hơn.
+    if((s.eatPulse||0)>0.22||s.boosting){
+      const tongue=r*(0.34+Math.min(0.55,(s.eatPulse||0)*0.45));
+      ctx.strokeStyle='#ff6b81';
+      ctx.lineWidth=Math.max(1.4,r*0.07);
+      ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.moveTo(r*1.00,0);
+      ctx.lineTo(r*1.00+tongue,0);
+      ctx.moveTo(r*1.00+tongue,0);
+      ctx.lineTo(r*1.00+tongue+r*0.16,-r*0.10);
+      ctx.moveTo(r*1.00+tongue,0);
+      ctx.lineTo(r*1.00+tongue+r*0.16,r*0.10);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+function drawParts(){
+  for(let i=0;i<P_MAX;i++){
+    const p=parts[i];
+    if(!p.a||!inView(p.x,p.y,12))continue;
+    ctx.globalAlpha=clamp(p.life/p.max,0,1);
+    ctx.fillStyle=p.c;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+function drawNames(z){
+  if(z<0.3)return;
+  const fs=Math.round(13/z);
+  ctx.font='700 '+fs+'px "Segoe UI",system-ui,sans-serif';
+  ctx.textAlign='center';
+  ctx.lineWidth=Math.max(2,fs*0.22);
+  ctx.strokeStyle='rgba(0,0,0,0.55)';
+  ctx.fillStyle='rgba(255,255,255,0.92)';
+  for(let i=0;i<snakes.length;i++){
+    const s=snakes[i];
+    if(!s.alive||!inView(s.hx,s.hy,60))continue;
+    const y=s.hy-s.r-10/z;
+    ctx.strokeText(s.name,s.hx,y);
+    ctx.fillText(s.name,s.hx,y);
+    if((s.spawnShieldT||0)>0){
+      const sec=Math.max(1,Math.ceil(s.spawnShieldT/60));
+      const sy=y-fs*1.08;
+      const oldFill=ctx.fillStyle;
+      ctx.fillStyle='#dfffea';
+      ctx.strokeText('🛡 '+sec+'s',s.hx,sy);
+      ctx.fillText('🛡 '+sec+'s',s.hx,sy);
+      ctx.fillStyle=oldFill;
+    }
+  }
+}
+
+/* ---------------- input ---------------- */
+let mouseX=W/2,mouseY=H/2,boostInput=false;
+let isTouch=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
+let joyActive=false,joyVX=0,joyVY=0,joyId=null,joyBX=0,joyBY=0;
+let boostTouchId=null;
+const joyEl=$('joy'),joyKnob=$('joyKnob');
+
+window.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
+canvas.addEventListener('mousedown',e=>{
+  if(e.button===0&&state==='play'){boostInput=true;e.preventDefault();}
+});
+window.addEventListener('mouseup',()=>{boostInput=false;});
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    if(state==='play'){boostInput=true;e.preventDefault();}
+  }
+});
+window.addEventListener('keyup',e=>{
+  if(e.code==='Space')boostInput=false;
+});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+
+function setJoy(dx,dy){
+  joyVX=dx;joyVY=dy;
+  const d=Math.sqrt(dx*dx+dy*dy)||1;
+  const m=Math.min(d,42);
+  joyKnob.style.transform='translate(calc(-50% + '+(dx/d*m)+'px),calc(-50% + '+(dy/d*m)+'px))';
+}
+canvas.addEventListener('touchstart',e=>{
+  if(state!=='play')return;
+  e.preventDefault();
+  Snd.init();Snd.resume();
+  for(let i=0;i<e.changedTouches.length;i++){
+    const t=e.changedTouches[i];
+    if(joyId===null&&t.clientX<W*0.62){
+      joyId=t.identifier;joyActive=true;
+      joyBX=t.clientX;joyBY=t.clientY;
+      joyEl.style.left=joyBX+'px';joyEl.style.top=joyBY+'px';
+      joyEl.style.display='block';
+      setJoy(0,0);
+    }else if(boostTouchId===null){
+      boostTouchId=t.identifier;boostInput=true;
+    }
+  }
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  if(state!=='play')return;
+  e.preventDefault();
+  for(let i=0;i<e.changedTouches.length;i++){
+    const t=e.changedTouches[i];
+    if(t.identifier===joyId)setJoy(t.clientX-joyBX,t.clientY-joyBY);
+  }
+},{passive:false});
+function endTouch(e){
+  for(let i=0;i<e.changedTouches.length;i++){
+    const t=e.changedTouches[i];
+    if(t.identifier===joyId){
+      joyId=null;joyActive=false;joyVX=0;joyVY=0;
+      joyEl.style.display='none';
+    }
+    if(t.identifier===boostTouchId){boostTouchId=null;boostInput=false;}
+  }
+}
+canvas.addEventListener('touchend',endTouch);
+canvas.addEventListener('touchcancel',endTouch);
+
+const boostBtn=$('boostBtn');
+boostBtn.addEventListener('touchstart',e=>{e.preventDefault();Snd.init();Snd.resume();boostInput=true;},{passive:false});
+boostBtn.addEventListener('touchend',e=>{e.preventDefault();boostInput=false;},{passive:false});
+boostBtn.addEventListener('mousedown',e=>{e.preventDefault();boostInput=true;});
+boostBtn.addEventListener('mouseup',()=>{boostInput=false;});
+
+document.addEventListener('touchmove',e=>{
+  if(state==='play')e.preventDefault();
+},{passive:false});
+
+/* ---------------- menu / UI wiring ---------------- */
+let selSkin=parseInt(LS.getItem('rsm_skin')||'0',10)||0;
+if(selSkin<0||selSkin>=SKINS.length)selSkin=0;
+
+function buildSkinList(){
+  const wrap=$('skinList');
+  for(let i=0;i<SKINS.length;i++){
+    const b=document.createElement('button');
+    b.className='skinBtn'+(i===selSkin?' sel':'');
+    b.title=SKINS[i].n;
+    const cv=document.createElement('canvas');
+    cv.width=52;cv.height=52;
+    b.appendChild(cv);
+    drawSkinPreview(cv,SKINS[i]);
+    b.addEventListener('click',()=>{
+      selSkin=i;LS.setItem('rsm_skin',String(i));
+      const kids=wrap.children;
+      for(let k=0;k<kids.length;k++)kids[k].classList.remove('sel');
+      b.classList.add('sel');
+      Snd.init();Snd.click();
+    });
+    wrap.appendChild(b);
+  }
+}
+function drawSkinPreview(cv,skin){
+  const c=cv.getContext('2d');
+  if(!c)return;
+  c.clearRect(0,0,52,52);
+  for(let i=6;i>=0;i--){
+    const t=i/6;
+    const x=10+t*32,y=26+Math.sin(t*4)*9;
+    c.fillStyle=shade(skin.c[0],0.45);
+    c.beginPath();c.arc(x,y,8.5,0,TAU);c.fill();
+    c.fillStyle=skin.rb?'hsl('+(i*50)+',95%,60%)':skin.c[((i/2)|0)%skin.c.length];
+    c.beginPath();c.arc(x,y,7,0,TAU);c.fill();
+  }
+  c.fillStyle='#fff';
+  c.beginPath();c.arc(12,20,2.4,0,TAU);c.arc(15,26,2.4,0,TAU);c.fill();
+  c.fillStyle='#111';
+  c.beginPath();c.arc(11.4,20,1.2,0,TAU);c.arc(14.4,26,1.2,0,TAU);c.fill();
+}
+
+function showBest(){
+  const localBest=parseInt(LS.getItem('rsm_best')||'0',10)||0;
+  const serverBest=(window.GameHiHiEventScoreDebug&&typeof window.GameHiHiEventScoreDebug.getBest==='function')?Math.max(0,Number(window.GameHiHiEventScoreDebug.getBest())||0):0;
+  const b=Math.max(localBest,serverBest);
+  if(b>localBest)LS.setItem('rsm_best',String(b));
+  $('bestLine').textContent=b>0?('⭐ Kỷ lục Rắn Săn Mồi: '+b+' điểm'):'Chưa có kỷ lục — chơi ván đầu tiên nào!';
+}
+
+$('btnPlay').addEventListener('click',()=>{Snd.init();Snd.resume();Snd.click();startGame();});
+$('btnAgain').addEventListener('click',()=>{Snd.init();Snd.resume();Snd.click();startGame();});
+$('btnMenu').addEventListener('click',()=>{
+  Snd.click();
+  state='menu';
+  $('gameover').classList.add('hidden');
+  $('hud').classList.remove('on');
+  $('menu').classList.remove('hidden');
+  showBest();
+});
+$('btnHow').addEventListener('click',()=>{Snd.init();Snd.click();$('howModal').classList.remove('hidden');});
+$('btnCloseHow').addEventListener('click',()=>{Snd.click();$('howModal').classList.add('hidden');});
+$('btnRank').addEventListener('click',()=>{
+  Snd.init();Snd.click();
+  showBest();
+});
+$('sndBtn').addEventListener('click',()=>{Snd.init();Snd.setOn(!Snd.on);Snd.click();});
+$('sndBtn2').addEventListener('click',()=>{Snd.init();Snd.setOn(!Snd.on);Snd.click();});
+window.addEventListener('pointerdown',()=>{Snd.init();Snd.resume();},{once:false});
+window.addEventListener('gamehihi:event-score-saved',showBest);
+window.addEventListener('gamehihi:end-game-saved',showBest);
+
+$('nameInput').value=LS.getItem('rsm_name')||'';
+updateServerPresence(true);
+buildSkinList();
+showBest();
+updateSndBtns();
+
+/* ---------------- main loop ---------------- */
+function loop(t){
+  let dtf=1;
+  if(lastT)dtf=clamp((t-lastT)/16.667,0.4,2.6);
+  lastT=t;
+  if(state==='play'||state==='over')update(dtf);
+  render();
+  window.requestAnimationFrame(loop);
+}
+window.requestAnimationFrame(loop);
+
+/* idle menu background: pre-populate the world so the menu has life behind it */
+initWorld();
+cam.x=0;cam.y=0;cam.z=0.55;
+(function menuSim(){
+  // lightweight ambient simulation while on menu
+  let last=0;
+  function step(t){
+    if(state==='menu'){
+      const dtf=last?clamp((t-last)/16.667,0.4,2.6):1;
+      last=t;
+      frame++;
+      foodGrid.clear();
+      for(let i=0;i<foods.length;i++){const f=foods[i];if(!f.dead)gridInsert(foodGrid,f.x,f.y,f);}
+      for(let i=0;i<snakes.length;i++){const s=snakes[i];if(s.alive){s.update(dtf);s.eat(dtf);}}
+      updateFoods(dtf);
+      for(let i=foods.length-1;i>=0;i--){if(foods[i].dead){foods[i]=foods[foods.length-1];foods.pop();}}
+      segGrid.clear();
+      for(let i=0;i<snakes.length;i++){const s=snakes[i];if(!s.alive)continue;for(let j=0;j<s.segs.length;j++)gridInsert(segGrid,s.segs[j].x,s.segs[j].y,s.segs[j]);}
+      for(let i=0;i<snakes.length;i++){const s=snakes[i];if(s.alive&&(frame+s.phase)%s.aiDecisionEvery()===0)s.aiThink();}
+      updateParts(dtf);
+      updateFx(dtf);
+      if(foods.length<FOOD_BASE)spawnFoodRandom();
+      // slow camera drift
+      cam.x=Math.cos(frame*0.0012)*900;
+      cam.y=Math.sin(frame*0.0009)*900;
+    }else{last=0;}
+    window.requestAnimationFrame(step);
+  }
+  window.requestAnimationFrame(step);
+})();
+
+/* debug handle (harmless, used for automated self-test) */
+window.__RSM__={
+  get snakes(){return snakes;},
+  get foods(){return foods;},
+  get player(){return player;},
+  get state(){return state;},
+  startGame:startGame,
+  killPlayer(){if(player)killSnake(player,null);},
+  killSnake(s){if(s)killSnake(s,null);},
+  get frame(){return frame;},
+  // Chạy n frame mô phỏng (dùng cho self-test tự động, không phụ thuộc requestAnimationFrame).
+  step(n,dtf){for(let i=0;i<(n||1);i++)update(dtf||1);},
+  showGameOver:showGameOver
+};
+
+})();
+</script>
+</body>
+</html>

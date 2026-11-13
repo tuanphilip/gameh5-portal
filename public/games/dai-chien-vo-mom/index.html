@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-visual">
+<meta name="theme-color" content="#140a2a">
+<meta name="description" content="Đại Chiến Võ Mồm Online — 8 cao thủ phố cổ đá, phi dép, nhổ dãi. Đấu 1v1, 2v2, chơi cùng bạn bè.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<title>Đại Chiến Võ Mồm Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=2dc189f245">
+</head>
+<body>
+<div id="safeProbe"></div>
+<div id="host">
+ <div id="wrap">
+  <canvas id="c"></canvas>
+
+  <!-- thanh trên -->
+  <div id="topbar">
+   <div class="tb-left">
+    <button class="ib hidden" id="btnPause" title="Menu cá nhân (Esc)" aria-label="Menu">⏸</button>
+    <button class="ib" id="btnFs" title="Toàn màn hình" aria-label="Toàn màn hình">⛶</button>
+    <span id="netBadge" class="badge hidden" title="Độ trễ mạng"></span>
+   </div>
+   <div class="tb-right" id="topRight">
+    <span id="onlineBadge" class="badge hidden"></span>
+    <button id="profChip" class="chip hidden" title="Hồ sơ"></button>
+    <div id="coins" class="hidden">🪙 <span id="coinN">0</span></div>
+    <button class="ib" id="btnVoice" title="Voice đồng đội" aria-label="Voice">🎙️</button>
+    <button class="ib" id="btnChat" title="Chat (Enter)" aria-label="Chat">💬<i id="chatDot" class="dot hidden"></i></button>
+    <button class="ib" id="btnSound" title="Âm thanh" aria-label="Âm thanh">🔊</button>
+   </div>
+  </div>
+
+  <!-- MENU CHÍNH -->
+  <div id="menu" class="ov">
+   <div class="title">ĐẠI CHIẾN<br>VÕ MỒM</div>
+   <div class="sub">ONLINE · 8 cao thủ phố cổ · Đá · Phi dép · Nhổ dãi 🤢</div>
+   <div class="row">
+    <button class="big orange" id="bQuick1">⚡ ĐẤU NHANH 1v1</button>
+    <button class="big blue" id="bQuick2">👥 ĐẤU ĐỘI 2v2</button>
+   </div>
+   <div class="row">
+    <button class="mid green" id="bRooms">🏠 PHÒNG</button>
+    <button class="mid purple" id="bParty">🤝 TẠO ĐỘI</button>
+    <button class="mid gray" id="bOffline">🤖 LUYỆN TẬP / 2 NGƯỜI</button>
+   </div>
+   <div class="row links">
+    <button class="link" id="bLeader">🏆 Bảng xếp hạng</button>
+    <button class="link" id="bProfile">👤 Hồ sơ</button>
+    <button class="link" id="bSettings">⚙️ Cài đặt</button>
+    <button class="link" id="bHelp">❓ Cách chơi</button>
+   </div>
+   <div id="netState" class="note"></div>
+   <div class="disc">Dép là để đi — đừng ném ngoài đời nha 😆</div>
+  </div>
+
+  <!-- PANEL ĐỘI (party) -->
+  <div id="partyPanel" class="panel hidden">
+   <div class="ph"><b>🤝 ĐỘI CỦA BẠN</b><span id="partyCode" class="code"></span></div>
+   <div id="partyMembers"></div>
+   <div class="row sm">
+    <button class="sm-btn" id="bPartyCopy">📋 Link mời</button>
+    <button class="sm-btn" id="bPartyReady">✅ Sẵn sàng</button>
+    <button class="sm-btn red" id="bPartyLeave">Rời đội</button>
+   </div>
+   <div class="note tiny">Đội 2 người chơi được Đấu đội 2v2 hoặc phòng riêng (luôn cùng đội).</div>
+  </div>
+
+  <!-- CHỌN NHÂN VẬT -->
+  <div id="select" class="ov hidden">
+   <div class="stitle" id="selTitle">CHỌN NHÂN VẬT</div>
+   <div class="shint" id="selHint"></div>
+   <div class="selrow">
+    <div class="slot active" id="slot0"><div class="slabel">NGƯỜI CHƠI 1</div><canvas width="240" height="300"></canvas><div class="sname"></div><div class="sdesc"></div></div>
+    <div id="grid"></div>
+    <div class="slot" id="slot1"><div class="slabel" id="slab1">CPU</div><canvas width="240" height="300"></canvas><div class="sname"></div><div class="sdesc"></div></div>
+   </div>
+   <div class="row" id="offOpts">
+    <span class="note">Độ khó BOT:</span>
+    <button class="seg on" data-diff="easy">Dễ</button><button class="seg" data-diff="normal">Thường</button><button class="seg" data-diff="hard" id="segHard">🔒 Khó</button>
+   </div>
+   <div class="row"><button class="mid blue" id="bBack">◀ QUAY LẠI</button><button class="mid green" id="bRand">🎲 NGẪU NHIÊN</button><button class="big orange" id="bFight">VÀO TRẬN!</button></div>
+  </div>
+
+  <!-- CHỌN CHẾ ĐỘ OFFLINE -->
+  <div id="offline" class="ov hidden">
+   <div class="stitle">CHƠI OFFLINE</div>
+   <div class="shint">Không cần mạng · không tính bảng xếp hạng online</div>
+   <div class="row">
+    <div class="col"><button class="big orange" id="bPractice">🤖 LUYỆN TẬP VỚI BOT</button><div class="note">3 mức khó · thắng để nhận xu</div></div>
+    <div class="col"><button class="big blue" id="b2p">👥 2 NGƯỜI CÙNG MÁY</button><div class="note" id="note2p">Cùng 1 bàn phím</div></div>
+   </div>
+   <button class="mid gray" id="bOffBack">◀ QUAY LẠI</button>
+  </div>
+
+  <!-- KHU CHỜ (lobby HUD) -->
+  <div id="lobbyHud" class="hidden">
+   <div class="lb-box">
+    <div class="lb-mode" id="lbMode"></div>
+    <div class="lb-count" id="lbCount"></div>
+    <div class="lb-timer" id="lbTimer"></div>
+    <div class="lb-status" id="lbStatus"></div>
+    <div id="lbTeams"></div>
+    <div class="row sm">
+     <button class="sm-btn green" id="bLbReady">✅ Sẵn sàng</button>
+     <button class="sm-btn red" id="bLbCancel">✖ Huỷ tìm trận</button>
+    </div>
+    <div class="note tiny">Đi lại (A/D, joystick), nhảy, vẫy tay (S / 1–4) trong lúc chờ. Đủ người hoặc hết giờ chờ sẽ vào trận, thiếu thì có BOT.</div>
+   </div>
+   <div class="emote-bar" id="emoteBar"></div>
+  </div>
+
+  <!-- PHÒNG -->
+  <div id="rooms" class="ov hidden">
+   <div class="stitle">🏠 PHÒNG</div>
+   <div class="rooms-grid">
+    <div class="rcard">
+     <div class="rc-h">➕ Tạo phòng mới</div>
+     <div class="rc-row"><span class="rc-l">Chế độ</span><div class="segs"><button class="seg on" data-rmode="1v1">⚔️ 1v1</button><button class="seg" data-rmode="2v2">👥 2v2</button></div></div>
+     <div class="rc-row"><span class="rc-l">Hiển thị</span><div class="segs"><button class="seg on" data-rpub="1">🌏 Công khai</button><button class="seg" data-rpub="0">🔒 Riêng tư</button></div></div>
+     <button class="mid orange wide" id="bRoomNew">Tạo phòng</button>
+    </div>
+    <div class="rcard">
+     <div class="rc-h">🔑 Vào bằng mã</div>
+     <input id="roomCodeIn" class="inp code-in" maxlength="6" placeholder="VD: AB12CD" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Mã phòng">
+     <button class="mid blue wide" id="bRoomJoin">Vào phòng</button>
+     <div class="rc-hint">Hoặc mở link mời bạn bè gửi cho bạn.</div>
+    </div>
+   </div>
+   <div class="rcard list-card">
+    <div class="rc-h">🌏 Phòng công khai <button class="icon-btn" id="bRoomsRefresh" title="Làm mới" aria-label="Làm mới">⟳</button></div>
+    <div id="roomList"><div class="empty">Đang tải danh sách…</div></div>
+   </div>
+   <button class="mid gray" id="bRoomsBack">◀ QUAY LẠI</button>
+  </div>
+  <div id="room" class="ov hidden">
+   <div class="stitle">PHÒNG <span id="roomCodeTxt" class="code"></span></div>
+   <div class="shint" id="roomInfo"></div>
+   <div class="teams" id="roomTeams"></div>
+   <div class="row sm" id="roomHostOpts">
+    <select id="roomMode" class="inp sel"><option value="1v1">1v1</option><option value="2v2">2v2</option></select>
+    <label class="chk"><input type="checkbox" id="roomPub2"> Công khai</label>
+    <span class="note">BOT:</span><select id="roomBot" class="inp sel"><option value="easy">Dễ</option><option value="normal">Thường</option><option value="hard">Khó</option></select>
+   </div>
+   <div class="row">
+    <button class="mid gray" id="bRoomCopy">📋 Link mời</button>
+    <button class="mid green" id="bRoomReady">✅ Sẵn sàng</button>
+    <button class="big orange" id="bRoomStart">▶ BẮT ĐẦU</button>
+    <button class="mid red" id="bRoomLeave">Rời phòng</button>
+   </div>
+   <div class="note tiny">Phòng riêng/phòng có BOT không tính bảng xếp hạng (chống farm điểm).</div>
+  </div>
+
+  <!-- TẠM DỪNG / MENU CÁ NHÂN -->
+  <div id="pause" class="ov hidden">
+   <div class="rtitle" id="pauseTitle">TẠM DỪNG</div>
+   <div class="shint" id="pauseHint"></div>
+   <div class="row"><button class="mid orange" id="bResume">▶ TIẾP TỤC</button><button class="mid green" id="bPauseSettings">⚙️ CÀI ĐẶT</button><button class="mid blue" id="bQuit">VỀ MENU</button></div>
+  </div>
+
+  <!-- KẾT QUẢ -->
+  <div id="result" class="ov hidden">
+   <div class="rtitle" id="rTitle"></div>
+   <div class="rsub" id="rSub"></div>
+   <div class="unlock hidden" id="rUnlock">🔓 Đã mở khoá BOT KHÓ!</div>
+   <table class="rtable hidden" id="rTable"><thead><tr><th>Người chơi</th><th>Đội</th><th>Kết quả</th><th>Sát thương</th><th>K.O.</th><th>Né đẹp</th><th>Điểm</th></tr></thead><tbody></tbody></table>
+   <div class="note" id="rNote"></div>
+   <div class="row" style="margin-top:.4em"><button class="big orange" id="bAgain">ĐẤU LẠI</button><button class="mid blue" id="bMenu">VỀ MENU</button></div>
+  </div>
+
+  <!-- BẢNG XẾP HẠNG -->
+  <div id="leader" class="ov hidden">
+   <div class="stitle">🏆 BẢNG XẾP HẠNG</div>
+   <div class="row sm">
+    <button class="seg on" data-lbp="day">Ngày</button><button class="seg" data-lbp="week">Tuần</button><button class="seg" data-lbp="month">Tháng</button>
+    <span class="sp"></span>
+    <button class="seg on" data-lbb="default">1v1</button><button class="seg" data-lbb="2v2">2v2</button>
+   </div>
+   <div class="card list" id="lbList"></div>
+   <div class="note tiny" id="lbNote">Điểm cao nhất của mỗi người trong kỳ (giờ Việt Nam, tuần bắt đầu thứ Hai). Chỉ trận đấu nhanh toàn người thật mới được xếp hạng.</div>
+   <button class="mid gray" id="bLbBack">◀ QUAY LẠI</button>
+  </div>
+
+  <!-- HỒ SƠ -->
+  <div id="profile" class="ov hidden">
+   <div class="stitle">👤 HỒ SƠ</div>
+   <div class="card prof">
+    <div class="row sm"><input id="nameIn" class="inp" maxlength="16" autocomplete="off" spellcheck="false"><button class="sm-btn green" id="bNameSave">Lưu tên</button></div>
+    <div id="accBox"></div>
+    <div id="statsBox" class="stats"></div>
+    <div class="ph"><b>Lịch sử trận</b></div>
+    <div id="histBox" class="list"></div>
+   </div>
+   <button class="mid gray" id="bProfBack">◀ QUAY LẠI</button>
+  </div>
+
+  <!-- CÀI ĐẶT -->
+  <div id="settings" class="ov hidden">
+   <div class="stitle">⚙️ CÀI ĐẶT</div>
+   <div class="card set">
+    <label>🎵 Nhạc <input type="range" min="0" max="1" step="0.05" id="volMusic"></label>
+    <label>💥 Hiệu ứng <input type="range" min="0" max="1" step="0.05" id="volSfx"></label>
+    <label>🎙️ Voice <input type="range" min="0" max="1" step="0.05" id="volVoice"></label>
+    <label class="chk"><input type="checkbox" id="optDuck"> Giảm nhạc khi đồng đội nói</label>
+    <label class="chk"><input type="checkbox" id="optPtt"> Nhấn để nói (push-to-talk) — phím <button class="kbd-btn" id="pttKeyBtn"></button></label>
+    <label class="chk"><input type="checkbox" id="optTap"> Chạm sân để di chuyển (điện thoại)</label>
+    <label class="chk"><input type="checkbox" id="optLowFx"> Giảm hiệu ứng (máy yếu)</label>
+    <div class="ph"><b>Phím điều khiển</b> <button class="link" id="bKeysReset">Mặc định</button></div>
+    <div id="keyList" class="keys"></div>
+   </div>
+   <button class="mid gray" id="bSetBack">◀ QUAY LẠI</button>
+  </div>
+
+  <!-- CÁCH CHƠI -->
+  <div id="help" class="ov hidden">
+   <div class="card">
+    <h2>CÁCH CHƠI</h2>
+    <p><b>PC:</b> <span class="kbd">A</span><span class="kbd">D</span> đi · <span class="kbd">W</span>/<span class="kbd">Space</span> nhảy · <span class="kbd">J</span> Lướt Né · <span class="kbd">K</span> Đá · <span class="kbd">L</span> Phi Dép · <span class="kbd">U</span> Nhổ Dãi · <span class="kbd">S</span> vẫy tay (chỉ biểu cảm, game 2D không có ngồi) · <span class="kbd">1</span>–<span class="kbd">4</span> biểu cảm · <span class="kbd">Enter</span> chat · <span class="kbd">V</span> nhấn-để-nói. Đổi phím trong Cài đặt.</p>
+    <p><b>2 người cùng máy:</b> P2 dùng <span class="kbd">←</span><span class="kbd">→</span> đi · <span class="kbd">↑</span> nhảy · <span class="kbd">1</span>/<span class="kbd">,</span> Né · <span class="kbd">2</span>/<span class="kbd">.</span> Đá · <span class="kbd">3</span>/<span class="kbd">/</span> Dép · <span class="kbd">4</span>/<span class="kbd">'</span> Nhổ</p>
+    <p><b>Điện thoại:</b> cần gạt bên trái để đi (gạt lên để nhảy), nút bên phải ra chiêu; chạm vào chỗ trống trên sân để đi tới đó.</p>
+    <p><b>Mẹo:</b> Né đúng lúc đối thủ ra đòn → <b>NÉ ĐẸP!</b> hồi chiêu Né ngay. Nhảy lên rồi đá = <b>Cước Bay</b> làm đối thủ ngã chổng vó. Ăn 3 đòn liên tiếp cũng ngã! <b>Nhổ Dãi</b> làm đối thủ chậm chạp, dãi rơi xuống đất thành vũng — ai đi qua là <b>TRƯỢT DÃI</b> (cả mình cũng trượt!). Đứng yên thì không sao.</p>
+    <p>Mỗi hiệp 60 giây · thắng <b>2/3 hiệp</b>. 2v2: hạ cả đội đối phương để thắng hiệp; hết giờ so tổng % máu; hoà liên tiếp tối đa 5 hiệp.</p>
+    <p><b>Điểm xếp hạng</b> (chỉ đấu nhanh toàn người thật): thắng 500 · hoà 200 · mỗi hiệp thắng 100 · mỗi HP gây cho người thật 1 · mỗi K.O. 50 · mỗi Né đẹp 15 (tối đa 10).</p>
+    <div style="text-align:center;margin-top:.6em"><button class="mid orange" id="bHelpOk">ĐÃ HIỂU!</button></div>
+   </div>
+  </div>
+
+  <!-- KHỞI ĐỘNG / MẤT KẾT NỐI -->
+  <div id="boot" class="ov">
+   <div class="title small">ĐẠI CHIẾN<br>VÕ MỒM</div>
+   <div class="sub" id="bootMsg">Đang tải…</div>
+   <button class="mid orange hidden" id="bBootRetry">Thử lại</button>
+   <button class="mid gray hidden" id="bBootOffline">Chơi offline</button>
+  </div>
+ </div>
+
+ <!-- CHAT (DOM ngoài canvas, render text an toàn) -->
+ <div id="chat" class="hidden">
+  <div class="ch-tabs"><button data-ch="world" class="on">🌏 Thế giới</button><button data-ch="team">🛡️ Đội</button><button data-ch="room">🏠 Phòng</button><button id="chatClose" title="Thu gọn">✕</button></div>
+  <div id="chatLog" aria-live="polite"></div>
+  <form id="chatForm" autocomplete="off"><input id="chatIn" maxlength="200" placeholder="Nhập tin nhắn… (Enter gửi, Esc đóng)" enterkeyhint="send"><button type="submit">Gửi</button></form>
+ </div>
+ <div id="chatMenu" class="hidden"></div>
+ <div id="chatPeek" class="hidden" aria-hidden="true"></div>
+
+ <!-- VOICE -->
+ <div id="voicePanel" class="hidden">
+  <div class="vp-head"><span class="vp-title">🎙️ Voice đồng đội</span><button class="x" id="voiceClose" aria-label="Đóng">✕</button></div>
+  <div class="vp-status"><i id="voiceDot" class="sdot"></i><span id="voiceStatus">Chưa tham gia</span></div>
+  <button class="vp-join" id="bVoiceJoin">🎧 Tham gia voice</button>
+  <div class="vp-row" id="voiceCtl"><button class="pill" id="bMic">🎤 Mic: Bật</button><button class="pill red" id="bVoiceLeave">Rời voice</button></div>
+  <label class="vp-field"><span>Micro</span><select id="micSel" class="inp sel"></select></label>
+  <div id="voicePeers"></div>
+  <div class="vp-foot">🔒 Chỉ đồng đội cùng đội nghe được · Không ghi âm · Không bắt buộc để chơi</div>
+ </div>
+
+ <!-- ĐIỀU KHIỂN CẢM ỨNG -->
+ <div id="touch" class="hidden">
+  <div id="joyZone"></div>
+  <div id="joy"><div id="knob"></div></div>
+  <button class="tb" id="tbD" data-a="d"><div class="cd"></div><span><i>💨</i>Né</span></button>
+  <button class="tb" id="tbK" data-a="k"><div class="cd"></div><span><i>🦶</i>Đá</span></button>
+  <button class="tb" id="tbS" data-a="s"><div class="cd"></div><span><i>🩴</i>Dép</span></button>
+  <button class="tb" id="tbP" data-a="p"><div class="cd"></div><span><i>💦</i>Nhổ</span></button>
+  <button class="tb" id="tbJ" data-a="j"><div class="cd"></div><span><i>⬆️</i>Nhảy</span></button>
+  <button class="tb small" id="tbE" data-a="e"><span><i>👋</i></span></button>
+  <button class="tb small hidden" id="tbV" data-a="v"><span><i>🎙️</i>Nói</span></button>
+ </div>
+
+ <div id="toasts"></div>
+ <div id="modal" class="hidden"><div class="card" id="modalCard"></div></div>
+ <div id="rotate" class="hidden"><div>📱↻<br>Xoay ngang màn hình<br>để đánh đã tay hơn!<br><span class="tiny" id="rotateHint"></span><br><button class="orange" id="bPortrait">Vẫn chơi màn dọc</button></div></div>
+</div>
+<noscript>Cần bật JavaScript để chơi.</noscript>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

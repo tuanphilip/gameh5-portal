@@ -1,0 +1,440 @@
+import os
+import json
+
+PORTAL_DIR = '/root/game-portal-project/public'
+
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameH5 - Kho Game Online Miễn Phí Hay Nhất</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e73be;
+      --primary-hover: #165b98;
+      --bg: #0d131a;
+      --card-bg: #141d26;
+      --card-border: #223242;
+      --text: #ffffff;
+      --text-muted: #8e9da8;
+      --badge-hot: #e53935;
+      --badge-viet: #2e7d32;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      font-family: 'Roboto Condensed', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* HEADER (Style GameH5.io) */
+    #header {
+      background-color: var(--primary);
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    #header_wrap {
+      max-width: 1200px;
+      height: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .logo a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .logo span.tag {
+      background: #ffeb3b;
+      color: #000;
+      font-size: 13px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .header-search {
+      flex: 1;
+      max-width: 380px;
+      margin: 0 20px;
+    }
+    .header-search input {
+      width: 100%;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 0 16px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .header-search input::placeholder { color: rgba(255,255,255,0.7); }
+    .header-search input:focus {
+      background: #fff;
+      color: #000;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-tab-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .nav-tab-btn:hover, .nav-tab-btn.active {
+      background: #fff;
+      color: var(--primary);
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 16px;
+      flex: 1;
+    }
+    .sec-title {
+      font-size: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+    .sec-title b { color: #ffeb3b; }
+
+    /* GAME GRID (GameH5.io item style) */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+      gap: 14px;
+    }
+    .game-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+    .game-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+      border-color: var(--primary);
+    }
+    .thumb-wrap {
+      width: 100%;
+      aspect-ratio: 1/1;
+      position: relative;
+      background: #1c2733;
+      overflow: hidden;
+    }
+    .thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 4px;
+      text-transform: uppercase;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+    .badge.hot { background: var(--badge-hot); }
+    .badge.viet { background: var(--badge-viet); }
+
+    .play-hover-btn {
+      position: absolute;
+      inset: 0;
+      background: rgba(30, 115, 190, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .game-card:hover .play-hover-btn { opacity: 1; }
+
+    .game-info {
+      padding: 8px 6px;
+      text-align: center;
+      background: var(--card-bg);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-title {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #e0e6ed;
+    }
+
+    /* PLAYER MODAL / IFRAME OVERLAY */
+    #player-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+    }
+    #player-modal.active { display: flex; }
+    .player-header {
+      height: 50px;
+      background: #141d26;
+      border-bottom: 1px solid #223242;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .player-title { font-size: 17px; font-weight: bold; }
+    .player-actions { display: flex; gap: 10px; }
+    .btn-action {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-close {
+      background: #e53935;
+    }
+    .iframe-container {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    #game-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #090e13;
+      border-top: 1px solid var(--card-border);
+      padding: 24px 16px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER (GameH5.io Clone) -->
+  <header id="header">
+    <div id="header_wrap">
+      <div class="logo">
+        <a href="/" onclick="filterGames('all'); return false;">GAMEH5<span class="tag">PRO</span></a>
+      </div>
+      <div class="header-search">
+        <input type="text" id="search-input" placeholder="Tìm kiếm trong 255 game..." oninput="handleSearch(this.value)">
+      </div>
+      <div class="nav-tabs">
+        <button class="nav-tab-btn active" onclick="filterGames('all')">Tất cả (255)</button>
+        <button class="nav-tab-btn" onclick="filterGames('viet')">🇻🇳 Game Việt (43)</button>
+        <button class="nav-tab-btn" onclick="filterGames('action')">Hành Động</button>
+        <button class="nav-tab-btn" onclick="filterGames('puzzle')">Trí Tuệ</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="container">
+    <div class="sec-title">
+      <span id="category-title">DANH SÁCH GAME</span>
+      <span id="game-count" style="font-size: 14px; color: var(--text-muted);">255 Game</span>
+    </div>
+    <div class="games-grid" id="games-grid">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- PLAYER MODAL -->
+  <div id="player-modal">
+    <div class="player-header">
+      <div class="player-title" id="player-title">Tên Trò Chơi</div>
+      <div class="player-actions">
+        <button class="btn-action" onclick="toggleFullscreen()">Toàn Màn Hình</button>
+        <button class="btn-action btn-close" onclick="closePlayer()">Đóng ✕</button>
+      </div>
+    </div>
+    <div class="iframe-container">
+      <iframe id="game-frame" allow="fullscreen; autoplay; gamepad; clipboard-write; microphone"></iframe>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 GameH5 Portal — Hệ thống Game H5 & WebGL Chơi Trực Tuyến Nhanh Nhất</p>
+    <p style="margin-top: 6px;">Tự host 43 Game Việt (JOYDIGI) & Tích hợp 212 Game Online Toàn Cầu</p>
+  </footer>
+
+  <script>
+    let ALL_GAMES = [];
+    let currentFilter = 'all';
+
+    async function init() {
+      try {
+        const res = await fetch('/data/games.json');
+        ALL_GAMES = await res.json();
+        renderGames(ALL_GAMES);
+      } catch (e) {
+        console.error('Lỗi tải games.json', e);
+      }
+    }
+
+    function renderGames(list) {
+      const grid = document.getElementById('games-grid');
+      document.getElementById('game-count').innerText = `${list.length} Game`;
+      if (!list.length) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #8e9da8;">Không tìm thấy game phù hợp.</p>';
+        return;
+      }
+      grid.innerHTML = list.map(g => {
+        let playSrc = '';
+        if (g.is_viet) {
+          playSrc = `/games/${g.slug}/index.html`;
+        } else {
+          playSrc = g.direct_game_url || g.play_url;
+        }
+
+        const badge = g.is_viet 
+          ? '<span class="badge viet">Việt Nam</span>' 
+          : '<span class="badge hot">HOT</span>';
+
+        return `
+          <div class="game-card" onclick="openGame('${g.title.replace(/'/g, "\\'")}', '${playSrc}')">
+            <div class="thumb-wrap">
+              <img src="${g.thumbnail || '/placeholder.png'}" loading="lazy" alt="${g.title}">
+              ${badge}
+              <div class="play-hover-btn">CHƠI</div>
+            </div>
+            <div class="game-info">
+              <div class="game-title" title="${g.title}">${g.title}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterGames(type) {
+      currentFilter = type;
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (type === 'all') {
+        renderGames(ALL_GAMES);
+        document.getElementById('category-title').innerText = 'TẤT CẢ GAME';
+      } else if (type === 'viet') {
+        const filtered = ALL_GAMES.filter(g => g.is_viet);
+        renderGames(filtered);
+        document.getElementById('category-title').innerText = 'KHO GAME VIỆT (JOYDIGI STUDIO)';
+      } else if (type === 'action') {
+        const filtered = ALL_GAMES.filter(g => (g.categories || []).some(c => c.toLowerCase().includes('hành động') || c.toLowerCase().includes('bắn')));
+        renderGames(filtered);
+        document.getElementById('category-title').innerText = 'GAME HÀNH ĐỘNG / BẮN SÚNG';
+      } else if (type === 'puzzle') {
+        const filtered = ALL_GAMES.filter(g => (g.categories || []).some(c => c.toLowerCase().includes('trí tuệ') || c.toLowerCase().includes('giải đố') || c.toLowerCase().includes('cờ')));
+        renderGames(filtered);
+        document.getElementById('category-title').innerText = 'GAME TRÍ TUỆ / CHIẾN THUẬT';
+      }
+    }
+
+    function handleSearch(q) {
+      const kw = q.trim().toLowerCase();
+      if (!kw) {
+        renderGames(ALL_GAMES);
+        return;
+      }
+      const filtered = ALL_GAMES.filter(g => g.title.toLowerCase().includes(kw) || (g.slug && g.slug.toLowerCase().includes(kw)));
+      renderGames(filtered);
+      document.getElementById('category-title').innerText = `KẾT QUẢ TÌM KIẾM: "${q}"`;
+    }
+
+    function openGame(title, src) {
+      document.getElementById('player-title').innerText = title;
+      const frame = document.getElementById('game-frame');
+      frame.src = src;
+      document.getElementById('player-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePlayer() {
+      const frame = document.getElementById('game-frame');
+      frame.src = '';
+      document.getElementById('player-modal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    function toggleFullscreen() {
+      const frame = document.getElementById('game-frame');
+      if (frame.requestFullscreen) {
+        frame.requestFullscreen();
+      } else if (frame.webkitRequestFullscreen) {
+        frame.webkitRequestFullscreen();
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
+"""
+
+with open(os.path.join(PORTAL_DIR, 'index.html'), 'w', encoding='utf-8') as f:
+    f.write(HTML_TEMPLATE)
+
+print("Đã tạo giao diện Portal GameH5.io thành công tại", os.path.join(PORTAL_DIR, 'index.html'))

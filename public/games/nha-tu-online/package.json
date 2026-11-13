@@ -1,0 +1,39 @@
+{
+  "name": "di-tu-online-3d",
+  "version": "2.0.0",
+  "description": "Đi Tù Online 3D – nhà tù hoạt hình nhiều người chơi trên trình duyệt + chế độ live TikTok",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "node server/index.js",
+    "build": "vite build",
+    "start": "node server/index.js --prod",
+    "test": "node --test \"test/**/*.test.js\"",
+    "sounds": "node scripts/generate-sounds.js",
+    "icons": "node scripts/generate-icons.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NDHxBoo/tiktok-live.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NDHxBoo/tiktok-live/issues"
+  },
+  "homepage": "https://github.com/NDHxBoo/tiktok-live#readme",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "socket.io": "^4.8.4",
+    "socket.io-client": "^4.8.1",
+    "three": "^0.170.0",
+    "tiktok-live-connector": "^2.4.4"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "vite": "^6.4.5"
+  },
+  "type": "module"
+}

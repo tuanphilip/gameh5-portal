@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Splash Wars HiHi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;-webkit-touch-callout:none;overscroll-behavior:none;background:#bfe4ff;font-family:'Baloo 2',system-ui,sans-serif;color:#fff}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hide{display:none!important}
+#hud{position:fixed;inset:0;pointer-events:none}
+#top{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;width:min(560px,92vw)}
+#topRow{display:flex;align-items:center;gap:10px;width:100%;justify-content:center}
+.roster{display:flex;gap:4px}
+.ri{width:30px;height:30px;border-radius:9px;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;box-shadow:0 2px 0 rgba(0,0,0,.25);position:relative}
+.ri.dead{filter:grayscale(1) brightness(.6)}
+.ri.dead::after{content:'✕';position:absolute;font-size:20px;color:#fff}
+.ri.me{outline:3px solid #ffe14d}
+#timer{background:#1d2340;border:3px solid #fff;border-radius:14px;padding:0 14px;font-size:26px;font-weight:800;min-width:92px;text-align:center;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+#timer.warn{background:#d62839;animation:pulse .6s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+#cov{width:100%;height:16px;border-radius:10px;background:#e9e1cf;border:3px solid #fff;overflow:hidden;display:flex;position:relative;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+#covA{background:#ff7a12;height:100%;transition:width .3s}
+#covMid{flex:1}
+#covB{background:#9446ff;height:100%;transition:width .3s}
+#covTxt{position:absolute;inset:0;display:flex;justify-content:space-between;padding:0 8px;font-size:12px;font-weight:800;line-height:10px;color:#1d2340}
+#mini{position:absolute;top:8px;right:8px;width:180px;height:135px;border:3px solid #fff;border-radius:10px;background:#d8c8a6;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+#feed{position:absolute;top:152px;right:8px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fi{background:rgba(29,35,64,.85);padding:2px 10px;border-radius:9px;font-size:14px;font-weight:700;animation:fin .25s}
+@keyframes fin{from{transform:translateX(30px);opacity:0}}
+#stats{position:absolute;left:12px;bottom:12px;display:flex;gap:10px;align-items:flex-end}
+.bar{width:150px}
+.bar label{font-size:13px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.bt{height:16px;border-radius:9px;background:rgba(0,0,0,.35);border:3px solid #fff;overflow:hidden}
+.bt i{display:block;height:100%;width:100%;transition:width .1s}
+#hpF{background:#3ccf5a}
+#inkF{background:#ff7a12}
+#spF{background:linear-gradient(90deg,#ffd23f,#ff4fa3)}
+#spBox.ready .bt{animation:glow .5s infinite alternate}
+@keyframes glow{to{box-shadow:0 0 14px 4px #ffe14d}}
+#cross{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border:3px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.25)}
+#cross::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;background:#fff;border-radius:50%}
+#cross.low{border-color:#ff4d4d}
+#msg{position:absolute;left:0;right:0;top:30%;text-align:center;font-size:clamp(34px,7vw,72px);font-weight:800;color:#fff;-webkit-text-stroke:3px #1d2340;text-shadow:0 6px 0 rgba(0,0,0,.25);opacity:0;transition:opacity .2s}
+#sub{position:absolute;left:0;right:0;top:calc(30% + 80px);text-align:center;font-size:22px;font-weight:800;color:#1d2340;opacity:0;transition:opacity .2s}
+#help{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(29,35,64,.75);padding:3px 12px;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap}
+#help b{background:#fff;color:#1d2340;border-radius:4px;padding:0 4px;margin:0 2px}
+#inkWarn{position:absolute;left:50%;top:calc(50% + 26px);transform:translateX(-50%);font-weight:800;font-size:16px;color:#fff;-webkit-text-stroke:1px #1d2340}
+#deadOv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(transparent 30%,rgba(29,35,64,.55));font-weight:800;text-align:center}
+#deadOv h2{font-size:38px;-webkit-text-stroke:2px #1d2340}
+#deadOv p{font-size:22px}
+.scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,24,48,.45);z-index:20;padding:12px}
+.card{background:#fffaf0;color:#1d2340;border-radius:22px;border:5px solid #1d2340;box-shadow:0 10px 0 rgba(0,0,0,.25);padding:20px 24px;max-width:560px;width:100%;max-height:96vh;overflow:auto;text-align:center}
+.card h1{font-size:clamp(28px,6vw,44px);line-height:1;color:#ff7a12;-webkit-text-stroke:2px #1d2340;margin-bottom:2px}
+.card h1 span{color:#9446ff}
+.tag{font-weight:700;opacity:.8;margin-bottom:12px}
+.card input{font:inherit;font-size:20px;font-weight:700;padding:6px 12px;border-radius:12px;border:3px solid #1d2340;width:100%;text-align:center;margin:4px 0 10px;-webkit-user-select:text;user-select:text}
+.lbl{font-weight:800;font-size:15px;text-align:left}
+.opts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0 12px}
+.opt{border:3px solid #1d2340;background:#fff;border-radius:12px;padding:3px 10px;font:inherit;font-weight:700;cursor:pointer;color:#1d2340}
+.opt.on{background:#ffe14d}
+.btn{font:inherit;font-size:24px;font-weight:800;color:#fff;background:#ff7a12;border:4px solid #1d2340;border-radius:16px;padding:6px 26px;cursor:pointer;box-shadow:0 5px 0 #1d2340;margin:4px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1d2340}
+.btn.alt{background:#9446ff}
+.how{font-size:14px;text-align:left;background:#f1e8d4;border-radius:12px;padding:8px 12px;margin-top:12px;line-height:1.45}
+.how b{color:#c4520a}
+#resTitle{font-size:clamp(30px,7vw,52px);font-weight:800;-webkit-text-stroke:2px #1d2340;line-height:1.05}
+.rbar{display:flex;height:42px;border-radius:14px;overflow:hidden;border:4px solid #1d2340;margin:10px 0;font-weight:800;font-size:20px}
+.rbar div{display:flex;align-items:center;justify-content:center;transition:width 1.4s cubic-bezier(.2,.8,.2,1);width:0;white-space:nowrap;overflow:hidden;color:#fff;-webkit-text-stroke:1px #1d2340}
+table{width:100%;border-collapse:collapse;font-size:15px;margin:6px 0 10px}
+td,th{padding:3px 4px;border-bottom:2px dashed #e0d5bd}
+th{font-size:13px;opacity:.7}
+tr.me td{background:#fff3b0;font-weight:800}
+.dot{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:4px;vertical-align:middle;border:2px solid #1d2340}
+/* touch */
+#touch{position:fixed;inset:0;z-index:5;pointer-events:none}
+#touch>*{pointer-events:auto}
+#lookZone{position:absolute;right:0;top:0;width:58%;height:100%}
+#joyZone{position:absolute;left:0;bottom:0;width:42%;height:70%}
+#joyBase{position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.6);pointer-events:none;display:none}
+#joyKnob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border-radius:50%;background:rgba(255,255,255,.75)}
+.tb{position:absolute;border-radius:50%;border:4px solid #fff;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;box-shadow:0 4px 0 rgba(0,0,0,.3);font-size:14px}
+#tFire{right:calc(22px + env(safe-area-inset-right,0px));bottom:90px;width:92px;height:92px;background:rgba(255,122,18,.85);font-size:19px}
+#tSwim{right:calc(128px + env(safe-area-inset-right,0px));bottom:30px;width:70px;height:70px;background:rgba(0,170,200,.8)}
+#tJump{right:calc(22px + env(safe-area-inset-right,0px));bottom:12px;width:62px;height:62px;background:rgba(60,207,90,.8)}
+#tBomb{right:calc(124px + env(safe-area-inset-right,0px));bottom:118px;width:62px;height:62px;background:rgba(29,35,64,.8)}
+#tSpec{right:calc(36px + env(safe-area-inset-right,0px));bottom:196px;width:62px;height:62px;background:rgba(150,150,150,.7)}
+#tSpec.ready{background:linear-gradient(135deg,#ffd23f,#ff4fa3);animation:glow .5s infinite alternate}
+#tPause{position:absolute;left:calc(8px + env(safe-area-inset-left,0px));top:8px;width:44px;height:44px;border-radius:12px;border:3px solid #fff;background:rgba(29,35,64,.7);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+/* menu preview */
+.card.wide{max-width:760px}
+.mrow{display:flex;gap:16px;align-items:stretch;text-align:left}
+.pvBox{flex:0 0 220px;position:relative;border-radius:18px;border:3px solid #1d2340;background:radial-gradient(circle at 50% 70%,#fff6d8,#ffd9a8 55%,#f7b67a);overflow:hidden;min-height:270px;touch-action:none;cursor:grab}
+.pvBox canvas{position:absolute;inset:0;width:100%;height:100%}
+.pvHint{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:12px;font-weight:800;color:#1d2340;opacity:.6;pointer-events:none}
+.pvTeam{position:absolute;left:8px;top:8px;background:#ff7a12;color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:0 8px;border:2px solid #1d2340}
+.mcol{flex:1;min-width:0}
+.mcol .opts{justify-content:flex-start}
+.hc{width:30px;height:30px;border-radius:50%;border:3px solid #1d2340;cursor:pointer;padding:0}
+.hc.on{outline:4px solid #ffe14d;outline-offset:1px}
+details.how summary{cursor:pointer;font-weight:800;color:#c4520a}
+#rotate{position:fixed;inset:0;z-index:60;background:#1d2340;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:22px;padding:20px;gap:12px}
+#rotate .ph{font-size:64px;animation:rot 1.6s infinite ease-in-out}
+@keyframes rot{0%,20%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+#tFull{position:absolute;left:calc(58px + env(safe-area-inset-left,0px));top:8px;width:44px;height:44px;border-radius:12px;border:3px solid #fff;background:rgba(29,35,64,.7);color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center}
+@media (max-width:560px){.mrow{flex-direction:column}.pvBox{flex-basis:auto;min-height:220px}}
+@media (max-height:520px){.card{padding:10px 14px}.card h1{font-size:26px}.tag{margin-bottom:6px;font-size:13px}.pvBox{min-height:200px;flex-basis:180px}.card input{font-size:16px;padding:3px 8px;margin:2px 0 6px}.opts{margin:2px 0 6px;gap:4px}.opt{padding:1px 8px;font-size:14px}.btn{font-size:20px;padding:3px 18px}.lbl{font-size:13px}.how{display:none}}
+/* mobile HUD */
+body.mob #help{display:none}
+body.mob #top{width:min(420px,60vw);top:4px}
+body.mob .ri{width:22px;height:22px;font-size:10px;border-width:2px;border-radius:6px}
+body.mob #timer{font-size:18px;min-width:64px;padding:0 8px;border-radius:10px}
+body.mob #cov{height:12px}
+body.mob #covTxt{font-size:10px;line-height:7px}
+body.mob #mini{width:120px;height:90px;top:4px;right:calc(4px + env(safe-area-inset-right,0px))}
+body.mob #feed{top:98px;right:4px}
+body.mob .fi{font-size:11px;padding:1px 6px}
+body.mob #stats{left:calc(110px + env(safe-area-inset-left,0px));top:6px;bottom:auto;flex-direction:column;gap:2px;align-items:flex-start}
+body.mob .bar{width:96px}
+body.mob .bar label{font-size:10px;line-height:1}
+body.mob .bt{height:9px;border-width:2px}
+body.mob #spLbl{white-space:nowrap}
+body.mob #msg{top:24%}
+body.mob #inkWarn{font-size:13px}
+body.mob .tb{user-select:none;-webkit-user-select:none;touch-action:none}
+body.mob #tFire{width:104px;height:104px;font-size:21px}
+#langRow{display:flex;justify-content:flex-end;margin:-8px -10px 2px 0}
+#langSel{font:inherit;font-weight:700;font-size:14px;border:3px solid #1d2340;border-radius:10px;padding:1px 6px;background:#fff;color:#1d2340;cursor:pointer;max-width:200px}
+.card h1 small{font-size:.5em;color:#1d2340;-webkit-text-stroke:0;vertical-align:middle}
+.sub2{font-weight:800;color:#c4520a;font-size:17px;margin-top:2px}
+#joyBase.idle{opacity:.38}
+.setRow{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-weight:800;flex-wrap:wrap}
+.setRow input[type=range]{width:160px;accent-color:#ff7a12}
+@media (max-height:420px){body.mob #tFire{width:86px;height:86px;bottom:76px}body.mob #tSpec{bottom:170px}body.mob #tBomb{bottom:104px}}
+#loadErr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1d2340;color:#fff;font-size:20px;text-align:center;padding:20px;z-index:99}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud" class="hide">
+  <div id="top">
+    <div id="topRow"><div class="roster" id="rosA"></div><div id="timer">3:00</div><div class="roster" id="rosB"></div></div>
+    <div id="cov"><div id="covA"></div><div id="covMid"></div><div id="covB"></div><div id="covTxt"><span id="pA">0%</span><span id="pB">0%</span></div></div>
+  </div>
+  <canvas id="mini" width="180" height="135"></canvas>
+  <div id="feed"></div>
+  <div id="cross"></div>
+  <div id="inkWarn" class="hide"></div>
+  <div id="stats">
+    <div class="bar"><label data-i="hp"></label><div class="bt"><i id="hpF"></i></div></div>
+    <div class="bar"><label data-i="ink"></label><div class="bt"><i id="inkF"></i></div></div>
+    <div class="bar" id="spBox"><label id="spLbl"></label><div class="bt"><i id="spF"></i></div></div>
+  </div>
+  <div id="help" data-ih="help"></div>
+  <div id="msg"></div><div id="sub"></div>
+  <div id="deadOv" class="hide"><h2 id="deadT"></h2><p id="deadC"></p></div>
+</div>
+
+<div id="touch" class="hide">
+  <div id="lookZone"></div>
+  <div id="joyZone"></div>
+  <div id="joyBase"><div id="joyKnob"></div></div>
+  <div class="tb" id="tFire" data-ih="tFire"></div>
+  <div class="tb" id="tSwim" data-ih="tSwim"></div>
+  <div class="tb" id="tJump" data-ih="tJump"></div>
+  <div class="tb" id="tBomb" data-ih="tBomb"></div>
+  <div class="tb" id="tSpec" data-ih="tSpec"></div>
+  <div id="tPause">II</div>
+  <div id="tFull">⛶</div>
+</div>
+
+<div class="scr" id="menu">
+  <div class="card wide">
+    <div id="langRow"><select id="langSel" aria-label="Language"></select></div>
+    <h1>SPLASH <span>WARS</span> <small>HiHi</small></h1>
+    <div class="sub2" data-i="subtitle"></div>
+    <div class="tag" id="tagline"></div>
+    <div class="mrow">
+      <div class="pvBox" id="pvBox"><canvas id="pv"></canvas><div class="pvTeam" id="pvTeam"></div><div class="pvHint" data-i="drag"></div></div>
+      <div class="mcol">
+        <div class="lbl" data-i="name"></div>
+        <input id="nameIn" maxlength="12" placeholder="" value="">
+        <div class="lbl" data-i="hair"></div>
+        <div class="opts" id="hairOpts"></div>
+        <div class="lbl" data-i="hairC"></div>
+        <div class="opts" id="hairCOpts"></div>
+        <div class="lbl" data-i="map"></div>
+        <div class="opts" id="mapOpts"></div>
+        <div class="lbl" data-i="diff"></div>
+        <div class="opts" id="diffOpts"></div>
+        <div class="lbl" data-i="mode"></div>
+        <div class="opts" id="modeOpts"></div>
+      </div>
+    </div>
+    <button class="btn" id="playBtn" style="margin-top:8px" data-i="play"></button>
+    <div class="how" data-ih="how"></div>
+  </div>
+</div>
+
+<div id="rotate" class="hide"><div class="ph">📱</div><span data-i="rot1"></span><div style="font-size:14px;opacity:.7" data-i="rot2"></div></div>
+<div class="scr hide" id="pause">
+  <div class="card">
+    <h1 data-i="pause"></h1>
+    <div class="tag" data-i="pauseSub"></div>
+    <button class="btn" id="resumeBtn" data-i="resume"></button>
+    <button class="btn alt" id="quitBtn" data-i="toMenu"></button>
+    <div style="margin-top:8px"><button class="opt" id="musicBtn"></button> <button class="opt" id="sfxBtn"></button></div>
+    <div class="setRow"><span data-i="sens"></span><input type="range" id="sensIn" min="0.4" max="2.4" step="0.1"><b id="sensV"></b></div>
+    <div class="setRow"><span data-i="qual"></span><span class="opts" id="qualOpts" style="margin:0"></span><span id="fpsV" style="opacity:.6;font-size:13px"></span></div>
+  </div>
+</div>
+
+<div class="scr hide" id="result">
+  <div class="card">
+    <div id="resTitle"></div>
+    <div class="tag" id="resSub"></div>
+    <div class="rbar"><div id="rA" style="background:#ff7a12"></div><div id="rN" style="background:#d8c8a6;flex:1"></div><div id="rB" style="background:#9446ff"></div></div>
+    <table id="resTable"></table>
+    <button class="btn" id="againBtn" data-i="again"></button>
+    <button class="btn alt" id="menuBtn" data-i="menu"></button>
+  </div>
+</div>
+
+<script>
+const LANGS=[['vi','Tiếng Việt'],['en','English'],['pt','Português (BR)'],['es','Español'],['fr','Français'],['de','Deutsch'],['it','Italiano'],['ru','Русский'],['tr','Türkçe'],['id','Bahasa Indonesia'],['th','ไทย'],['zh','中文'],['ja','日本語'],['ko','한국어'],['hi','हिन्दी'],['ar','العربية']];
+const I18N={
+vi:{subtitle:'Đại Chiến Bắn Sơn Sân Trường',teamA:'Lớp 9A',teamB:'Lớp 9B',tagline:'{A} 🧡 đại chiến 💜 {B} · 4 đấu 4',name:'Tên của bạn',namePh:'Nhập tên…',hair:'Kiểu tóc',hairC:'Màu tóc',diff:'Độ khó bot',mode:'Chơi trên',pc:'💻 Máy tính',phone:'📱 Điện thoại',lang:'🌐 Ngôn ngữ',play:'VÀO TIẾT CHIẾN! ▶',drag:'👆 Kéo để xoay',
+hs:['Tóc ngắn','Tóc mái','Tóc dựng','Đầu đinh','Tóc dài','Mũ lưỡi trai'],hc:['Nâu','Đen','Vàng hoe','Hồng','Xanh dương','Bạc'],df:['Dễ','Vừa','Khó'],
+how:'🎯 <b>Mục tiêu:</b> trong 3 phút, tô sơn màu lớp mình lên càng nhiều sân trường càng tốt. Hết giờ, lớp nào phủ nhiều diện tích hơn thì <b>thắng</b>.<br>🎨 Bắn trúng bạn lớp kia để <b>hạ gục</b> (về chỗ hồi sinh). Giữ <b>Lướt sơn</b> trên sơn lớp mình để chạy nhanh, ẩn thân và <b>nạp sơn</b>.<br>💣 <b>Bom sơn</b> tốn nửa bình. Tô đủ sân sẽ nạp đầy <b>Bom Khổng Lồ</b>. Sơn lớp kia làm bạn chậm và mất máu, nên tránh nhé!',
+hp:'❤ Máu',ink:'🎨 Sơn',sp:'💥 Bom Khổng Lồ',spPc:'💥 SẴN SÀNG! Nhấn E',spMob:'💥 SẴN SÀNG! Bấm BOM TO',inkWarn:'HẾT SƠN! Giữ {k} trên sơn nhà để nạp',swimMob:'LƯỚT SƠN',
+help:'<b>WASD</b> chạy · <b>Chuột</b> ngắm · <b>Click</b> bắn · <b>Shift</b> lướt sơn · <b>Q</b>/<b>Chuột phải</b> bom · <b>E</b> bom khổng lồ · <b>Space</b> nhảy · <b>P</b> tạm dừng · <b>M</b> nhạc',
+deadBy:'Bạn bị {n} tô màu!',dead:'Bạn bị tô màu!',respawn:'Hồi sinh sau {s}…',splat:'bị dính sơn',tFire:'BẮN',tSwim:'LƯỚT<br>SƠN',tJump:'NHẢY',tBomb:'BOM',tSpec:'BOM<br>TO',
+rot1:'Xoay ngang điện thoại để chơi nhé!',rot2:'Game sẽ tự tiếp tục khi bạn xoay ngang',pause:'TẠM DỪNG',pauseSub:'Cô giáo đang điểm danh… 📋',resume:'CHƠI TIẾP',toMenu:'VỀ MENU',music:'🎵 Nhạc',sfx:'🔊 Âm thanh',on:'BẬT',off:'TẮT',
+win:'{t} THẮNG!',draw:'HÒA NHAU!',winSub:'🎉 Lớp bạn được tuyên dương dưới cờ!',loseSub:'😅 Lớp bạn phải trực nhật lau sân cả tuần…',drawSub:'🤝 Hai lớp bắt tay làm hòa!',cols:['Học sinh','Diện tích tô','Hạ gục','Bị hạ'],again:'TRẬN MỚI ▶',menu:'MENU',
+startSub:'Tùng! Tùng! Tùng! Vào tiết rồi!',go:'BẮT ĐẦU!',last30:'30 GIÂY CUỐI!',timeUp:'HẾT GIỜ!',noInk:'Không đủ sơn ném bom!',bigBomb:'BOM SƠN KHỔNG LỒ!',ko:'HẠ GỤC {n}!',botBig:'BOM KHỔNG LỒ ĐÂY!!',you:'Bạn',
+qk:['Tô màu nè!','Về chỗ đi bạn ơi!','Trực nhật đi nha!','Lớp mình là số 1!','Hihi trúng rồi!','Áo trắng hết rồi kìa!','Cho chừa nè!'],qd:['Ơ kìa!','Mách cô giáo!','Ăn gian!','Đợi đấy!','Áo của tui!!','Huhu mẹ mắng…','Chưa xong đâu!'],qs:['Lên lên!','Tô hết sân đi!','Theo tui!','Sơn nè sơn nè!'],
+loadErr:'Không tải được thư viện 3D. Kiểm tra mạng rồi tải lại trang nhé!'},
+en:{subtitle:'School Yard Paint Battle',teamA:'Class 9A',teamB:'Class 9B',tagline:'{A} 🧡 vs 💜 {B} · 4 vs 4',name:'Your name',namePh:'Enter name…',hair:'Hairstyle',hairC:'Hair color',diff:'Bot difficulty',mode:'Play on',pc:'💻 Computer',phone:'📱 Phone',lang:'🌐 Language',play:'START BATTLE! ▶',drag:'👆 Drag to rotate',
+hs:['Short','Bangs','Spiky','Buzz cut','Long','Cap'],hc:['Brown','Black','Blonde','Pink','Blue','Silver'],df:['Easy','Normal','Hard'],
+how:'🎯 <b>Goal:</b> in 3 minutes, cover as much of the school yard as you can in your class color. When time runs out, the class with more ground <b>wins</b>.<br>🎨 Hit the other class to <b>splat</b> them (they respawn). Hold <b>Swim</b> on your own paint to move fast, hide and <b>refill ink</b>.<br>💣 A <b>paint bomb</b> costs half your tank. Paint enough ground to charge the <b>Mega Bomb</b>. Enemy paint slows you down and hurts, so avoid it!',
+hp:'❤ Health',ink:'🎨 Ink',sp:'💥 Mega Bomb',spPc:'💥 READY! Press E',spMob:'💥 READY! Tap MEGA',inkWarn:'OUT OF INK! Hold {k} on your paint to refill',swimMob:'SWIM',
+help:'<b>WASD</b> move · <b>Mouse</b> aim · <b>Click</b> shoot · <b>Shift</b> swim · <b>Q</b>/<b>Right click</b> bomb · <b>E</b> mega bomb · <b>Space</b> jump · <b>P</b> pause · <b>M</b> music',
+deadBy:'You got splatted by {n}!',dead:'You got splatted!',respawn:'Respawning in {s}…',splat:'got splatted',tFire:'SHOOT',tSwim:'SWIM',tJump:'JUMP',tBomb:'BOMB',tSpec:'MEGA',
+rot1:'Turn your phone sideways to play!',rot2:'The game resumes when you rotate',pause:'PAUSED',pauseSub:'The teacher is taking attendance… 📋',resume:'RESUME',toMenu:'MAIN MENU',music:'🎵 Music',sfx:'🔊 Sound',on:'ON',off:'OFF',
+win:'{t} WINS!',draw:'IT\'S A DRAW!',winSub:'🎉 Your class gets praised at the flag ceremony!',loseSub:'😅 Your class has to mop the yard all week…',drawSub:'🤝 Both classes shake hands!',cols:['Student','Area painted','Splats','Splatted'],again:'NEW MATCH ▶',menu:'MENU',
+startSub:'Boom! Boom! Boom! Class has started!',go:'GO!',last30:'LAST 30 SECONDS!',timeUp:'TIME\'S UP!',noInk:'Not enough ink for a bomb!',bigBomb:'MEGA PAINT BOMB!',ko:'SPLATTED {n}!',botBig:'MEGA BOMB INCOMING!!',you:'You',
+qk:['Painted you!','Back to your seat!','You\'re on cleanup duty!','Our class is #1!','Hehe, got you!','Your shirt\'s ruined!','Take that!'],qd:['Hey!','I\'m telling the teacher!','No fair!','Just you wait!','My shirt!!','Mom\'s gonna be mad…','Not over yet!'],qs:['Let\'s go!','Paint it all!','Follow me!','Paint time!'],
+loadErr:'Could not load the 3D library. Check your connection and reload!'},
+pt:{subtitle:'Batalha de Tinta no Pátio da Escola',teamA:'Turma 9A',teamB:'Turma 9B',tagline:'{A} 🧡 x 💜 {B} · 4 contra 4',name:'Seu nome',namePh:'Digite seu nome…',hair:'Cabelo',hairC:'Cor do cabelo',diff:'Dificuldade dos bots',mode:'Jogar no',pc:'💻 Computador',phone:'📱 Celular',lang:'🌐 Idioma',play:'BORA PRA BATALHA! ▶',drag:'👆 Arraste para girar',
+hs:['Curto','Franja','Espetado','Raspado','Longo','Boné'],hc:['Castanho','Preto','Loiro','Rosa','Azul','Prata'],df:['Fácil','Médio','Difícil'],
+how:'🎯 <b>Objetivo:</b> em 3 minutos, pinte o máximo do pátio com a cor da sua turma. No fim, a turma que cobrir mais área <b>vence</b>.<br>🎨 Acerte a outra turma para <b>eliminar</b> (eles renascem). Segure <b>Nadar</b> na sua tinta para correr, se esconder e <b>recarregar</b>.<br>💣 A <b>bomba de tinta</b> gasta meio tanque. Pinte bastante para carregar a <b>Mega Bomba</b>. Tinta inimiga deixa você lento e tira vida!',
+hp:'❤ Vida',ink:'🎨 Tinta',sp:'💥 Mega Bomba',spPc:'💥 PRONTA! Aperte E',spMob:'💥 PRONTA! Toque MEGA',inkWarn:'SEM TINTA! Segure {k} na sua tinta para recarregar',swimMob:'NADAR',
+help:'<b>WASD</b> mover · <b>Mouse</b> mirar · <b>Clique</b> atirar · <b>Shift</b> nadar · <b>Q</b>/<b>Botão direito</b> bomba · <b>E</b> mega bomba · <b>Espaço</b> pular · <b>P</b> pausar · <b>M</b> música',
+deadBy:'{n} te pintou!',dead:'Você foi pintado!',respawn:'Renascendo em {s}…',splat:'levou tinta',tFire:'ATIRAR',tSwim:'NADAR',tJump:'PULAR',tBomb:'BOMBA',tSpec:'MEGA',
+rot1:'Vire o celular na horizontal para jogar!',rot2:'O jogo continua quando você virar',pause:'PAUSADO',pauseSub:'A professora está fazendo a chamada… 📋',resume:'CONTINUAR',toMenu:'MENU PRINCIPAL',music:'🎵 Música',sfx:'🔊 Som',on:'LIGADO',off:'DESLIGADO',
+win:'{t} VENCEU!',draw:'EMPATE!',winSub:'🎉 Sua turma ganhou elogio no pátio!',loseSub:'😅 Sua turma vai limpar o pátio a semana toda…',drawSub:'🤝 As duas turmas fizeram as pazes!',cols:['Aluno','Área pintada','Eliminou','Eliminado'],again:'NOVA PARTIDA ▶',menu:'MENU',
+startSub:'Bum! Bum! Bum! A aula começou!',go:'JÁ!',last30:'ÚLTIMOS 30 SEGUNDOS!',timeUp:'ACABOU O TEMPO!',noInk:'Tinta insuficiente para a bomba!',bigBomb:'MEGA BOMBA DE TINTA!',ko:'ELIMINOU {n}!',botBig:'LÁ VAI A MEGA BOMBA!!',you:'Você',
+qk:['Pintei você!','Volta pro seu lugar!','Hoje a faxina é sua!','Nossa turma é a melhor!','Hehe, acertei!','Sua camisa já era!','Toma essa!'],qd:['Ei!','Vou contar pra professora!','Roubou!','Me aguarde!','Minha camisa!!','Minha mãe vai brigar…','Ainda não acabou!'],qs:['Bora!','Pinta tudo!','Vem comigo!','Hora da tinta!'],
+loadErr:'Não foi possível carregar a biblioteca 3D. Verifique a conexão e recarregue!'},
+es:{subtitle:'Batalla de Pintura en el Patio',teamA:'Clase 9A',teamB:'Clase 9B',tagline:'{A} 🧡 vs 💜 {B} · 4 contra 4',name:'Tu nombre',namePh:'Escribe tu nombre…',hair:'Peinado',hairC:'Color de pelo',diff:'Dificultad de bots',mode:'Jugar en',pc:'💻 Ordenador',phone:'📱 Móvil',lang:'🌐 Idioma',play:'¡A LA BATALLA! ▶',drag:'👆 Arrastra para girar',
+hs:['Corto','Flequillo','De punta','Rapado','Largo','Gorra'],hc:['Castaño','Negro','Rubio','Rosa','Azul','Plateado'],df:['Fácil','Normal','Difícil'],
+how:'🎯 <b>Objetivo:</b> en 3 minutos, pinta todo el patio que puedas con el color de tu clase. Al final, <b>gana</b> la clase que cubra más terreno.<br>🎨 Dispara a la otra clase para <b>eliminarlos</b> (reaparecen). Mantén <b>Nadar</b> sobre tu pintura para correr, esconderte y <b>recargar</b>.<br>💣 La <b>bomba de pintura</b> gasta medio tanque. Pinta mucho para cargar la <b>Mega Bomba</b>. ¡La pintura enemiga te frena y te daña!',
+hp:'❤ Vida',ink:'🎨 Pintura',sp:'💥 Mega Bomba',spPc:'💥 ¡LISTA! Pulsa E',spMob:'💥 ¡LISTA! Toca MEGA',inkWarn:'¡SIN PINTURA! Mantén {k} sobre tu pintura para recargar',swimMob:'NADAR',
+help:'<b>WASD</b> moverse · <b>Ratón</b> apuntar · <b>Clic</b> disparar · <b>Shift</b> nadar · <b>Q</b>/<b>Clic derecho</b> bomba · <b>E</b> mega bomba · <b>Espacio</b> saltar · <b>P</b> pausa · <b>M</b> música',
+deadBy:'¡{n} te ha pintado!',dead:'¡Te han pintado!',respawn:'Reapareces en {s}…',splat:'quedó pintado',tFire:'DISPARAR',tSwim:'NADAR',tJump:'SALTAR',tBomb:'BOMBA',tSpec:'MEGA',
+rot1:'¡Gira el móvil en horizontal para jugar!',rot2:'El juego sigue cuando lo gires',pause:'PAUSA',pauseSub:'La profe está pasando lista… 📋',resume:'CONTINUAR',toMenu:'MENÚ PRINCIPAL',music:'🎵 Música',sfx:'🔊 Sonido',on:'SÍ',off:'NO',
+win:'¡GANA {t}!',draw:'¡EMPATE!',winSub:'🎉 ¡Tu clase recibe un aplauso en el patio!',loseSub:'😅 Tu clase limpiará el patio toda la semana…',drawSub:'🤝 ¡Las dos clases hacen las paces!',cols:['Alumno','Área pintada','Eliminó','Eliminado'],again:'NUEVA PARTIDA ▶',menu:'MENÚ',
+startSub:'¡Bum! ¡Bum! ¡Bum! ¡Empieza la clase!',go:'¡YA!',last30:'¡ÚLTIMOS 30 SEGUNDOS!',timeUp:'¡SE ACABÓ EL TIEMPO!',noInk:'¡No tienes pintura para la bomba!',bigBomb:'¡MEGA BOMBA DE PINTURA!',ko:'¡ELIMINASTE A {n}!',botBig:'¡¡AHÍ VA LA MEGA BOMBA!!',you:'Tú',
+qk:['¡Te pinté!','¡A tu sitio!','¡Hoy te toca limpiar!','¡Nuestra clase es la mejor!','¡Jeje, te di!','¡Adiós a tu camiseta!','¡Toma!'],qd:['¡Oye!','¡Se lo digo a la profe!','¡Trampa!','¡Ya verás!','¡¡Mi camiseta!!','Mi madre me va a reñir…','¡Esto no acaba aquí!'],qs:['¡Vamos!','¡Píntalo todo!','¡Sígueme!','¡A pintar!'],
+loadErr:'No se pudo cargar la librería 3D. ¡Revisa la conexión y recarga!'},
+fr:{subtitle:'Bataille de Peinture dans la Cour',teamA:'Classe 9A',teamB:'Classe 9B',tagline:'{A} 🧡 contre 💜 {B} · 4 contre 4',name:'Ton prénom',namePh:'Écris ton prénom…',hair:'Coiffure',hairC:'Couleur des cheveux',diff:'Difficulté des bots',mode:'Jouer sur',pc:'💻 Ordinateur',phone:'📱 Téléphone',lang:'🌐 Langue',play:'À LA BATAILLE ! ▶',drag:'👆 Glisse pour tourner',
+hs:['Courts','Frange','Hérissés','Rasés','Longs','Casquette'],hc:['Châtain','Noir','Blond','Rose','Bleu','Argent'],df:['Facile','Normal','Difficile'],
+how:'🎯 <b>But :</b> en 3 minutes, peins un maximum de la cour avec la couleur de ta classe. À la fin, la classe qui couvre le plus de terrain <b>gagne</b>.<br>🎨 Touche l’autre classe pour les <b>éliminer</b> (ils réapparaissent). Maintiens <b>Nager</b> sur ta peinture pour aller vite, te cacher et <b>recharger</b>.<br>💣 La <b>bombe de peinture</b> coûte un demi-réservoir. Peins assez pour charger la <b>Méga Bombe</b>. La peinture ennemie te ralentit et te blesse !',
+hp:'❤ Vie',ink:'🎨 Peinture',sp:'💥 Méga Bombe',spPc:'💥 PRÊTE ! Appuie sur E',spMob:'💥 PRÊTE ! Touche MÉGA',inkWarn:'PLUS DE PEINTURE ! Maintiens {k} sur ta peinture',swimMob:'NAGER',
+help:'<b>ZQSD</b> bouger · <b>Souris</b> viser · <b>Clic</b> tirer · <b>Shift</b> nager · <b>A</b>/<b>Clic droit</b> bombe · <b>E</b> méga bombe · <b>Espace</b> sauter · <b>P</b> pause · <b>M</b> musique',
+deadBy:'{n} t’a repeint !',dead:'Tu as été repeint !',respawn:'Retour dans {s}…',splat:'s’est fait repeindre',tFire:'TIRER',tSwim:'NAGER',tJump:'SAUTER',tBomb:'BOMBE',tSpec:'MÉGA',
+rot1:'Tourne ton téléphone à l’horizontale !',rot2:'Le jeu reprend quand tu le tournes',pause:'PAUSE',pauseSub:'La maîtresse fait l’appel… 📋',resume:'REPRENDRE',toMenu:'MENU PRINCIPAL',music:'🎵 Musique',sfx:'🔊 Son',on:'OUI',off:'NON',
+win:'{t} GAGNE !',draw:'ÉGALITÉ !',winSub:'🎉 Ta classe est félicitée devant toute l’école !',loseSub:'😅 Ta classe nettoie la cour toute la semaine…',drawSub:'🤝 Les deux classes se serrent la main !',cols:['Élève','Surface peinte','Éliminations','Éliminé'],again:'NOUVELLE PARTIE ▶',menu:'MENU',
+startSub:'Boum ! Boum ! Boum ! Le cours commence !',go:'C’EST PARTI !',last30:'30 DERNIÈRES SECONDES !',timeUp:'TEMPS ÉCOULÉ !',noInk:'Pas assez de peinture pour une bombe !',bigBomb:'MÉGA BOMBE DE PEINTURE !',ko:'{n} ÉLIMINÉ !',botBig:'ATTENTION MÉGA BOMBE !!',you:'Toi',
+qk:['Repeint !','Retourne à ta place !','C’est toi qui nettoies !','Notre classe est la meilleure !','Hihi, touché !','Ton t-shirt est fichu !','Et toc !'],qd:['Hé !','Je le dis à la maîtresse !','Tricheur !','Tu vas voir !','Mon t-shirt !!','Maman va me gronder…','Ce n’est pas fini !'],qs:['On y va !','Peignez tout !','Suivez-moi !','À la peinture !'],
+loadErr:'Impossible de charger la bibliothèque 3D. Vérifie ta connexion et recharge !'},
+de:{subtitle:'Farbschlacht auf dem Schulhof',teamA:'Klasse 9A',teamB:'Klasse 9B',tagline:'{A} 🧡 gegen 💜 {B} · 4 gegen 4',name:'Dein Name',namePh:'Namen eingeben…',hair:'Frisur',hairC:'Haarfarbe',diff:'Bot-Schwierigkeit',mode:'Spielen auf',pc:'💻 Computer',phone:'📱 Handy',lang:'🌐 Sprache',play:'AUF IN DIE SCHLACHT! ▶',drag:'👆 Ziehen zum Drehen',
+hs:['Kurz','Pony','Stachelig','Kurzgeschoren','Lang','Kappe'],hc:['Braun','Schwarz','Blond','Rosa','Blau','Silber'],df:['Leicht','Mittel','Schwer'],
+how:'🎯 <b>Ziel:</b> Färbe in 3 Minuten so viel vom Schulhof wie möglich in der Farbe deiner Klasse. Am Ende <b>gewinnt</b> die Klasse mit der größeren Fläche.<br>🎨 Triff die andere Klasse, um sie <b>auszuschalten</b> (sie kehren zurück). Halte <b>Schwimmen</b> auf eigener Farbe, um schnell zu sein, dich zu verstecken und <b>nachzuladen</b>.<br>💣 Eine <b>Farbbombe</b> kostet einen halben Tank. Male genug, um die <b>Mega-Bombe</b> zu laden. Gegnerische Farbe bremst dich und schadet dir!',
+hp:'❤ Leben',ink:'🎨 Farbe',sp:'💥 Mega-Bombe',spPc:'💥 BEREIT! Drücke E',spMob:'💥 BEREIT! Tippe MEGA',inkWarn:'KEINE FARBE! Halte {k} auf eigener Farbe zum Nachladen',swimMob:'SCHWIMMEN',
+help:'<b>WASD</b> laufen · <b>Maus</b> zielen · <b>Klick</b> schießen · <b>Shift</b> schwimmen · <b>Q</b>/<b>Rechtsklick</b> Bombe · <b>E</b> Mega-Bombe · <b>Leertaste</b> springen · <b>P</b> Pause · <b>M</b> Musik',
+deadBy:'{n} hat dich angemalt!',dead:'Du wurdest angemalt!',respawn:'Zurück in {s}…',splat:'wurde angemalt',tFire:'FEUER',tSwim:'SCHWIM-<br>MEN',tJump:'SPRUNG',tBomb:'BOMBE',tSpec:'MEGA',
+rot1:'Dreh dein Handy quer zum Spielen!',rot2:'Das Spiel geht weiter, sobald du es drehst',pause:'PAUSE',pauseSub:'Die Lehrerin prüft die Anwesenheit… 📋',resume:'WEITER',toMenu:'HAUPTMENÜ',music:'🎵 Musik',sfx:'🔊 Ton',on:'AN',off:'AUS',
+win:'{t} GEWINNT!',draw:'UNENTSCHIEDEN!',winSub:'🎉 Deine Klasse wird vor der ganzen Schule gelobt!',loseSub:'😅 Deine Klasse muss eine Woche lang den Hof putzen…',drawSub:'🤝 Beide Klassen geben sich die Hand!',cols:['Schüler','Bemalte Fläche','Treffer','Ausgeschaltet'],again:'NEUE RUNDE ▶',menu:'MENÜ',
+startSub:'Bumm! Bumm! Bumm! Der Unterricht beginnt!',go:'LOS!',last30:'LETZTE 30 SEKUNDEN!',timeUp:'ZEIT IST UM!',noInk:'Zu wenig Farbe für eine Bombe!',bigBomb:'MEGA-FARBBOMBE!',ko:'{n} AUSGESCHALTET!',botBig:'ACHTUNG, MEGA-BOMBE!!',you:'Du',
+qk:['Angemalt!','Zurück auf deinen Platz!','Du hast Putzdienst!','Unsere Klasse ist die Beste!','Hihi, getroffen!','Dein Shirt ist hin!','Nimm das!'],qd:['Hey!','Das sag ich der Lehrerin!','Unfair!','Na warte!','Mein Shirt!!','Mama wird schimpfen…','Noch nicht vorbei!'],qs:['Los geht’s!','Alles anmalen!','Mir nach!','Farbe marsch!'],
+loadErr:'3D-Bibliothek konnte nicht geladen werden. Verbindung prüfen und neu laden!'},
+it:{subtitle:'Battaglia di Vernice in Cortile',teamA:'Classe 9A',teamB:'Classe 9B',tagline:'{A} 🧡 contro 💜 {B} · 4 contro 4',name:'Il tuo nome',namePh:'Scrivi il nome…',hair:'Capelli',hairC:'Colore capelli',diff:'Difficoltà bot',mode:'Gioca su',pc:'💻 Computer',phone:'📱 Telefono',lang:'🌐 Lingua',play:'ALLA BATTAGLIA! ▶',drag:'👆 Trascina per ruotare',
+hs:['Corti','Frangia','A punta','Rasati','Lunghi','Cappellino'],hc:['Castano','Nero','Biondo','Rosa','Blu','Argento'],df:['Facile','Normale','Difficile'],
+how:'🎯 <b>Obiettivo:</b> in 3 minuti, colora più cortile possibile con il colore della tua classe. Alla fine <b>vince</b> la classe che copre più terreno.<br>🎨 Colpisci l’altra classe per <b>eliminarli</b> (poi rientrano). Tieni premuto <b>Nuota</b> sulla tua vernice per correre, nasconderti e <b>ricaricare</b>.<br>💣 La <b>bomba di vernice</b> costa mezzo serbatoio. Colora abbastanza per caricare la <b>Mega Bomba</b>. La vernice nemica ti rallenta e ti fa male!',
+hp:'❤ Vita',ink:'🎨 Vernice',sp:'💥 Mega Bomba',spPc:'💥 PRONTA! Premi E',spMob:'💥 PRONTA! Tocca MEGA',inkWarn:'VERNICE FINITA! Tieni {k} sulla tua vernice per ricaricare',swimMob:'NUOTA',
+help:'<b>WASD</b> muoviti · <b>Mouse</b> mira · <b>Clic</b> spara · <b>Shift</b> nuota · <b>Q</b>/<b>Clic destro</b> bomba · <b>E</b> mega bomba · <b>Spazio</b> salta · <b>P</b> pausa · <b>M</b> musica',
+deadBy:'{n} ti ha colorato!',dead:'Sei stato colorato!',respawn:'Rientri tra {s}…',splat:'è stato colorato',tFire:'SPARA',tSwim:'NUOTA',tJump:'SALTA',tBomb:'BOMBA',tSpec:'MEGA',
+rot1:'Gira il telefono in orizzontale per giocare!',rot2:'Il gioco riprende quando lo giri',pause:'PAUSA',pauseSub:'La maestra fa l’appello… 📋',resume:'CONTINUA',toMenu:'MENU PRINCIPALE',music:'🎵 Musica',sfx:'🔊 Suoni',on:'SÌ',off:'NO',
+win:'{t} VINCE!',draw:'PAREGGIO!',winSub:'🎉 La tua classe viene lodata davanti a tutta la scuola!',loseSub:'😅 La tua classe pulirà il cortile per tutta la settimana…',drawSub:'🤝 Le due classi si stringono la mano!',cols:['Studente','Area colorata','Eliminazioni','Eliminato'],again:'NUOVA PARTITA ▶',menu:'MENU',
+startSub:'Bum! Bum! Bum! Inizia la lezione!',go:'VIA!',last30:'ULTIMI 30 SECONDI!',timeUp:'TEMPO SCADUTO!',noInk:'Vernice insufficiente per la bomba!',bigBomb:'MEGA BOMBA DI VERNICE!',ko:'{n} ELIMINATO!',botBig:'ARRIVA LA MEGA BOMBA!!',you:'Tu',
+qk:['Colorato!','Torna al posto!','Oggi pulisci tu!','La nostra classe è la migliore!','Hihi, preso!','Addio maglietta!','Beccati questa!'],qd:['Ehi!','Lo dico alla maestra!','Non vale!','Aspetta e vedrai!','La mia maglietta!!','La mamma mi sgrida…','Non è finita!'],qs:['Andiamo!','Coloriamo tutto!','Seguitemi!','Si colora!'],
+loadErr:'Impossibile caricare la libreria 3D. Controlla la connessione e ricarica!'},
+ru:{subtitle:'Битва красками на школьном дворе',teamA:'Класс 9А',teamB:'Класс 9Б',tagline:'{A} 🧡 против 💜 {B} · 4 на 4',name:'Твоё имя',namePh:'Введи имя…',hair:'Причёска',hairC:'Цвет волос',diff:'Сложность ботов',mode:'Играть на',pc:'💻 Компьютер',phone:'📱 Телефон',lang:'🌐 Язык',play:'В БОЙ! ▶',drag:'👆 Потяни, чтобы повернуть',
+hs:['Короткие','Чёлка','Ёжик','Под ноль','Длинные','Кепка'],hc:['Каштановые','Чёрные','Светлые','Розовые','Синие','Серебристые'],df:['Легко','Средне','Сложно'],
+how:'🎯 <b>Цель:</b> за 3 минуты закрась как можно больше двора цветом своего класса. В конце <b>побеждает</b> класс, закрасивший больше.<br>🎨 Попадай в соперников, чтобы <b>выбить</b> их (они возрождаются). Держи <b>Нырок</b> на своей краске: бежишь быстрее, прячешься и <b>пополняешь краску</b>.<br>💣 <b>Бомба</b> тратит полбака. Закрась побольше, чтобы зарядить <b>Мега-бомбу</b>. Чужая краска замедляет и ранит!',
+hp:'❤ Здоровье',ink:'🎨 Краска',sp:'💥 Мега-бомба',spPc:'💥 ГОТОВО! Нажми E',spMob:'💥 ГОТОВО! Жми МЕГА',inkWarn:'КРАСКА КОНЧИЛАСЬ! Держи {k} на своей краске',swimMob:'НЫРОК',
+help:'<b>WASD</b> ходьба · <b>Мышь</b> прицел · <b>Клик</b> выстрел · <b>Shift</b> нырок · <b>Q</b>/<b>ПКМ</b> бомба · <b>E</b> мега-бомба · <b>Пробел</b> прыжок · <b>P</b> пауза · <b>M</b> музыка',
+deadBy:'Тебя закрасил(а) {n}!',dead:'Тебя закрасили!',respawn:'Возрождение через {s}…',splat:'закрашен',tFire:'ОГОНЬ',tSwim:'НЫРОК',tJump:'ПРЫЖОК',tBomb:'БОМБА',tSpec:'МЕГА',
+rot1:'Поверни телефон горизонтально!',rot2:'Игра продолжится, когда повернёшь',pause:'ПАУЗА',pauseSub:'Учительница проверяет посещаемость… 📋',resume:'ПРОДОЛЖИТЬ',toMenu:'ГЛАВНОЕ МЕНЮ',music:'🎵 Музыка',sfx:'🔊 Звук',on:'ВКЛ',off:'ВЫКЛ',
+win:'{t} ПОБЕЖДАЕТ!',draw:'НИЧЬЯ!',winSub:'🎉 Твой класс хвалят на линейке!',loseSub:'😅 Твой класс всю неделю моет двор…',drawSub:'🤝 Классы пожали друг другу руки!',cols:['Ученик','Закрашено','Выбил','Выбит'],again:'НОВЫЙ МАТЧ ▶',menu:'МЕНЮ',
+startSub:'Бум! Бум! Бум! Урок начался!',go:'ВПЕРЁД!',last30:'ПОСЛЕДНИЕ 30 СЕКУНД!',timeUp:'ВРЕМЯ ВЫШЛО!',noInk:'Мало краски для бомбы!',bigBomb:'МЕГА-БОМБА!',ko:'{n} ВЫБИТ!',botBig:'ЛОВИ МЕГА-БОМБУ!!',you:'Ты',
+qk:['Закрасил!','Марш на место!','Сегодня ты дежурный!','Наш класс лучший!','Хи-хи, попал!','Прощай, рубашка!','Получай!'],qd:['Эй!','Я всё расскажу учительнице!','Нечестно!','Ну погоди!','Моя рубашка!!','Мама будет ругаться…','Это ещё не конец!'],qs:['Вперёд!','Красим всё!','За мной!','Время красить!'],
+loadErr:'Не удалось загрузить 3D-библиотеку. Проверь сеть и обнови страницу!'},
+tr:{subtitle:'Okul Bahçesinde Boya Savaşı',teamA:'9-A Sınıfı',teamB:'9-B Sınıfı',tagline:'{A} 🧡 vs 💜 {B} · 4’e 4',name:'Adın',namePh:'Adını yaz…',hair:'Saç modeli',hairC:'Saç rengi',diff:'Bot zorluğu',mode:'Cihaz',pc:'💻 Bilgisayar',phone:'📱 Telefon',lang:'🌐 Dil',play:'SAVAŞA BAŞLA! ▶',drag:'👆 Döndürmek için sürükle',
+hs:['Kısa','Kâküllü','Diken diken','Kazınmış','Uzun','Şapka'],hc:['Kahverengi','Siyah','Sarı','Pembe','Mavi','Gümüş'],df:['Kolay','Orta','Zor'],
+how:'🎯 <b>Amaç:</b> 3 dakikada okul bahçesini sınıfının rengiyle olabildiğince çok boya. Süre bitince daha fazla alanı kaplayan sınıf <b>kazanır</b>.<br>🎨 Diğer sınıfı vurup <b>oyundan çıkar</b> (yeniden doğarlar). Kendi boyanın üstünde <b>Yüz</b> tuşunu basılı tut: hızlanır, saklanır ve <b>boya doldurursun</b>.<br>💣 <b>Boya bombası</b> yarım depo harcar. Yeterince boyayınca <b>Mega Bomba</b> dolar. Rakip boya seni yavaşlatır ve can götürür!',
+hp:'❤ Can',ink:'🎨 Boya',sp:'💥 Mega Bomba',spPc:'💥 HAZIR! E’ye bas',spMob:'💥 HAZIR! MEGA’ya dokun',inkWarn:'BOYA BİTTİ! Kendi boyanda {k} basılı tut',swimMob:'YÜZ',
+help:'<b>WASD</b> hareket · <b>Fare</b> nişan · <b>Tık</b> ateş · <b>Shift</b> yüz · <b>Q</b>/<b>Sağ tık</b> bomba · <b>E</b> mega bomba · <b>Boşluk</b> zıpla · <b>P</b> duraklat · <b>M</b> müzik',
+deadBy:'{n} seni boyadı!',dead:'Boyandın!',respawn:'{s} sn sonra dönüyorsun…',splat:'boyandı',tFire:'ATEŞ',tSwim:'YÜZ',tJump:'ZIPLA',tBomb:'BOMBA',tSpec:'MEGA',
+rot1:'Oynamak için telefonu yan çevir!',rot2:'Çevirince oyun devam eder',pause:'DURAKLATILDI',pauseSub:'Öğretmen yoklama alıyor… 📋',resume:'DEVAM',toMenu:'ANA MENÜ',music:'🎵 Müzik',sfx:'🔊 Ses',on:'AÇIK',off:'KAPALI',
+win:'{t} KAZANDI!',draw:'BERABERE!',winSub:'🎉 Sınıfın törende tebrik edildi!',loseSub:'😅 Sınıfın bütün hafta bahçeyi temizleyecek…',drawSub:'🤝 İki sınıf tokalaştı!',cols:['Öğrenci','Boyanan alan','Çıkardı','Çıktı'],again:'YENİ MAÇ ▶',menu:'MENÜ',
+startSub:'Güm! Güm! Güm! Ders başladı!',go:'BAŞLA!',last30:'SON 30 SANİYE!',timeUp:'SÜRE DOLDU!',noInk:'Bomba için yeterli boya yok!',bigBomb:'MEGA BOYA BOMBASI!',ko:'{n} ÇIKTI!',botBig:'MEGA BOMBA GELİYOR!!',you:'Sen',
+qk:['Boyadım!','Yerine dön!','Temizlik sende!','En iyi sınıf bizimki!','Hihi, vurdum!','Tişörtün gitti!','Al bakalım!'],qd:['Hey!','Öğretmene söyleyeceğim!','Hile!','Görürsün sen!','Tişörtüm!!','Annem kızacak…','Daha bitmedi!'],qs:['Hadi!','Her yeri boya!','Beni takip et!','Boya zamanı!'],
+loadErr:'3D kütüphanesi yüklenemedi. Bağlantını kontrol edip sayfayı yenile!'},
+id:{subtitle:'Perang Cat di Halaman Sekolah',teamA:'Kelas 9A',teamB:'Kelas 9B',tagline:'{A} 🧡 vs 💜 {B} · 4 lawan 4',name:'Nama kamu',namePh:'Ketik nama…',hair:'Gaya rambut',hairC:'Warna rambut',diff:'Tingkat bot',mode:'Main di',pc:'💻 Komputer',phone:'📱 HP',lang:'🌐 Bahasa',play:'AYO PERANG! ▶',drag:'👆 Geser untuk memutar',
+hs:['Pendek','Berponi','Jabrik','Cepak','Panjang','Topi'],hc:['Cokelat','Hitam','Pirang','Pink','Biru','Perak'],df:['Mudah','Sedang','Sulit'],
+how:'🎯 <b>Tujuan:</b> dalam 3 menit, cat halaman sekolah sebanyak mungkin dengan warna kelasmu. Saat waktu habis, kelas dengan area terluas <b>menang</b>.<br>🎨 Tembak kelas lawan untuk <b>menjatuhkan</b> mereka (mereka muncul lagi). Tahan <b>Selam</b> di atas cat sendiri untuk lari cepat, sembunyi, dan <b>isi ulang cat</b>.<br>💣 <b>Bom cat</b> memakai setengah tangki. Cat cukup banyak untuk mengisi <b>Bom Raksasa</b>. Cat lawan bikin kamu lambat dan terluka!',
+hp:'❤ Darah',ink:'🎨 Cat',sp:'💥 Bom Raksasa',spPc:'💥 SIAP! Tekan E',spMob:'💥 SIAP! Ketuk MEGA',inkWarn:'CAT HABIS! Tahan {k} di cat sendiri untuk isi ulang',swimMob:'SELAM',
+help:'<b>WASD</b> gerak · <b>Mouse</b> bidik · <b>Klik</b> tembak · <b>Shift</b> selam · <b>Q</b>/<b>Klik kanan</b> bom · <b>E</b> bom raksasa · <b>Spasi</b> lompat · <b>P</b> jeda · <b>M</b> musik',
+deadBy:'Kamu dicat oleh {n}!',dead:'Kamu kena cat!',respawn:'Muncul lagi dalam {s}…',splat:'kena cat',tFire:'TEMBAK',tSwim:'SELAM',tJump:'LOMPAT',tBomb:'BOM',tSpec:'MEGA',
+rot1:'Putar HP-mu ke posisi miring untuk bermain!',rot2:'Game lanjut otomatis setelah diputar',pause:'JEDA',pauseSub:'Bu guru sedang mengabsen… 📋',resume:'LANJUT',toMenu:'MENU UTAMA',music:'🎵 Musik',sfx:'🔊 Suara',on:'NYALA',off:'MATI',
+win:'{t} MENANG!',draw:'SERI!',winSub:'🎉 Kelasmu dipuji saat upacara bendera!',loseSub:'😅 Kelasmu harus piket bersihkan halaman seminggu…',drawSub:'🤝 Kedua kelas bersalaman!',cols:['Siswa','Area dicat','Menjatuhkan','Jatuh'],again:'MAIN LAGI ▶',menu:'MENU',
+startSub:'Dug! Dug! Dug! Pelajaran dimulai!',go:'MULAI!',last30:'30 DETIK TERAKHIR!',timeUp:'WAKTU HABIS!',noInk:'Cat tidak cukup untuk bom!',bigBomb:'BOM CAT RAKSASA!',ko:'{n} JATUH!',botBig:'AWAS BOM RAKSASA!!',you:'Kamu',
+qk:['Kena cat!','Balik ke bangkumu!','Kamu yang piket!','Kelas kami nomor 1!','Hihi, kena!','Bajumu kotor semua!','Rasakan!'],qd:['Eh!','Aku lapor bu guru!','Curang!','Awas ya!','Bajuku!!','Nanti dimarahi ibu…','Belum selesai!'],qs:['Ayo!','Cat semuanya!','Ikuti aku!','Waktunya ngecat!'],
+loadErr:'Gagal memuat pustaka 3D. Cek koneksi lalu muat ulang!'},
+th:{subtitle:'สงครามสาดสีในสนามโรงเรียน',teamA:'ห้อง 9A',teamB:'ห้อง 9B',tagline:'{A} 🧡 ปะทะ 💜 {B} · 4 ต่อ 4',name:'ชื่อของคุณ',namePh:'พิมพ์ชื่อ…',hair:'ทรงผม',hairC:'สีผม',diff:'ระดับบอท',mode:'เล่นบน',pc:'💻 คอมพิวเตอร์',phone:'📱 มือถือ',lang:'🌐 ภาษา',play:'ลุยเลย! ▶',drag:'👆 ลากเพื่อหมุน',
+hs:['สั้น','หน้าม้า','ตั้งชี้','เกรียน','ยาว','หมวกแก๊ป'],hc:['น้ำตาล','ดำ','บลอนด์','ชมพู','น้ำเงิน','เงิน'],df:['ง่าย','ปานกลาง','ยาก'],
+how:'🎯 <b>เป้าหมาย:</b> ภายใน 3 นาที ทาสีสนามโรงเรียนด้วยสีของห้องคุณให้มากที่สุด เมื่อหมดเวลา ห้องที่ครอบคลุมพื้นที่มากกว่า<b>ชนะ</b><br>🎨 ยิงห้องฝ่ายตรงข้ามเพื่อ<b>เก็บ</b>พวกเขา (จะเกิดใหม่) กด<b>ดำสี</b>ค้างบนสีของตัวเองเพื่อวิ่งเร็ว ซ่อนตัว และ<b>เติมสี</b><br>💣 <b>ระเบิดสี</b>ใช้สีครึ่งถัง ทาสีให้มากพอเพื่อชาร์จ<b>ระเบิดยักษ์</b> สีของศัตรูทำให้ช้าและเสียพลังชีวิต!',
+hp:'❤ พลังชีวิต',ink:'🎨 สี',sp:'💥 ระเบิดยักษ์',spPc:'💥 พร้อมแล้ว! กด E',spMob:'💥 พร้อมแล้ว! แตะ ยักษ์',inkWarn:'สีหมด! กด {k} ค้างบนสีของตัวเองเพื่อเติม',swimMob:'ดำสี',
+help:'<b>WASD</b> เดิน · <b>เมาส์</b> เล็ง · <b>คลิก</b> ยิง · <b>Shift</b> ดำสี · <b>Q</b>/<b>คลิกขวา</b> ระเบิด · <b>E</b> ระเบิดยักษ์ · <b>Space</b> กระโดด · <b>P</b> หยุด · <b>M</b> เพลง',
+deadBy:'คุณโดน {n} สาดสี!',dead:'คุณโดนสาดสี!',respawn:'เกิดใหม่ใน {s}…',splat:'โดนสาดสี',tFire:'ยิง',tSwim:'ดำสี',tJump:'กระโดด',tBomb:'ระเบิด',tSpec:'ยักษ์',
+rot1:'หมุนมือถือเป็นแนวนอนเพื่อเล่น!',rot2:'เกมจะเล่นต่อเมื่อหมุนแล้ว',pause:'หยุดชั่วคราว',pauseSub:'คุณครูกำลังเช็กชื่อ… 📋',resume:'เล่นต่อ',toMenu:'เมนูหลัก',music:'🎵 เพลง',sfx:'🔊 เสียง',on:'เปิด',off:'ปิด',
+win:'{t} ชนะ!',draw:'เสมอ!',winSub:'🎉 ห้องของคุณได้รับคำชมหน้าเสาธง!',loseSub:'😅 ห้องของคุณต้องทำเวรกวาดสนามทั้งสัปดาห์…',drawSub:'🤝 สองห้องจับมือคืนดีกัน!',cols:['นักเรียน','พื้นที่ที่ทา','เก็บได้','โดนเก็บ'],again:'เล่นใหม่ ▶',menu:'เมนู',
+startSub:'ตูม! ตูม! ตูม! เข้าเรียนแล้ว!',go:'เริ่ม!',last30:'30 วินาทีสุดท้าย!',timeUp:'หมดเวลา!',noInk:'สีไม่พอสำหรับระเบิด!',bigBomb:'ระเบิดสียักษ์!',ko:'เก็บ {n} แล้ว!',botBig:'ระเบิดยักษ์มาแล้ว!!',you:'คุณ',
+qk:['โดนสีไปเลย!','กลับไปนั่งที่!','วันนี้เธอเข้าเวรนะ!','ห้องเราเบอร์หนึ่ง!','ฮิๆ โดนแล้ว!','เสื้อเลอะหมดแล้ว!','เอาไปเลย!'],qd:['เฮ้ย!','จะฟ้องครู!','โกงนี่!','รอดูเถอะ!','เสื้อฉัน!!','แม่ต้องดุแน่…','ยังไม่จบหรอก!'],qs:['ไปกันเลย!','ทาให้ทั่ว!','ตามฉันมา!','ได้เวลาสาดสี!'],
+loadErr:'โหลดไลบรารี 3D ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วโหลดหน้าใหม่!'},
+zh:{subtitle:'校园涂鸦大作战',teamA:'9A班',teamB:'9B班',tagline:'{A} 🧡 对决 💜 {B} · 4对4',name:'你的名字',namePh:'输入名字…',hair:'发型',hairC:'发色',diff:'机器人难度',mode:'游玩设备',pc:'💻 电脑',phone:'📱 手机',lang:'🌐 语言',play:'开战！▶',drag:'👆 拖动旋转',
+hs:['短发','刘海','刺猬头','寸头','长发','鸭舌帽'],hc:['棕色','黑色','金色','粉色','蓝色','银色'],df:['简单','普通','困难'],
+how:'🎯 <b>目标：</b>3分钟内，用你班级的颜色涂满尽可能多的校园。时间到时，覆盖面积更大的班级<b>获胜</b>。<br>🎨 击中对方班级可<b>击倒</b>他们（会复活）。在己方颜料上按住<b>潜游</b>可加速、隐身并<b>补充颜料</b>。<br>💣 <b>颜料炸弹</b>消耗半罐颜料。涂得足够多就能充满<b>巨型炸弹</b>。敌方颜料会让你减速并受伤！',
+hp:'❤ 生命',ink:'🎨 颜料',sp:'💥 巨型炸弹',spPc:'💥 就绪！按 E',spMob:'💥 就绪！点击 巨型',inkWarn:'颜料用完！在己方颜料上按住 {k} 补充',swimMob:'潜游',
+help:'<b>WASD</b> 移动 · <b>鼠标</b> 瞄准 · <b>左键</b> 射击 · <b>Shift</b> 潜游 · <b>Q</b>/<b>右键</b> 炸弹 · <b>E</b> 巨型炸弹 · <b>空格</b> 跳跃 · <b>P</b> 暂停 · <b>M</b> 音乐',
+deadBy:'你被 {n} 涂中了！',dead:'你被涂中了！',respawn:'{s} 秒后复活…',splat:'被涂中了',tFire:'射击',tSwim:'潜游',tJump:'跳跃',tBomb:'炸弹',tSpec:'巨型',
+rot1:'请横屏游玩！',rot2:'横过来后游戏会自动继续',pause:'已暂停',pauseSub:'老师正在点名… 📋',resume:'继续',toMenu:'主菜单',music:'🎵 音乐',sfx:'🔊 音效',on:'开',off:'关',
+win:'{t}获胜！',draw:'平局！',winSub:'🎉 你的班级在升旗仪式上受到表扬！',loseSub:'😅 你的班级要打扫操场一整周…',drawSub:'🤝 两个班握手言和！',cols:['学生','涂色面积','击倒','被击倒'],again:'再来一局 ▶',menu:'菜单',
+startSub:'咚！咚！咚！上课啦！',go:'开始！',last30:'最后30秒！',timeUp:'时间到！',noInk:'颜料不够扔炸弹！',bigBomb:'巨型颜料炸弹！',ko:'击倒 {n}！',botBig:'巨型炸弹来啦！！',you:'你',
+qk:['涂到你啦！','回座位去吧！','今天你值日哦！','我们班第一！','嘻嘻，打中了！','衣服全花啦！','接招！'],qd:['哎呀！','我要告诉老师！','耍赖！','你等着！','我的衣服！！','妈妈要骂我了…','还没完呢！'],qs:['冲啊！','全部涂满！','跟我来！','开涂！'],
+loadErr:'3D 库加载失败，请检查网络后刷新！'},
+ja:{subtitle:'校庭ペイントバトル',teamA:'9年A組',teamB:'9年B組',tagline:'{A} 🧡 VS 💜 {B} · 4対4',name:'名前',namePh:'名前を入力…',hair:'髪型',hairC:'髪の色',diff:'ボットの強さ',mode:'プレイ端末',pc:'💻 パソコン',phone:'📱 スマホ',lang:'🌐 言語',play:'バトル開始！▶',drag:'👆 ドラッグで回転',
+hs:['ショート','前髪あり','ツンツン','坊主','ロング','キャップ'],hc:['茶色','黒','金髪','ピンク','青','銀'],df:['かんたん','ふつう','むずかしい'],
+how:'🎯 <b>目的：</b>3分間で、校庭をクラスの色でできるだけ多く塗ろう。時間切れの時、塗った面積が広いクラスの<b>勝ち</b>。<br>🎨 相手クラスに当てて<b>倒そう</b>（復活します）。自分の色の上で<b>もぐる</b>を長押しすると速く動けて、隠れられて、<b>インクを補充</b>できる。<br>💣 <b>ペイントボム</b>はインクを半分使う。たくさん塗ると<b>メガボム</b>がたまる。相手の色の上では遅くなりダメージを受けるので注意！',
+hp:'❤ 体力',ink:'🎨 インク',sp:'💥 メガボム',spPc:'💥 準備OK！Eキー',spMob:'💥 準備OK！メガをタップ',inkWarn:'インク切れ！自分の色の上で{k}を長押しして補充',swimMob:'もぐる',
+help:'<b>WASD</b> 移動 · <b>マウス</b> 照準 · <b>クリック</b> 射撃 · <b>Shift</b> もぐる · <b>Q</b>/<b>右クリック</b> ボム · <b>E</b> メガボム · <b>Space</b> ジャンプ · <b>P</b> 一時停止 · <b>M</b> 音楽',
+deadBy:'{n}に塗られた！',dead:'塗られた！',respawn:'{s}秒後に復活…',splat:'が塗られた',tFire:'うつ',tSwim:'もぐる',tJump:'ジャンプ',tBomb:'ボム',tSpec:'メガ',
+rot1:'スマホを横向きにしてね！',rot2:'横にすると自動で再開します',pause:'一時停止',pauseSub:'先生が出席をとっています… 📋',resume:'つづける',toMenu:'メインメニュー',music:'🎵 音楽',sfx:'🔊 効果音',on:'オン',off:'オフ',
+win:'{t}の勝ち！',draw:'引き分け！',winSub:'🎉 朝礼でクラスが表彰された！',loseSub:'😅 一週間、校庭のそうじ当番…',drawSub:'🤝 両クラス仲直り！',cols:['生徒','塗った面積','倒した数','倒された数'],again:'もう一回 ▶',menu:'メニュー',
+startSub:'ドン！ドン！ドン！授業開始！',go:'スタート！',last30:'残り30秒！',timeUp:'タイムアップ！',noInk:'ボムを投げるインクが足りない！',bigBomb:'メガペイントボム！',ko:'{n}を倒した！',botBig:'メガボムいくぞー！！',you:'あなた',
+qk:['塗ったぞ！','席に戻りな！','今日のそうじ当番ね！','うちのクラスが一番！','ふふ、当たり！','服が台無し！','くらえ！'],qd:['ちょっと！','先生に言いつけるよ！','ずるい！','覚えてろ！','ぼくの服が！！','ママに怒られる…','まだ終わってない！'],qs:['行くよ！','全部塗っちゃえ！','ついてきて！','塗りまくれ！'],
+loadErr:'3Dライブラリを読み込めませんでした。接続を確認して再読み込みしてね！'},
+ko:{subtitle:'학교 운동장 페인트 대작전',teamA:'9학년 A반',teamB:'9학년 B반',tagline:'{A} 🧡 VS 💜 {B} · 4대4',name:'이름',namePh:'이름 입력…',hair:'헤어스타일',hairC:'머리 색',diff:'봇 난이도',mode:'플레이 기기',pc:'💻 컴퓨터',phone:'📱 휴대폰',lang:'🌐 언어',play:'전투 시작! ▶',drag:'👆 드래그해서 회전',
+hs:['짧은 머리','앞머리','뾰족 머리','삭발','긴 머리','야구모자'],hc:['갈색','검정','금발','분홍','파랑','은색'],df:['쉬움','보통','어려움'],
+how:'🎯 <b>목표:</b> 3분 동안 운동장을 우리 반 색으로 최대한 많이 칠하세요. 시간이 끝나면 더 넓게 칠한 반이 <b>승리</b>!<br>🎨 상대 반을 맞혀 <b>쓰러뜨리세요</b> (부활합니다). 우리 색 위에서 <b>잠수</b>를 누르고 있으면 빨라지고, 숨고, <b>잉크가 충전</b>돼요.<br>💣 <b>페인트 폭탄</b>은 잉크 절반을 써요. 많이 칠하면 <b>메가 폭탄</b>이 충전돼요. 상대 색 위에서는 느려지고 피해를 입어요!',
+hp:'❤ 체력',ink:'🎨 잉크',sp:'💥 메가 폭탄',spPc:'💥 준비 완료! E 누르기',spMob:'💥 준비 완료! 메가 터치',inkWarn:'잉크 부족! 우리 색 위에서 {k} 길게 누르기',swimMob:'잠수',
+help:'<b>WASD</b> 이동 · <b>마우스</b> 조준 · <b>클릭</b> 발사 · <b>Shift</b> 잠수 · <b>Q</b>/<b>우클릭</b> 폭탄 · <b>E</b> 메가 폭탄 · <b>Space</b> 점프 · <b>P</b> 일시정지 · <b>M</b> 음악',
+deadBy:'{n}에게 칠해졌어요!',dead:'칠해졌어요!',respawn:'{s}초 후 부활…',splat:'칠해짐',tFire:'발사',tSwim:'잠수',tJump:'점프',tBomb:'폭탄',tSpec:'메가',
+rot1:'휴대폰을 가로로 돌려 주세요!',rot2:'가로로 돌리면 게임이 계속돼요',pause:'일시정지',pauseSub:'선생님이 출석 부르는 중… 📋',resume:'계속하기',toMenu:'메인 메뉴',music:'🎵 음악',sfx:'🔊 효과음',on:'켜기',off:'끄기',
+win:'{t} 승리!',draw:'무승부!',winSub:'🎉 조회 시간에 우리 반이 칭찬받았어요!',loseSub:'😅 우리 반은 일주일 내내 운동장 청소…',drawSub:'🤝 두 반이 악수했어요!',cols:['학생','칠한 면적','처치','쓰러짐'],again:'새 게임 ▶',menu:'메뉴',
+startSub:'둥! 둥! 둥! 수업 시작!',go:'시작!',last30:'마지막 30초!',timeUp:'시간 종료!',noInk:'폭탄을 던질 잉크가 부족해요!',bigBomb:'메가 페인트 폭탄!',ko:'{n} 처치!',botBig:'메가 폭탄 간다!!',you:'나',
+qk:['칠했다!','자리로 돌아가!','오늘 청소 당번은 너야!','우리 반이 최고!','히히, 맞혔다!','옷 다 버렸네!','받아라!'],qd:['야!','선생님한테 이를 거야!','반칙이야!','두고 봐!','내 옷!!','엄마한테 혼나겠다…','아직 안 끝났어!'],qs:['가자!','다 칠해!','나를 따라와!','칠하자!'],
+loadErr:'3D 라이브러리를 불러오지 못했어요. 연결을 확인하고 새로고침하세요!'},
+hi:{subtitle:'स्कूल के मैदान में रंगों की जंग',teamA:'कक्षा 9A',teamB:'कक्षा 9B',tagline:'{A} 🧡 बनाम 💜 {B} · 4 बनाम 4',name:'आपका नाम',namePh:'नाम लिखें…',hair:'हेयरस्टाइल',hairC:'बालों का रंग',diff:'बॉट कठिनाई',mode:'किस पर खेलें',pc:'💻 कंप्यूटर',phone:'📱 फ़ोन',lang:'🌐 भाषा',play:'जंग शुरू! ▶',drag:'👆 घुमाने के लिए खींचें',
+hs:['छोटे','फ्रिंज','नुकीले','बहुत छोटे','लंबे','टोपी'],hc:['भूरा','काला','सुनहरा','गुलाबी','नीला','चांदी'],df:['आसान','सामान्य','कठिन'],
+how:'🎯 <b>लक्ष्य:</b> 3 मिनट में स्कूल के मैदान को अपनी कक्षा के रंग से जितना हो सके रंग दें। समय खत्म होने पर ज़्यादा जगह रंगने वाली कक्षा <b>जीतती</b> है।<br>🎨 दूसरी कक्षा को निशाना बनाकर <b>आउट</b> करें (वे फिर लौटते हैं)। अपने रंग पर <b>तैरें</b> दबाए रखें: तेज़ चलें, छिपें और <b>रंग भरें</b>।<br>💣 <b>रंग बम</b> आधा टैंक खर्च करता है। काफ़ी रंगने पर <b>मेगा बम</b> चार्ज होता है। दुश्मन का रंग आपको धीमा करता है और चोट पहुँचाता है!',
+hp:'❤ जान',ink:'🎨 रंग',sp:'💥 मेगा बम',spPc:'💥 तैयार! E दबाएँ',spMob:'💥 तैयार! मेगा दबाएँ',inkWarn:'रंग खत्म! अपने रंग पर {k} दबाए रखें',swimMob:'तैरें',
+help:'<b>WASD</b> चलें · <b>माउस</b> निशाना · <b>क्लिक</b> फ़ायर · <b>Shift</b> तैरें · <b>Q</b>/<b>राइट क्लिक</b> बम · <b>E</b> मेगा बम · <b>Space</b> कूदें · <b>P</b> रोकें · <b>M</b> संगीत',
+deadBy:'{n} ने आपको रंग दिया!',dead:'आप रंग गए!',respawn:'{s} में वापसी…',splat:'रंग गया',tFire:'फ़ायर',tSwim:'तैरें',tJump:'कूदें',tBomb:'बम',tSpec:'मेगा',
+rot1:'खेलने के लिए फ़ोन को आड़ा करें!',rot2:'घुमाते ही खेल फिर शुरू होगा',pause:'रुका हुआ',pauseSub:'टीचर हाज़िरी ले रही हैं… 📋',resume:'जारी रखें',toMenu:'मुख्य मेन्यू',music:'🎵 संगीत',sfx:'🔊 आवाज़',on:'चालू',off:'बंद',
+win:'{t} जीती!',draw:'बराबरी!',winSub:'🎉 प्रार्थना सभा में आपकी कक्षा की तारीफ़ हुई!',loseSub:'😅 आपकी कक्षा पूरे हफ़्ते मैदान साफ़ करेगी…',drawSub:'🤝 दोनों कक्षाओं ने हाथ मिलाया!',cols:['छात्र','रंगा क्षेत्र','आउट किए','आउट हुए'],again:'नया मैच ▶',menu:'मेन्यू',
+startSub:'ढम! ढम! ढम! क्लास शुरू!',go:'शुरू!',last30:'आख़िरी 30 सेकंड!',timeUp:'समय खत्म!',noInk:'बम के लिए रंग कम है!',bigBomb:'मेगा रंग बम!',ko:'{n} आउट!',botBig:'मेगा बम आ रहा है!!',you:'आप',
+qk:['रंग दिया!','अपनी सीट पर जाओ!','आज सफ़ाई तुम करोगे!','हमारी कक्षा नंबर 1!','हीही, लग गया!','कमीज़ गई!','ये लो!'],qd:['अरे!','टीचर से शिकायत करूँगा!','चीटिंग!','देख लेना!','मेरी कमीज़!!','मम्मी डाँटेंगी…','अभी खत्म नहीं हुआ!'],qs:['चलो!','सब रंग दो!','मेरे पीछे आओ!','रंगने का समय!'],
+loadErr:'3D लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें और पेज रीलोड करें!'},
+ar:{subtitle:'معركة الألوان في ساحة المدرسة',teamA:'الصف 9A',teamB:'الصف 9B',tagline:'{A} 🧡 ضد 💜 {B} · 4 ضد 4',name:'اسمك',namePh:'اكتب اسمك…',hair:'تسريحة الشعر',hairC:'لون الشعر',diff:'صعوبة الروبوتات',mode:'اللعب على',pc:'💻 كمبيوتر',phone:'📱 هاتف',lang:'🌐 اللغة',play:'إلى المعركة! ▶',drag:'👆 اسحب للتدوير',
+hs:['قصير','غُرّة','مدبّب','حلاقة قصيرة','طويل','قبعة'],hc:['بني','أسود','أشقر','وردي','أزرق','فضي'],df:['سهل','متوسط','صعب'],
+how:'🎯 <b>الهدف:</b> خلال 3 دقائق لوّن أكبر مساحة ممكنة من ساحة المدرسة بلون صفك. عند انتهاء الوقت <b>يفوز</b> الصف الذي غطّى مساحة أكبر.<br>🎨 أصِب الصف الآخر <b>لإقصائهم</b> (سيعودون). اضغط مطولاً على <b>الغوص</b> فوق لونك لتسرع وتختبئ و<b>تعيد تعبئة الطلاء</b>.<br>💣 <b>قنبلة الطلاء</b> تستهلك نصف الخزان. لوّن بما يكفي لشحن <b>القنبلة العملاقة</b>. طلاء الخصم يبطئك ويؤذيك!',
+hp:'❤ الصحة',ink:'🎨 الطلاء',sp:'💥 القنبلة العملاقة',spPc:'💥 جاهزة! اضغط E',spMob:'💥 جاهزة! المس عملاقة',inkWarn:'نفد الطلاء! اضغط مطولاً {k} فوق لونك',swimMob:'غوص',
+help:'<b>WASD</b> حركة · <b>الفأرة</b> تصويب · <b>نقرة</b> إطلاق · <b>Shift</b> غوص · <b>Q</b>/<b>نقرة يمين</b> قنبلة · <b>E</b> قنبلة عملاقة · <b>Space</b> قفز · <b>P</b> إيقاف · <b>M</b> موسيقى',
+deadBy:'لوّنك {n}!',dead:'تم تلوينك!',respawn:'العودة بعد {s}…',splat:'تم تلوينه',tFire:'إطلاق',tSwim:'غوص',tJump:'قفز',tBomb:'قنبلة',tSpec:'عملاقة',
+rot1:'أدر هاتفك أفقياً للعب!',rot2:'ستستمر اللعبة عند التدوير',pause:'إيقاف مؤقت',pauseSub:'المعلمة تأخذ الحضور… 📋',resume:'متابعة',toMenu:'القائمة الرئيسية',music:'🎵 الموسيقى',sfx:'🔊 الصوت',on:'تشغيل',off:'إيقاف',
+win:'فاز {t}!',draw:'تعادل!',winSub:'🎉 تم تكريم صفك في الطابور الصباحي!',loseSub:'😅 على صفك تنظيف الساحة طوال الأسبوع…',drawSub:'🤝 تصافح الصفان!',cols:['الطالب','المساحة الملونة','أقصى','أُقصي'],again:'مباراة جديدة ▶',menu:'القائمة',
+startSub:'دوم! دوم! دوم! بدأ الدرس!',go:'انطلق!',last30:'آخر 30 ثانية!',timeUp:'انتهى الوقت!',noInk:'الطلاء لا يكفي للقنبلة!',bigBomb:'قنبلة طلاء عملاقة!',ko:'أقصيت {n}!',botBig:'القنبلة العملاقة قادمة!!',you:'أنت',
+qk:['لوّنتك!','عُد إلى مقعدك!','دورك في التنظيف!','صفنا الأفضل!','هههه، أصبتك!','ضاع قميصك!','خذ هذه!'],qd:['هيه!','سأخبر المعلمة!','غش!','سترى!','قميصي!!','أمي ستوبخني…','لم ينتهِ الأمر بعد!'],qs:['هيا!','لوّنوا كل شيء!','اتبعوني!','وقت التلوين!'],
+loadErr:'تعذّر تحميل مكتبة 3D. تحقق من الاتصال وأعد التحميل!'}
+};
+const I18N_X={"vi": ["Độ nhạy ngắm", "Chất lượng hình", "Tự động", "Thấp", "Cao"], "en": ["Aim sensitivity", "Graphics", "Auto", "Low", "High"], "pt": ["Sensibilidade da mira", "Gráficos", "Automático", "Baixo", "Alto"], "es": ["Sensibilidad de apuntado", "Gráficos", "Automático", "Bajo", "Alto"], "fr": ["Sensibilité de visée", "Graphismes", "Auto", "Bas", "Élevé"], "de": ["Ziel-Empfindlichkeit", "Grafik", "Automatisch", "Niedrig", "Hoch"], "it": ["Sensibilità mira", "Grafica", "Automatica", "Bassa", "Alta"], "ru": ["Чувствительность прицела", "Графика", "Авто", "Низкая", "Высокая"], "tr": ["Nişan hassasiyeti", "Grafik", "Otomatik", "Düşük", "Yüksek"], "id": ["Sensitivitas bidik", "Grafis", "Otomatis", "Rendah", "Tinggi"], "th": ["ความไวการเล็ง", "กราฟิก", "อัตโนมัติ", "ต่ำ", "สูง"], "zh": ["瞄准灵敏度", "画质", "自动", "低", "高"], "ja": ["エイム感度", "画質", "自動", "低", "高"], "ko": ["조준 감도", "그래픽", "자동", "낮음", "높음"], "hi": ["निशाने की संवेदनशीलता", "ग्राफ़िक्स", "ऑटो", "कम", "ज़्यादा"], "ar": ["حساسية التصويب", "الرسومات", "تلقائي", "منخفضة", "عالية"]};for(const k in I18N_X){const a=I18N_X[k];Object.assign(I18N[k],{sens:a[0],qual:a[1],qAuto:a[2],qLow:a[3],qHigh:a[4]});}
+const I18N_M={"vi": ["🗺️ Bản đồ", "Sân Trường", "Chợ Đêm", "Bãi Biển", "Công Viên", "Ngẫu nhiên"], "en": ["🗺️ Map", "School Yard", "Night Market", "Beach", "Park", "Random"], "pt": ["🗺️ Mapa", "Pátio da Escola", "Feira Noturna", "Praia", "Parque", "Aleatório"], "es": ["🗺️ Mapa", "Patio Escolar", "Mercado Nocturno", "Playa", "Parque", "Aleatorio"], "fr": ["🗺️ Carte", "Cour d’école", "Marché de nuit", "Plage", "Parc", "Aléatoire"], "de": ["🗺️ Karte", "Schulhof", "Nachtmarkt", "Strand", "Park", "Zufall"], "it": ["🗺️ Mappa", "Cortile", "Mercato notturno", "Spiaggia", "Parco", "Casuale"], "ru": ["🗺️ Карта", "Школьный двор", "Ночной рынок", "Пляж", "Парк", "Случайная"], "tr": ["🗺️ Harita", "Okul Bahçesi", "Gece Pazarı", "Plaj", "Park", "Rastgele"], "id": ["🗺️ Peta", "Halaman Sekolah", "Pasar Malam", "Pantai", "Taman", "Acak"], "th": ["🗺️ แผนที่", "สนามโรงเรียน", "ตลาดกลางคืน", "ชายหาด", "สวนสาธารณะ", "สุ่ม"], "zh": ["🗺️ 地图", "校园操场", "夜市", "海滩", "公园", "随机"], "ja": ["🗺️ マップ", "校庭", "ナイトマーケット", "ビーチ", "公園", "ランダム"], "ko": ["🗺️ 맵", "학교 운동장", "야시장", "해변", "공원", "랜덤"], "hi": ["🗺️ नक्शा", "स्कूल मैदान", "रात का बाज़ार", "समुद्र तट", "पार्क", "रैंडम"], "ar": ["🗺️ الخريطة", "ساحة المدرسة", "السوق الليلي", "الشاطئ", "الحديقة", "عشوائي"]};for(const k in I18N_M){const a=I18N_M[k];Object.assign(I18N[k],{map:a[0],mSchool:a[1],mMarket:a[2],mBeach:a[3],mPark:a[4],mRandom:a[5]});}
+function detectLang(){let s=null;try{s=localStorage.getItem('sc_lang');}catch(e){}if(s&&I18N[s])return s;
+  const ls=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'en']);
+  for(const l of ls){const k=String(l).toLowerCase().split('-')[0];if(I18N[k])return k;}return 'en';}
+let LANG=detectLang();
+const tr=(k,v)=>t(k,v);
+function t(k,v){const L=I18N[LANG]||I18N.en;let s=L[k];if(s===undefined)s=I18N.en[k];if(s===undefined)s=I18N.vi[k];if(s===undefined)return k;
+  if(typeof s==='string'&&v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s;}
+
+</script>
+<script src="js/three.min.js"></script>
+<script>if(!window.THREE)document.write('<script src="js/three.min.js"><\/script>');</script>
+<script>
+'use strict';
+if(!window.THREE){document.body.insertAdjacentHTML('beforeend','<div id="loadErr">'+t('loadErr')+'</div>');throw new Error('no three');}
+
+/* ================= CORE ================= */
+const $=id=>document.getElementById(id);
+const rand=(a,b)=>a+Math.random()*(b-a), clamp=(v,a,b)=>v<a?a:v>b?b:v, pick=a=>a[(Math.random()*a.length)|0];
+const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+const SMALL=Math.min(screen.width,screen.height)<820;
+let MOBILE=IS_TOUCH&&SMALL;
+const HX=32,HZ=24,G=2,GW=HX*2*G,GD=HZ*2*G,PPU=16,MATCH_TIME=180,S=0.85;
+const TEAM=[null,
+  {name:'Lớp 9A',short:'9A',color:'#ff7a12',hex:0xff7a12,dark:0xb84d00,spawn:{x:0,z:18},yaw:0},
+  {name:'Lớp 9B',short:'9B',color:'#9446ff',hex:0x9446ff,dark:0x5b20b5,spawn:{x:0,z:-18},yaw:Math.PI}];
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+const canvas=$('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!IS_TOUCH,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,IS_TOUCH&&SMALL?1.3:IS_TOUCH?1.5:2));
+renderer.shadowMap.enabled=!IS_TOUCH;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0xbfe4ff);scene.fog=new THREE.Fog(0xcfe9ff,75,180);
+const camera=new THREE.PerspectiveCamera(66,1,0.1,IS_TOUCH?230:400);
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+let hemiL,ambL;scene.add(hemiL=new THREE.HemisphereLight(0xfff6e0,0x8a7a60,0.5));
+scene.add(ambL=new THREE.AmbientLight(0xffffff,0.12));
+const sun=new THREE.DirectionalLight(0xfff3dc,0.62);sun.position.set(22,42,16);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-44,right:44,top:36,bottom:-36,near:1,far:120});sun.shadow.bias=-0.0006;scene.add(sun);
+
+const MC={};function M(c){return MC[c]||(MC[c]=new THREE.MeshLambertMaterial({color:c}));}
+const BOX=new THREE.BoxGeometry(1,1,1);
+function box(w,h,d,x,y,z,mat,parent,shadow){const m=new THREE.Mesh(BOX,typeof mat==='number'?M(mat):mat);m.scale.set(w,h,d);m.position.set(x,y,z);if(shadow!==false){m.castShadow=true;m.receiveShadow=true;}(parent||BUILD).add(m);return m;}
+function cv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function texOf(c,near){const t=new THREE.CanvasTexture(c);if(near!==false)t.magFilter=THREE.NearestFilter;t.anisotropy=renderer.capabilities.getMaxAnisotropy?Math.min(8,renderer.capabilities.getMaxAnisotropy()):1;return t;}
+function speckle(ctx,w,h,cell,amp){for(let y=0;y<h;y+=cell)for(let x=0;x<w;x+=cell){const v=(Math.random()-.5)*amp;ctx.fillStyle=v>0?`rgba(255,255,255,${v})`:`rgba(0,0,0,${-v})`;ctx.fillRect(x,y,cell,cell);}}
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+const FONT='"Baloo 2",system-ui,sans-serif';
+
+/* ================= AUDIO ================= */
+let AC=null,master=null,sfxOn=ls.get('sc_sfx')!=='0',musicOn=ls.get('sc_music')!=='0',nbuf=null,nextNote=0,step=0;
+function initAudio(){if(AC){if(AC.state==='suspended')AC.resume();return;}try{AC=new(window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=.55;master.connect(AC.destination);
+  nbuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}catch(e){AC=null;}}
+function tone(f1,f2,dur,type,vol,delay,force){if(!AC||(!sfxOn&&!force))return;const t=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.02);}
+function nz(dur,vol,freq,delay){if(!AC||!sfxOn)return;const t=AC.currentTime+(delay||0);const s=AC.createBufferSource();s.buffer=nbuf;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=freq;const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(master);s.start(t,Math.random()*.5);s.stop(t+dur+.02);}
+let lastShot=0;
+const SFX={
+  shot(){const n=performance.now();if(n-lastShot<70)return;lastShot=n;tone(950,420,.06,'square',.035);nz(.05,.05,2600);},
+  splat(v){nz(.12,.07*(v||1),700);},
+  hit(){tone(520,980,.08,'triangle',.12);},
+  hurt(){tone(320,120,.16,'sawtooth',.1);},
+  kill(){tone(520,1040,.12,'square',.1);tone(780,1560,.16,'square',.1,.1);},
+  boom(v){nz(.45,.32*(v||1),520);tone(150,40,.45,'sine',.38*(v||1));},
+  throw(){tone(300,700,.15,'triangle',.08);},
+  drum(){[0,.42,.84].forEach(d=>{tone(115,48,.4,'sine',.7,d);nz(.12,.18,320,d);});},
+  win(){[523,659,784,1046].forEach((f,i)=>tone(f,f,.22,'square',.09,i*.13));},
+  lose(){[392,349,311,262].forEach((f,i)=>tone(f,f*.98,.26,'triangle',.12,i*.16));},
+  tick(){tone(1200,1200,.05,'square',.05);},
+  click(){tone(660,880,.06,'triangle',.08);}
+};
+// small looping chiptune
+const MEL=[0,4,7,9,7,4,2,4, 0,4,7,12,9,7,9,7, 5,9,12,9,7,4,2,0, 2,4,7,4,2,-1,0,null];
+const BAS=[0,0,7,7,5,5,7,7];
+function musicTick(){if(!AC||!musicOn||state!=='play'||paused)return;if(nextNote<AC.currentTime)nextNote=AC.currentTime+.05;
+  while(nextNote<AC.currentTime+.2){const spd=timeLeft<30?.13:.16;const n=MEL[step%MEL.length];
+    if(n!==null)note(523.25*Math.pow(2,n/12),spd*.9,'square',.022,nextNote);
+    if(step%2===0)note(130.8*Math.pow(2,BAS[(step>>2)%BAS.length]/12),spd*1.8,'triangle',.06,nextNote);
+    nextNote+=spd;step++;}}
+function note(f,dur,type,vol,at){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,at);g.gain.exponentialRampToValueAtTime(.001,at+dur);o.connect(g);g.connect(master);o.start(at);o.stop(at+dur+.02);}
+
+/* ================= GROUND & PAINT ================= */
+const owner=new Uint8Array(GW*GD),blocked=new Uint8Array(GW*GD);let counts=[0,0,0],totalCells=0;
+const px=x=>(x+HX)*PPU,pz=z=>(z+HZ)*PPU;
+const baseC=cv(HX*2*PPU,HZ*2*PPU),bctx=baseC.getContext('2d');
+const PPP=IS_TOUCH&&SMALL?8:16,ppx=x=>(x+HX)*PPP,ppz=z=>(z+HZ)*PPP;
+const paintC=cv(HX*2*PPP,HZ*2*PPP),pctx=paintC.getContext('2d');
+const paintTex=texOf(paintC,false);let paintDirty=false,paintUpT=0;
+
+function drawYard(){
+  const c=bctx,W=baseC.width,H=baseC.height;
+  c.fillStyle='#d9c9a6';c.fillRect(0,0,W,H);speckle(c,W,H,4,.07);
+  // brick tiles grid (like sidewalk)
+  c.fillStyle='rgba(150,120,80,.10)';
+  for(let x=-HX;x<HX;x+=2)for(let z=-HZ;z<HZ;z+=2)if(((x+z)/2)%2===0)c.fillRect(px(x),pz(z),32,32);
+  c.strokeStyle='rgba(110,90,60,.16)';c.lineWidth=1;
+  for(let x=-HX;x<=HX;x+=2){c.beginPath();c.moveTo(px(x),0);c.lineTo(px(x),H);c.stroke();}
+  for(let z=-HZ;z<=HZ;z+=2){c.beginPath();c.moveTo(0,pz(z));c.lineTo(W,pz(z));c.stroke();}
+  // gutter
+  c.strokeStyle='rgba(80,70,50,.4)';c.lineWidth=14;c.strokeRect(7,7,W-14,H-14);
+  // assembly lines (vạch xếp hàng chào cờ)
+  c.strokeStyle='rgba(255,255,255,.75)';c.lineWidth=4;
+  for(let i=-3;i<=3;i++){if(i===0)continue;c.beginPath();c.moveTo(px(i*3.2),pz(4.5));c.lineTo(px(i*3.2),pz(15));c.stroke();c.beginPath();c.moveTo(px(i*3.2),pz(-15));c.lineTo(px(i*3.2),pz(-4.5));c.stroke();}
+  c.strokeRect(px(-13),pz(-16.5),26*PPU,33*PPU);
+  c.fillStyle='rgba(255,255,255,.8)';c.font=`800 40px ${FONT}`;c.textAlign='center';c.textBaseline='middle';
+  c.fillText('9A',px(-14.5),pz(13));c.save();c.translate(px(14.5),pz(-13));c.rotate(Math.PI);c.fillText('9B',0,0);c.restore();
+  // hopscotch (nhảy lò cò)
+  c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=3;c.font=`700 22px ${FONT}`;
+  const hs=[[0,0],[0,1],[-.5,2],[.5,2],[0,3],[-.5,4],[.5,4],[0,5]];
+  hs.forEach(([a,b],i)=>{const x=px(-26+a*2),y=pz(19-b*1.6),w=(a===0?1.6:1)*PPU*1.0;c.strokeRect(x-w/2,y-12,w,24);c.fillText(i+1,x,y+1);});
+  // chalk doodles
+  c.fillStyle='rgba(255,255,255,.7)';c.font=`800 30px ${FONT}`;c.fillText('HiHi ♥',px(25),pz(-19));c.fillText('9A ♥ 9B',px(-24),pz(-20));
+  c.font=`700 22px ${FONT}`;c.fillText('Ô ăn quan',px(24),pz(20.5));
+  c.strokeRect(px(21),pz(21.5),6*PPU,1.6*PPU);for(let i=1;i<5;i++){c.beginPath();c.moveTo(px(21+i*1.2),pz(21.5));c.lineTo(px(21+i*1.2),pz(23.1));c.stroke();}
+}
+function resetPaint(){owner.fill(0);pctx.clearRect(0,0,paintC.width,paintC.height);counts=[totalCells,0,0];paintDirty=true;}
+function cellIdx(x,z){const cx=Math.floor((x+HX)*G),cz=Math.floor((z+HZ)*G);if(cx<0||cz<0||cx>=GW||cz>=GD)return -1;return cz*GW+cx;}
+function ownerAt(x,z){const i=cellIdx(x,z);return i<0?0:owner[i];}
+function paint(x,z,r,team,src){
+  const x0=Math.max(0,Math.floor((x-r+HX)*G)),x1=Math.min(GW-1,Math.floor((x+r+HX)*G)),z0=Math.max(0,Math.floor((z-r+HZ)*G)),z1=Math.min(GD-1,Math.floor((z+r+HZ)*G));
+  let ch=0;const r2=r*r;
+  for(let cz=z0;cz<=z1;cz++)for(let cx=x0;cx<=x1;cx++){const wx=(cx+.5)/G-HX,wz=(cz+.5)/G-HZ,dx=wx-x,dz=wz-z;if(dx*dx+dz*dz>r2)continue;const i=cz*GW+cx;if(blocked[i])continue;const o=owner[i];if(o!==team){counts[o]--;counts[team]++;owner[i]=team;ch++;}}
+  pctx.fillStyle=TEAM[team].color;pctx.beginPath();pctx.arc(ppx(x),ppz(z),r*PPP,0,6.2832);pctx.fill();
+  const n=r>1.5?7:r>.7?3:1;for(let i=0;i<n;i++){const a=Math.random()*6.28,d=r*rand(.75,1.15),s=r*rand(.14,.3);pctx.beginPath();pctx.arc(ppx(x+Math.sin(a)*d),ppz(z+Math.cos(a)*d),Math.max(1,s*PPP),0,6.2832);pctx.fill();}
+  paintDirty=true;
+  if(src&&ch){src.points+=ch;src.special=Math.min(100,src.special+ch*.16);}
+  return ch;
+}
+
+/* ================= WORLD / MAPS ================= */
+const OB=[];let BUILD=scene,world=null,curMap=null;
+let flagMesh=null;
+const MBC={};function MB(c){return MBC[c]||(MBC[c]=new THREE.MeshBasicMaterial({color:c}));}
+function makeTextTex(w,h,draw){const c=cv(w,h);draw(c.getContext('2d'),w,h);return texOf(c);}
+function symDefs(defs){OB.length=0;defs.forEach(d=>{OB.push({x:d[0],z:d[1],w:d[2],d:d[3],h:d[4],type:d[5]});if(d[0]||d[1])OB.push({x:-d[0],z:-d[1],w:d[2],d:d[3],h:d[4],type:d[5],m:1});});}
+function cyl(rt,rb,h,seg,x,y,z,mat,parent){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),typeof mat==='number'?M(mat):mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;(parent||BUILD).add(m);return m;}
+function flatPlane(w,d,x,y,z,mat,parent){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),typeof mat==='number'?M(mat):mat);m.rotation.x=-Math.PI/2;m.position.set(x,y,z);m.receiveShadow=true;(parent||BUILD).add(m);return m;}
+function signTex(text,bg,fg,w,h,fs){return makeTextTex(w||256,h||56,(c,W,H)=>{c.fillStyle=bg;c.fillRect(0,0,W,H);c.fillStyle=fg;c.font=`800 ${fs||26}px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(text,W/2,H/2+1);});}
+function signMesh(text,bg,fg,w,h,x,y,z,ry,parent){const t=signTex(text,bg,fg,256,56);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,side:THREE.DoubleSide}));m.position.set(x,y,z);m.rotation.y=ry||0;(parent||BUILD).add(m);return m;}
+
+/* ---------- ground painters (base canvas) ---------- */
+function drawMarket(){const c=bctx,W=baseC.width,H=baseC.height;c.fillStyle='#3d3c44';c.fillRect(0,0,W,H);
+  for(let x=-HX;x<HX;x++)for(let z=-HZ;z<HZ;z++){c.fillStyle=pick(['#55535c','#4c4a53','#5d5a62','#47464f','#625e66']);c.fillRect(px(x)+1+(z%2?PPU/2:0),pz(z)+1,PPU-2,PPU-2);}
+  speckle(c,W,H,4,.06);
+  c.fillStyle='rgba(180,60,40,.35)';[[-10,6],[10,-6],[-10,-6],[10,6],[-20,8],[20,-8],[-20,-4],[20,4]].forEach(([x,z])=>c.fillRect(px(x-2.6),pz(z-1.6),5.2*PPU,3.2*PPU));
+  c.strokeStyle='rgba(230,200,140,.35)';c.lineWidth=6;c.beginPath();c.arc(px(0),pz(0),5*PPU,0,6.28);c.stroke();c.beginPath();c.arc(px(0),pz(0),3.2*PPU,0,6.28);c.stroke();
+  c.fillStyle='rgba(255,220,150,.5)';c.font=`800 34px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText('CHỢ ĐÊM',px(-24),pz(20));c.fillText('PHỐ CỔ',px(24),pz(-20));}
+function drawBeach(){const c=bctx,W=baseC.width,H=baseC.height;c.fillStyle='#efd8a0';c.fillRect(0,0,W,H);speckle(c,W,H,4,.09);
+  c.strokeStyle='rgba(170,130,70,.18)';c.lineWidth=3;for(let i=0;i<40;i++){const x=rand(0,W),y=rand(0,H);c.beginPath();c.moveTo(x,y);c.quadraticCurveTo(x+30,y-8,x+60,y);c.stroke();}
+  c.fillStyle='rgba(150,110,60,.25)';for(let i=0;i<60;i++){const x=rand(0,W),y=rand(0,H);c.fillRect(x,y,5,8);c.fillRect(x+9,y+12,5,8);}
+  c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=5;c.strokeRect(px(-7),pz(-4.5),14*PPU,9*PPU);
+  for(let i=0;i<30;i++){c.fillStyle=pick(['#fff','#ffd9c7','#ff9f68']);c.beginPath();c.arc(rand(0,W),rand(0,H),rand(2,4),0,6.28);c.fill();}
+  c.fillStyle='rgba(255,255,255,.75)';c.font=`800 34px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText('HiHi BEACH',px(-24),pz(19));c.fillText('☀',px(24),pz(-19));}
+function drawPark(){const c=bctx,W=baseC.width,H=baseC.height;c.fillStyle='#78b955';c.fillRect(0,0,W,H);speckle(c,W,H,4,.12);
+  c.fillStyle='rgba(40,90,30,.15)';for(let i=0;i<300;i++)c.fillRect(rand(0,W),rand(0,H),3,7);
+  const path='#d9c39e';c.fillStyle=path;c.fillRect(0,pz(-1.6),W,3.2*PPU);c.fillRect(px(-1.6),0,3.2*PPU,H);
+  c.strokeStyle=path;c.lineWidth=3*PPU;c.beginPath();c.arc(px(0),pz(0),7*PPU,0,6.28);c.stroke();
+  c.strokeStyle='rgba(120,90,60,.25)';c.lineWidth=1;for(let x=-HX;x<HX;x+=1){c.beginPath();c.moveTo(px(x),pz(-1.6));c.lineTo(px(x),pz(1.6));c.stroke();}
+  for(let i=0;i<80;i++){c.fillStyle=pick(['#ff6b9a','#ffd23f','#ffffff','#b07cff']);c.fillRect(rand(0,W),rand(0,H),4,4);}}
+
+/* ---------- obstacles ---------- */
+function buildObstacle(o,map){
+  const {x,z,w,d,h}=o;const g=new THREE.Group();g.position.set(x,0,z);if(o.m)g.rotation.y=Math.PI;BUILD.add(g);
+  switch(o.type){
+    case 'flag':{box(2.6,.3,2.6,0,.15,0,0xb9b2a4,g);box(1.9,.3,1.9,0,.45,0,0xd0c8b8,g);box(.16,9,.16,0,5.1,0,0xdfe5ea,g);box(.3,.2,.3,0,9.65,0,0xffd23f,g);
+      const t=makeTextTex(96,64,(c,W,H)=>{c.fillStyle='#da251d';c.fillRect(0,0,W,H);c.fillStyle='#ffde00';c.beginPath();for(let i=0;i<5;i++){const a=-Math.PI/2+i*4*Math.PI/5;c.lineTo(W/2+Math.cos(a)*18,H/2+Math.sin(a)*18);}c.fill();});
+      flagMesh=new THREE.Mesh(new THREE.PlaneGeometry(2.1,1.4,6,1),new THREE.MeshLambertMaterial({map:t,side:THREE.DoubleSide}));flagMesh.position.set(1.13,8.75,0);flagMesh.userData.noMerge=1;g.add(flagMesh);break;}
+    case 'planter':{box(w,h,d,0,h/2,0,0xb5523b,g);box(w-.2,.06,d-.2,0,h,0,0x4a3424,g);for(let i=0;i<7;i++){const s=rand(.55,.85);box(s,s*.8,s,rand(-w/2+.5,w/2-.5),h+s*.4,rand(-.35,.35),pick([0x3e8e3e,0x2f7a34,0x4fa147]),g);}
+      for(let i=0;i<10;i++)box(.18,.18,.18,rand(-w/2+.3,w/2-.3),h+rand(.55,.85),rand(-.6,.6),pick([0xff4f7a,0xffd23f,0xffffff,0xff8a2b]),g,false);break;}
+    case 'crates':{box(2,.75,2,0,.375,0,0x9c6a36,g);box(1.9,.06,1.9,0,.76,0,0x7a4f26,g);box(1.6,.65,1.4,.1,1.08,.1,0xb88a52,g);
+      [[-.7,-.7],[.7,-.7],[-.7,.7],[.7,.7]].forEach(([a,b])=>box(.1,.4,.1,a*1.0,1.6,b*.9,0x6b4423,g));break;}
+    case 'baskets':{for(let i=0;i<3;i++)cyl(.55,.45,.6,10,-.5+i*.5,.3+(i===1?.6:0),i%2?.3:-.3,0xc8a165,g);for(let i=0;i<8;i++)box(.2,.2,.2,rand(-.8,.8),.75+rand(0,.5),rand(-.6,.6),pick([0xff4d4d,0xffa62b,0x7bd148,0xfff176]),g,false);box(1.2,.5,.8,.4,.25,.5,0xe9e1c9,g);break;}
+    case 'pingpong':{[[-1.3,-.65],[1.3,-.65],[-1.3,.65],[1.3,.65]].forEach(([a,b])=>box(.12,.8,.12,a,.4,b,0x333333,g));box(3,.1,1.6,0,.85,0,0x1f7a4a,g);box(3,.11,.05,0,.851,0,0xffffff,g);box(.05,.25,1.7,0,1.02,0,0xf5f5f5,g);break;}
+    case 'bench':{box(3,.15,1,0,.55,0,0xa3a39d,g);box(.3,.48,.8,-1.1,.24,0,0x8c8c86,g);box(.3,.48,.8,1.1,.24,0,0x8c8c86,g);break;}
+    case 'tree':{box(2,.7,2,0,.35,0,0xb5523b,g);box(1.8,.06,1.8,0,.71,0,0x4a3424,g);box(.5,4.2,.5,0,2.8,0,0x6b4a2e,g);box(.3,1.4,.3,.6,3.8,0,0x6b4a2e,g).rotation.z=-.6;
+      box(5,1.1,5,0,5,0,0x3c8a3a,g);box(4,1,4,.3,6,-.2,0x469b40,g);box(2.6,.8,2.6,-.2,6.8,.3,0x3c8a3a,g);
+      if(map.flowers!==false)for(let i=0;i<16;i++)box(rand(.5,1),.35,rand(.5,1),rand(-2.4,2.4),pick([5.6,6.55,7.25]),rand(-2.4,2.4),pick([0xe8432e,0xff5a36,0xd9301c]),g,false);break;}
+    case 'shed':{box(w,h,d,0,h/2,0,0xcfc6b2,g);box(w+.02,.3,d+.02,0,.15,0,0x4f7cb5,g);box(3.4,.16,9.8,1.4,2.7,0,0x3f74b8,g);
+      [[2.9,-4.6],[2.9,4.6],[2.9,0]].forEach(([a,b])=>box(.14,2.65,.14,a,1.33,b,0x7a7a7a,g));
+      for(let i=-3;i<=3;i+=1.5){const bc=pick([0x2e86de,0xe84118,0x44bd32,0x111111,0xfbc531]);box(1.5,.08,.08,1.0,.75,i,bc,g);box(.08,.5,.5,.3,.3,i,0x222222,g,false);box(.08,.5,.5,1.7,.3,i,0x222222,g,false);box(.1,.3,.1,1.55,.95,i,bc,g,false);box(.4,.06,.18,.45,.95,i,0x222222,g,false);}break;}
+    case 'tank':{box(2,.6,2,0,.3,0,0x9e9a92,g);box(1.8,1.05,1.8,0,1.12,0,0xcfd8de,g);box(1.6,.1,1.6,0,1.68,0,0xb8c2c8,g);box(.5,.12,.5,0,1.76,0,0x8d989e,g);box(.12,.8,.12,.95,.6,.6,0x8d989e,g);break;}
+    case 'lowwall':{const W=map.wall;const t=makeTextTex(256,80,(c,CW,CH)=>{c.fillStyle=W[2];c.fillRect(0,0,CW,CH);speckle(c,CW,CH,4,.05);c.fillStyle=W[3];c.fillRect(0,CH-16,CW,16);c.fillStyle=W[4];c.font=`800 24px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(W[0],CW/2,CH*.32);c.fillText(W[1],CW/2,CH*.64);});
+      const mt=new THREE.MeshLambertMaterial({map:t}),mw=M(parseInt(W[2].slice(1),16));const m=new THREE.Mesh(BOX,[mw,mw,mw,mw,mt,mt]);m.scale.set(w,h,d);m.position.set(0,h/2,0);m.castShadow=m.receiveShadow=true;g.add(m);break;}
+    case 'pillar':{box(w,h,d,0,h/2,0,0xd8cbaa,g);box(w+.1,.2,d+.1,0,h,0,0xb5523b,g);box(.9,.6,.9,0,h+.4,0,0x2f7a34,g);break;}
+    case 'trash':{box(w*.9,h,d*.9,0,h/2,0,0x2e9e5b,g);box(w,.12,d,0,h+.05,0,0x1f7a44,g);box(.5,.06,.2,0,h+.13,0,0xffffff,g,false);break;}
+    // ---- market ----
+    case 'well':{box(w,h*.75,d,0,h*.375,0,0x8a8580,g);box(w+.2,.18,d+.2,0,h*.75+.09,0,0x9d978f,g);box(w-.7,.05,d-.7,0,h*.75+.19,0,0x24506e,g);
+      box(.18,2.4,.18,-w/2+.25,1.2,0,0x6b4423,g);box(.18,2.4,.18,w/2-.25,1.2,0,0x6b4423,g);box(w-.3,.16,.16,0,2.4,0,0x6b4423,g);box(.35,.35,.35,0,1.9,0,0x7a5530,g);
+      box(.4,.55,.4,0,2.0+.55,0,MB(0xff5a36),g,false);box(.5,.08,.5,0,2.86,0,0x222222,g,false);break;}
+    case 'stall':{const cA=pick([0xd63031,0x0984e3,0x00a86b,0xe17055]);box(w,.12,d,0,.95,0,0x8b5a2b,g);[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>box(.1,2.5,.1,a*(w/2-.1),1.25,b*(d/2-.1),0x5b3a1b,g));
+      box(w-.1,.8,d-.1,0,.45,0,0x6e4521,g);
+      for(let i=0;i<12;i++)box(rand(.2,.35),rand(.15,.3),rand(.2,.35),rand(-w/2+.3,w/2-.3),1.1,rand(-d/2+.3,d/2-.3),pick([0xff4d4d,0xffa62b,0x7bd148,0xfff176,0xffffff,0x9b59b6,0xe84393]),g,false);
+      const n=6;for(let i=0;i<n;i++)box(w/n+.05,.14,d+.7,-w/2+w/n*(i+.5),2.5,0,i%2?0xffffff:cA,g);
+      box(.3,.42,.3,-w/4,2.15,0,MB(0xffb347),g,false);box(.3,.42,.3,w/4,2.15,0,MB(0xff6b4a),g,false);break;}
+    case 'cart':{box(w,.6,d*.75,0,.85,0,0xd63031,g);box(w-.2,.5,d*.6,0,1.4,0,MB(0xfff3c4),g,false);box(w+.1,.08,d*.8,0,1.67,0,0xb71c1c,g);
+      box(.08,.5,.5,0,.28,-d*.42,0x222222,g,false);box(.08,.5,.5,0,.28,d*.42,0x222222,g,false);box(.08,2.4,.08,w/2-.1,1.6,0,0x444444,g);box(1.8,.1,1.8,w/2-.1,2.8,0,pick([0xffd23f,0x2ecc71,0xff7aa2]),g);
+      signMesh(pick(['BÁNH MÌ','CHÈ','NGÔ NƯỚNG','BÁNH TRÁNG']),'#b71c1c','#fff',1.4,.32,0,1.25,d*.39,0,g);break;}
+    case 'lamppost':{box(.2,h,.2,0,h/2,0,0x2d2d33,g);box(1.0,.12,.12,.4,h-.1,0,0x2d2d33,g);box(.5,.65,.5,.8,h-.6,0,MB(map.lamp||0xff5a36),g,false);box(.56,.1,.56,.8,h-.24,0,MB(0xffd23f),g,false);box(.5,.5,.5,0,.25,0,0x3a3a40,g);break;}
+    // ---- beach ----
+    case 'net':{box(.16,2.6,.16,-w/2,1.3,0,0xdedede,g);box(.16,2.6,.16,w/2,1.3,0,0xdedede,g);box(w,.12,.06,0,2.5,0,0xffffff,g);box(w,1.1,.03,0,1.85,0,M(0x2d3436),g);
+      for(let i=-w/2+.3;i<w/2;i+=.3)box(.03,1.1,.05,i,1.85,0,0xffffff,g,false);box(w,.6,.2,0,.3,0,0xe9cf92,g);break;}
+    case 'umbrella':{const a=pick([0xff5a5f,0x0fb9b1,0xffb400,0x6c5ce7]);box(.12,2.7,.12,0,1.35,0,0xffffff,g);box(2.8,.14,2.8,0,2.7,0,a,g);box(1.9,.14,1.9,0,2.84,0,0xffffff,g);box(.9,.14,.9,0,2.98,0,a,g);
+      box(.8,.12,1.7,1.1,.35,.2,0x74b9ff,g);box(.8,.6,.12,1.1,.6,-.6,0x74b9ff,g);box(.7,.04,1.2,1.1,.42,.3,pick([0xffeaa7,0xfd79a8]),g,false);break;}
+    case 'boat':{const m=cyl(1.25,1.0,.85,14,0,.42,0,0x7a5530,g);cyl(1.1,1.1,.05,14,0,.84,0,0x4a3220,g);box(.12,.12,2.4,.4,.95,.2,0x9c6a36,g).rotation.y=.6;box(.5,.06,.3,1.2,.92,1.0,0x9c6a36,g);break;}
+    case 'lounger':{box(w,.12,d,0,.4,0,0xffffff,g);box(w,.08,d*.9,0,.48,0,pick([0x0984e3,0xe17055,0x00b894]),g);const b=box(w,.7,.1,0,.75,-d/2+.1,0xffffff,g);b.rotation.x=-.5;
+      [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,c])=>box(.08,.35,.08,a*(w/2-.08),.17,c*(d/2-.1),0xbdbdbd,g,false));break;}
+    case 'sandcastle':{box(w,.5,d,0,.25,0,0xe2c27e,g);box(w*.6,.4,d*.6,0,.7,0,0xd9b56c,g);[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>box(.28,.6,.28,a*w*.42,.8,b*d*.42,0xe2c27e,g));
+      box(.04,.5,.04,0,1.15,0,0x555555,g,false);box(.28,.18,.02,.14,1.32,0,MB(0xff3b30),g,false);break;}
+    case 'palm':{let px0=0,py=0;for(let i=0;i<7;i++){box(.42-i*.02,.9,.42-i*.02,px0,py+.45,0,i%2?0x8d6e4a:0x7a5c3b,g);py+=.86;px0+=.12;}
+      for(let i=0;i<6;i++){const a=i/6*Math.PI*2;const l=box(2.8,.1,.55,px0+Math.cos(a)*1.3,py-.2,Math.sin(a)*1.3,pick([0x2e8b3a,0x37a046]),g);l.rotation.y=-a;l.rotation.z=.35*(Math.cos(a)>0?-1:1)*0;l.rotateZ(-.35);}
+      for(let i=0;i<3;i++)box(.28,.28,.28,px0+rand(-.3,.3),py-.35,rand(-.3,.3),0x5a3b1e,g,false);break;}
+    case 'rock':{box(w,h*.7,d,0,h*.35,0,0x8e8e86,g);box(w*.7,h*.5,d*.6,.2,h*.8,.1,0x9e9e96,g).rotation.y=.4;box(w*.5,h*.4,d*.5,-.4,.2,.6,0x7f7f78,g);break;}
+    case 'cooler':{box(w,h*.85,d,0,h*.42,0,0xf5f5f5,g);box(w+.05,.12,d+.05,0,h*.88,0,0x2e86de,g);box(.4,.08,.08,0,h*.98,0,0x1d5ea8,g);for(let i=0;i<3;i++)box(.5,.12,.2,rand(-.3,.3),h+.02,rand(-.3,.3),pick([0x9fb7c9,0xff8c69]),g,false);break;}
+    // ---- park ----
+    case 'fountain':{box(w,.6,d,0,.3,0,0xbdb6aa,g);box(w-.5,.05,d-.5,0,.58,0,M(0x4fb3e8),g);box(.7,1.7,.7,0,.85,0,0xd6d0c4,g);box(1.6,.22,1.6,0,1.7,0,0xd6d0c4,g);box(1.3,.05,1.3,0,1.82,0,M(0x6cc4f0),g);
+      box(.25,.7,.25,0,2.15,0,M(0xa8e1ff),g,false);for(let i=0;i<8;i++){const a=i/8*6.283;box(.16,.4,.16,Math.cos(a)*.9,1.55,Math.sin(a)*.9,M(0xa8e1ff),g,false);}break;}
+    case 'hedge':{box(w,h,d,0,h/2,0,0x2f7a34,g);box(w-.2,.25,d-.2,0,h+.1,0,0x3e8e3e,g);for(let i=0;i<10;i++)box(.16,.16,.16,rand(-w/2+.2,w/2-.2),h+.25,rand(-d/2+.2,d/2-.2),pick([0xff6b9a,0xffd23f,0xffffff]),g,false);break;}
+    case 'slide':{box(1.4,.15,1.4,-.7,1.9,0,0xffd23f,g);[[-1.35,-.6],[-1.35,.6],[-.05,-.6],[-.05,.6]].forEach(([a,b])=>box(.12,1.9,.12,a,.95,b,0x0984e3,g));
+      for(let i=0;i<5;i++)box(.1,.08,1.2,-1.45,.35+i*.35,0,0xd63031,g);const s=box(2.2,.1,1.0,.75,1.05,0,0xff5a5f,g);s.rotation.z=-.7;box(2.2,.3,.08,.75,1.15,.5,0xff5a5f,g).rotation.z=-.7;box(2.2,.3,.08,.75,1.15,-.5,0xff5a5f,g).rotation.z=-.7;
+      box(1.5,.6,.08,-.7,2.25,.7,0x00b894,g);box(1.5,.6,.08,-.7,2.25,-.7,0x00b894,g);break;}
+    case 'swing':{[[-1,-.8],[-1,.8],[1,-.8],[1,.8]].forEach(([a,b])=>{const p=box(.12,2.6,.12,a*(w/2-.1),1.25,b*.25,0x6c5ce7,g);p.rotation.x=b*.25;});box(w,.14,.14,0,2.5,0,0x6c5ce7,g);
+      [-.45,.45].forEach(s=>{box(.03,1.8,.03,s-.25,1.55,0,0x999999,g,false);box(.03,1.8,.03,s+.25,1.55,0,0x999999,g,false);box(.6,.08,.3,s,.65,0,pick([0xffd23f,0xff5a5f]),g);});break;}
+    case 'kiosk':{box(w,2.0,d,0,1.0,0,0xff9ff3,g);box(w+.5,.16,d+.6,0,2.1,0,0xffffff,g);box(w-.6,.8,.06,0,1.35,d/2+.01,MB(0xfff3c4),g,false);box(w,.3,.3,0,.95,d/2+.15,0xffffff,g);
+      signMesh('KEM ★ HiHi','#e84393','#fff',w,.45,0,2.45,d/2+.32,0,g);for(let i=0;i<3;i++){box(.2,.35,.2,-.6+i*.6,1.25,d/2+.25,0xf5d29a,g,false);box(.26,.26,.26,-.6+i*.6,1.52,d/2+.25,pick([0xff9ff3,0x81ecec,0xffeaa7]),g,false);}break;}
+  }
+}
+function markBlocked(){blocked.fill(0);totalCells=0;for(let cz=0;cz<GD;cz++)for(let cx=0;cx<GW;cx++){const wx=(cx+.5)/G-HX,wz=(cz+.5)/G-HZ;let b=0;for(const o of OB)if(Math.abs(wx-o.x)<o.w/2&&Math.abs(wz-o.z)<o.d/2){b=1;break;}blocked[cz*GW+cx]=b;if(!b)totalCells++;}}
+
+/* ---------- facades (school) ---------- */
+function facadeSchool(){const W=66*PPU,H=11*PPU;const c=cv(W,H),x=c.getContext('2d');
+  x.fillStyle='#f3cd55';x.fillRect(0,0,W,H);speckle(x,W,H,4,.06);x.fillStyle='#c9a13c';x.fillRect(0,H-12,W,12);
+  const fh=3.1*PPU;for(let f=0;f<3;f++){const y0=H-12-(f+1)*fh;
+    x.fillStyle='#e8e2d2';x.fillRect(0,y0+fh-8,W,8);
+    for(let i=0;i<16;i++){const bx=i*4*PPU+18;
+      if(i%2===0){x.fillStyle='#2f7d4f';x.fillRect(bx,y0+10,22,fh-18);x.fillStyle='#24603c';x.fillRect(bx+10,y0+10,2,fh-18);}
+      x.fillStyle='#fff';x.fillRect(bx+28,y0+10,28,24);x.fillStyle='#4a8ad0';x.fillRect(bx+30,y0+12,11,9);x.fillRect(bx+43,y0+12,11,9);x.fillRect(bx+30,y0+23,11,9);x.fillRect(bx+43,y0+23,11,9);
+      x.fillStyle='#d9b244';x.fillRect(i*4*PPU,y0,6,fh);}
+    if(f>0){x.fillStyle='#7fb3e0';x.fillRect(0,y0+fh-24,W,3);for(let i=0;i<W;i+=8)x.fillRect(i,y0+fh-24,2,16);}}
+  x.fillStyle='#c0392b';rr(x,W/2-200,6,400,30,6);x.fill();x.fillStyle='#fff';x.font=`800 26px ${FONT}`;x.textAlign='center';x.textBaseline='middle';x.fillText('TRƯỜNG THCS HiHi',W/2,22);
+  x.fillStyle='#c0392b';x.font=`800 18px ${FONT}`;x.fillText('TIÊN HỌC LỄ',W*.2,20);x.fillText('HẬU HỌC VĂN',W*.8,20);return texOf(c);}
+function facadeTapThe(label){const Wu=46,Hu=16,W=Wu*PPU,H=Hu*PPU;const c=cv(W,H),x=c.getContext('2d');
+  x.fillStyle='#cdbda3';x.fillRect(0,0,W,H);speckle(x,W,H,4,.08);
+  for(let i=0;i<30;i++){x.fillStyle='rgba(70,60,45,.13)';x.fillRect(rand(0,W),rand(0,H*.7),rand(4,10),rand(30,90));}
+  const fh=3*PPU;
+  for(let f=0;f<5;f++){const y0=H-(f+1)*fh-8;
+    for(let u=0;u<9;u++){const bx=u*5*PPU+20;if(u===4){x.fillStyle='#b9a98c';x.fillRect(bx,y0,60,fh);x.fillStyle='rgba(60,50,40,.35)';for(let a=0;a<6;a++)for(let b=0;b<4;b++)x.fillRect(bx+6+a*9,y0+6+b*10,6,6);continue;}
+      x.fillStyle='#5b6b78';x.fillRect(bx+4,y0+8,26,24);x.fillStyle='#8fb6d0';x.fillRect(bx+6,y0+10,10,9);x.fillRect(bx+18,y0+10,10,9);
+      if(f>0&&Math.random()<.85){// chuồng cọp
+        x.fillStyle='rgba(40,40,40,.85)';x.fillRect(bx+36,y0+4,36,fh-8);x.fillStyle='#cdbda3';
+        for(let a=0;a<6;a++)for(let b=0;b<6;b++)x.fillRect(bx+38+a*6,y0+6+b*6,4,4);
+        for(let k=0;k<3;k++){x.fillStyle=pick(['#e84118','#fbc531','#44bd32','#0097e6','#fff','#e056fd']);x.fillRect(bx+38+k*11,y0+14,8,12);}
+        if(Math.random()<.5){x.fillStyle='#3e8e3e';x.fillRect(bx+40,y0+fh-16,30,8);}}
+      else if(f===0){x.fillStyle='#6b5137';x.fillRect(bx+36,y0+12,34,fh-12);}
+      if(Math.random()<.4){x.fillStyle='#eee';x.fillRect(bx+6,y0+34,16,10);x.fillStyle='#999';x.fillRect(bx+8,y0+36,12,2);}}
+    x.fillStyle='#b3a385';x.fillRect(0,y0+fh-4,W,4);}
+  x.fillStyle='#1d4e89';rr(x,W/2-110,4,220,26,5);x.fill();x.fillStyle='#fff';x.font=`800 20px ${FONT}`;x.textAlign='center';x.textBaseline='middle';x.fillText(label,W/2,18);
+  x.fillStyle='#c0392b';rr(x,26,H-44,110,22,4);x.fill();x.fillStyle='#fff';x.font=`800 13px ${FONT}`;x.fillText('TẠP HÓA CÔ BA',81,H-33);
+  x.fillStyle='#2d3436';rr(x,W-150,H-44,120,22,4);x.fill();x.fillStyle='#ffd23f';x.fillText('SỬA XE ĐẠP',W-90,H-33);
+  return texOf(c);}
+
+/* ---------- decor per map ---------- */
+function outsidePlane(color,rep){const c=cv(256,256),x=c.getContext('2d');x.fillStyle=color;x.fillRect(0,0,256,256);speckle(x,256,256,4,.1);const t=texOf(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep||40,rep||40);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(320,320),new THREE.MeshLambertMaterial({map:t}));m.rotation.x=-Math.PI/2;m.position.y=-.03;m.receiveShadow=true;BUILD.add(m);}
+function fenceSimple(col,base,h){[[0,-HZ-.3,HX*2+1.2,.5],[0,HZ+.3,HX*2+1.2,.5],[-HX-.3,0,.5,HZ*2+1.2],[HX+.3,0,.5,HZ*2+1.2]].forEach(([x,z,w,d])=>{box(w,h,d,x,h/2,z,col);if(base)box(w+.02,.25,d+.02,x,.12,z,base);});}
+function treeOut(x,z,c1,c2){box(.6,3,.6,x,1.5,z,0x6b4a2e);box(3.6,2.2,3.6,x,4,z,c1||pick([0x3c8a3a,0x469b40,0x2f7a34]));box(2.4,1.4,2.4,x,5.6,z,c2||0x469b40);}
+function decorSchool(){
+  outsidePlane('#8fb85a');
+  const rdC=cv(64,64),rc=rdC.getContext('2d');rc.fillStyle='#55575c';rc.fillRect(0,0,64,64);speckle(rc,64,64,2,.12);const rdT=texOf(rdC);rdT.wrapS=rdT.wrapT=THREE.RepeatWrapping;rdT.repeat.set(30,2);
+  const road=new THREE.Mesh(new THREE.PlaneGeometry(200,10),new THREE.MeshLambertMaterial({map:rdT}));road.rotation.x=-Math.PI/2;road.position.set(0,-.02,33);road.receiveShadow=true;BUILD.add(road);
+  for(let i=-20;i<20;i++)box(2,.02,.25,i*5,0,33,0xf5d33a,BUILD,false);
+  const fw=0xefe3c8,fb=0x2f5f9e;
+  [[0,-HZ-.3,HX*2+1.2,.5],[-HX-.3,0,.5,HZ*2+1.2],[HX+.3,0,.5,HZ*2+1.2]].forEach(([x,z,w,d])=>{box(w,1.3,d,x,.65,z,fw);box(w+.02,.3,d+.02,x,.15,z,fb);});
+  box(HX-4+.6,1.3,.5,-(HX+4)/2-.3,.65,HZ+.3,fw);box(HX-4+.6,1.3,.5,(HX+4)/2+.3,.65,HZ+.3,fw);
+  [-4,4].forEach(x=>{box(1.1,2.8,1.1,x,1.4,HZ+.3,0xd9c9a6);box(1.3,.3,1.3,x,2.9,HZ+.3,0xb5523b);});
+  box(7,1.9,.12,0,1.05,HZ+.35,0x2f5f9e);for(let i=-3.3;i<=3.3;i+=.55)box(.08,1.9,.14,i,1.05,HZ+.35,0x1d3f6e,BUILD,false);
+  signMesh('CỔNG TRƯỜNG','#1d4e89','#fff',8.6,1.2,0,3.6,HZ+.9,0);box(.2,.6,.2,-4,3.1,HZ+.9,0x555555);box(.2,.6,.2,4,3.1,HZ+.9,0x555555);
+  const wall=M(0xf3cd55),fT=new THREE.MeshLambertMaterial({map:facadeSchool()});
+  const sch=new THREE.Mesh(BOX,[wall,wall,wall,wall,fT,wall]);sch.scale.set(66,11,7);sch.position.set(0,5.5,-HZ-6.2);sch.castShadow=sch.receiveShadow=true;BUILD.add(sch);
+  box(67,.6,8,0,11.3,-HZ-6.2,0xb0442f);box(62,.6,6,0,11.9,-HZ-6.2,0xa53d29);box(54,.6,3.6,0,12.5,-HZ-6.2,0x963322);
+  box(8,.4,2.4,0,.2,-HZ-1.7,0xc9c0ae);box(8,.4,1.6,0,.6,-HZ-2.1,0xc9c0ae);
+  const dr=new THREE.Group();dr.position.set(-8,0,-HZ-1.8);BUILD.add(dr);box(.15,1,.15,-.6,.5,0,0x6b4423,dr);box(.15,1,.15,.6,.5,0,0x6b4423,dr);
+  const drum=cyl(.7,.7,1.1,12,0,1.2,0,0xb03a2e,dr);drum.rotation.z=Math.PI/2;const dsk=cyl(.66,.66,1.14,12,0,1.2,0,0xf0dcb0,dr);dsk.rotation.z=Math.PI/2;dsk.scale.set(.98,1,.98);
+  [[-1,'KHU TẬP THỂ C3'],[1,'KHU TẬP THỂ C4']].forEach(([s,l])=>{const w2=M(0xcdbda3),ft=new THREE.MeshLambertMaterial({map:facadeTapThe(l)});
+    const mats=s<0?[ft,w2,M(0xb8aa92),w2,w2,w2]:[w2,ft,M(0xb8aa92),w2,w2,w2];const b=new THREE.Mesh(BOX,mats);b.scale.set(10,16,46);b.position.set(s*(HX+9),8,0);b.castShadow=b.receiveShadow=true;BUILD.add(b);
+    for(let i=0;i<4;i++){box(1.6,1.2,1.6,s*(HX+rand(6,12)),16.6,rand(-18,18),pick([0x2e86de,0xcfd8de]));}
+    box(.1,3,.1,s*(HX+8),17.5,6,0x555555);box(1.6,.1,.1,s*(HX+8),18.5,6,0x555555);
+    for(let k=-1;k<=1;k+=2){const z0=k*14;box(.1,2.4,.1,s*(HX+1.6),1.2,z0-3,0x666666);box(.1,2.4,.1,s*(HX+1.6),1.2,z0+3,0x666666);box(.04,.04,6,s*(HX+1.6),2.3,z0,0x333333,BUILD,false);
+      for(let j=0;j<5;j++)box(.06,rand(.6,1),.7,s*(HX+1.6),1.9,z0-2.4+j*1.2,pick([0xe84118,0xfbc531,0x44bd32,0x0097e6,0xffffff,0xe056fd]));}});
+  [[-20,30],[-12,29],[12,29],[20,30],[-30,28],[30,28],[-48,-30],[48,-30],[-48,30],[48,30],[-26,-36],[26,-36],[0,-38]].forEach(([x,z])=>treeOut(x,z));
+  for(let i=-5;i<=5;i++){const h=rand(6,12),c=pick([0xe9b872,0xd98e73,0x9fc5c9,0xe3d5b8,0xc7a4d9]);box(7.6,h,8,i*8,h/2,42,c);box(7.8,.4,8.2,i*8,h+.2,42,0x8d6e63);
+    for(let f=0;f<Math.floor(h/3);f++)box(2,1.4,.1,i*8,2+f*3,37.95,0x5d8fbf,BUILD,false);}
+}
+function shophouse(x,z,w,h,face,col){// face: direction vector toward yard (fx,fz)
+  const [fx,fz]=face;const dx=fz!==0?w:5,dz=fz!==0?5:w;box(dx,h,dz,x,h/2,z,col);box(dx+.3,.3,dz+.3,x,h+.15,z,0x8d4b3a);
+  const fxo=x+fx*2.52,fzo=z+fz*2.52;const along=(a)=>fz!==0?[x+a,fzo]:[fxo,z+a];
+  for(let f=0;f<Math.floor(h/3);f++)for(let k=-1;k<=1;k+=2){const [wx,wz]=along(k*w*.25);const lit=Math.random()<.75;box(fz!==0?1.2:.08,1.3,fz!==0?.08:1.2,wx,2.4+f*3,wz,lit?MB(pick([0xffd27a,0xffe7a8,0xffc46b])):M(0x2c3e50),BUILD,false);}
+  const [sx,sz]=along(0);box(fz!==0?w*.7:.1,.7,fz!==0?.1:w*.7,sx+fx*.05,4.2,sz+fz*.05,MB(pick([0xff3b6b,0x00d2ff,0xffd23f,0x7bed9f,0xff9f43])),BUILD,false);
+  box(fz!==0?w*.9:1.4,.12,fz!==0?1.4:w*.9,x+fx*3.1,3,z+fz*3.1,pick([0xc0392b,0x16a085,0xd35400]));}
+function decorMarket(){
+  outsidePlane('#33323a',40);
+  fenceSimple(0x5a5860,0x3f3e45,.55);
+  const cols=[0xd9b44a,0x5fa8a0,0xc98b7a,0x9a8fc4,0xd6a35c,0x7fa37a];
+  for(let i=0;i<10;i++){shophouse(-HX+3.2+i*6.4,-HZ-5,6.2,rand(8,14),[0,1],pick(cols));shophouse(-HX+3.2+i*6.4,HZ+5,6.2,rand(8,14),[0,-1],pick(cols));}
+  for(let i=0;i<8;i++){shophouse(-HX-5,-HZ+3+i*6,5.8,rand(8,13),[1,0],pick(cols));shophouse(HX+5,-HZ+3+i*6,5.8,rand(8,13),[-1,0],pick(cols));}
+  for(const zz of [-13,-4.5,4.5,13]){box(HX*2+2,.04,.04,0,5.6,zz,0x222222,BUILD,false);for(let x=-HX;x<=HX;x+=1.6){box(.32,.42,.32,x,5.3-Math.abs(Math.sin(x*.4))*.15,zz,MB(pick([0xff3b30,0xffb400,0xff6b4a,0xffd23f])),BUILD,false);}}
+  [[-HX-.3,-HZ-.3],[HX+.3,-HZ-.3],[-HX-.3,HZ+.3],[HX+.3,HZ+.3]].forEach(([x,z])=>{box(.25,5.8,.25,x,2.9,z,0x2d2d33);});
+  const moon=new THREE.Mesh(new THREE.CircleGeometry(6,24),MB(0xfff6d0));moon.position.set(-40,70,-150);moon.lookAt(0,0,0);BUILD.add(moon);
+  for(let i=0;i<70;i++){const a=rand(0,6.28),r=rand(120,170);const s=box(.6,.6,.6,Math.cos(a)*r,rand(40,110),Math.sin(a)*r,MB(0xffffff),BUILD,false);s.castShadow=false;}
+  signMesh('CHỢ ĐÊM PHỐ CỔ HiHi','#b71c1c','#ffd23f',14,1.6,0,9,-HZ-2.4,0);
+}
+function decorBeach(){
+  outsidePlane('#e9cf92',40);
+  const sea=new THREE.Mesh(new THREE.PlaneGeometry(320,140),new THREE.MeshLambertMaterial({color:0x2a9fd6}));sea.rotation.x=-Math.PI/2;sea.position.set(0,-.01,-HZ-74);BUILD.add(sea);
+  for(let x=-60;x<=60;x+=3)box(rand(1.5,3),.04,rand(.4,.8),x+rand(-1,1),.01,-HZ-4.2+rand(-.3,.3),MB(0xffffff),BUILD,false);
+  const sea2=new THREE.Mesh(new THREE.PlaneGeometry(320,10),new THREE.MeshLambertMaterial({color:0x58c3e8}));sea2.rotation.x=-Math.PI/2;sea2.position.set(0,0,-HZ-9);BUILD.add(sea2);
+  [[-60,-110,30,10],[20,-120,40,14],[80,-100,24,8]].forEach(([x,z,w,h])=>{box(w,h,w*.5,x,h/2-1,z,0x3e8e5a);box(w*.6,h*.5,w*.3,x+w*.15,h,z,0x4fa36a);});
+  for(let i=0;i<5;i++){const x=rand(-40,40),z=rand(-HZ-14,-HZ-40);cyl(1.2,1,.7,12,x,.2,z,0x7a5530);}
+  // bamboo rope fence
+  for(let x=-HX;x<=HX;x+=2){box(.14,1,.14,x,.5,-HZ-.3,0xc8a165);box(.14,1,.14,x,.5,HZ+.3,0xc8a165);}
+  for(let z=-HZ;z<=HZ;z+=2){box(.14,1,.14,-HX-.3,.5,z,0xc8a165);box(.14,1,.14,HX+.3,.5,z,0xc8a165);}
+  box(HX*2,.05,.05,0,.85,-HZ-.3,0xffffff,BUILD,false);box(HX*2,.05,.05,0,.85,HZ+.3,0xffffff,BUILD,false);box(.05,.05,HZ*2,-HX-.3,.85,0,0xffffff,BUILD,false);box(.05,.05,HZ*2,HX+.3,.85,0,0xffffff,BUILD,false);
+  // seafood shacks
+  for(let i=-2;i<=2;i++){const x=i*12;box(8,3.2,5,x,1.6,HZ+6,0xf0e2c0);box(9,.3,6,x,3.35,HZ+6,0x2e86de);signMesh(pick(['HẢI SẢN CÔ TƯ','ỐC & NGHÊU','MỰC NƯỚNG','KEM DỪA']),'#2e86de','#fff',6,.9,x,4.0,HZ+3.4,0);}
+  const palm=(x,z)=>{let p=0,y=0;for(let i=0;i<7;i++){box(.42,.9,.42,x+p,y+.45,z,0x8d6e4a);y+=.86;p+=.12;}for(let i=0;i<6;i++){const a=i/6*6.283;const l=box(2.8,.1,.55,x+p+Math.cos(a)*1.3,y-.2,z+Math.sin(a)*1.3,0x2e8b3a);l.rotation.y=-a;l.rotateZ(-.35);}};
+  [[-HX-4,-12],[-HX-4,0],[-HX-4,12],[HX+4,-12],[HX+4,0],[HX+4,12],[-HX-10,-6],[HX+10,6],[-HX-10,8],[HX+10,-8]].forEach(([x,z])=>palm(x,z));
+  for(let i=0;i<4;i++){box(9,rand(10,18),9,-HX-22-i*2,8,-16+i*11,pick([0xf5f0e6,0xe8f1f8]));box(9,rand(10,18),9,HX+22+i*2,8,16-i*11,pick([0xf5f0e6,0xe8f1f8]));}
+}
+function decorPark(){
+  outsidePlane('#6faf4c',40);
+  [[0,-HZ-.3,HX*2+1.2,.12],[0,HZ+.3,HX*2+1.2,.12],[-HX-.3,0,.12,HZ*2+1.2],[HX+.3,0,.12,HZ*2+1.2]].forEach(([x,z,w,d])=>{box(w,.1,d,x,1.05,z,0x1e5631);box(w,.1,d,x,.35,z,0x1e5631);});
+  for(let x=-HX;x<=HX;x+=1){box(.06,1.1,.06,x,.55,-HZ-.3,0x1e5631,BUILD,false);box(.06,1.1,.06,x,.55,HZ+.3,0x1e5631,BUILD,false);}
+  for(let z=-HZ;z<=HZ;z+=1){box(.06,1.1,.06,-HX-.3,.55,z,0x1e5631,BUILD,false);box(.06,1.1,.06,HX+.3,.55,z,0x1e5631,BUILD,false);}
+  const lake=new THREE.Mesh(new THREE.PlaneGeometry(40,60),new THREE.MeshLambertMaterial({color:0x3fa3d8}));lake.rotation.x=-Math.PI/2;lake.position.set(-HX-26,-.01,0);BUILD.add(lake);
+  for(let i=0;i<3;i++){const x=-HX-20-i*6,z=-10+i*10;box(2,.6,1.2,x,.2,z,pick([0xff5a5f,0xffffff,0xffd23f]));box(1.2,.8,.1,x,.8,z+.5,0xffffff);}
+  for(let i=0;i<26;i++){const a=i/26*6.283,r=rand(44,60);treeOut(Math.cos(a)*r*1.1,Math.sin(a)*r*.8,pick([0x2f7a34,0x3c8a3a,0x58a845]),pick([0x469b40,0x6abf4b]));}
+  for(let i=-3;i<=3;i++){const h=rand(18,34);box(9,h,9,i*16,h/2,-HZ-40,pick([0xb8c4cc,0xd5d0c6,0xa9b8c4]));box(9,h,9,i*16+8,h/2,HZ+42,pick([0xb8c4cc,0xd5d0c6,0xa9b8c4]));}
+  signMesh('CÔNG VIÊN HiHi','#1e5631','#fff',9,1.3,0,3.4,HZ+1.6,0);box(.2,3,.2,-4.4,1.5,HZ+1.6,0x1e5631);box(.2,3,.2,4.4,1.5,HZ+1.6,0x1e5631);
+}
+
+/* ---------- map table ---------- */
+const MAPS={
+ school:{icon:'🏫',key:'mSchool',ground:drawYard,decor:decorSchool,wall:['GIỮ GÌN SÂN TRƯỜNG','SẠCH ĐẸP','#efe2c4','#2f5f9e','#c0392b'],
+  sky:0xbfe4ff,fog:[0xcfe9ff,75,180],hemi:[0xfff6e0,0x8a7a60,.5],amb:[0xffffff,.12],sun:[0xfff3dc,.62],
+  defs:[[0,0,2.6,2.6,.6,'flag'],[-10,0,6,1.8,.8,'planter'],[-6,7,2,2,1.4,'crates'],[-20,0,2,2,1.4,'crates'],[0,10.5,3,1.6,.9,'pingpong'],
+   [-17,-8,3,1,.6,'bench'],[-17,8,3,1,.6,'bench'],[-22,-14,2,2,.7,'tree'],[-22,14,2,2,.7,'tree'],[-28.6,0,.6,9,2.4,'shed'],[-8,-16,2,2,1.6,'tank'],
+   [-13,-18.5,4,.8,1.3,'lowwall'],[-13,18.5,4,.8,1.3,'lowwall'],[-4,-4.5,1.2,1.2,1.5,'pillar'],[-26,-6,1.4,1.4,1.0,'trash']]},
+ market:{icon:'🏮',key:'mMarket',ground:drawMarket,decor:decorMarket,flowers:false,lamp:0xff5a36,
+  sky:0x141a3a,fog:[0x141a3a,45,130],hemi:[0x8494ff,0x3a2a1a,.55],amb:[0xffcf8a,.34],sun:[0xb4c2ff,.4],
+  defs:[[0,0,3,3,1.2,'well'],[-10,6,4,1.8,1.0,'stall'],[-10,-6,4,1.8,1.0,'stall'],[-20,8,4,1.8,1.0,'stall'],[-20,-4,4,1.8,1.0,'stall'],
+   [-4,11,1.4,1.4,1.2,'cart'],[-15,15,2,2,1.4,'baskets'],[-27,10,1.4,1.4,1.2,'cart'],[-6,-13,.6,.6,3.4,'lamppost'],[-15,1,.6,.6,3.4,'lamppost'],
+   [-26,-14,2,2,1.4,'crates'],[-12,-18,2,2,1.4,'baskets'],[-28,1,.6,.6,3.4,'lamppost'],[-5,3.5,.6,.6,3.4,'lamppost']]},
+ beach:{icon:'🏖️',key:'mBeach',ground:drawBeach,decor:decorBeach,
+  sky:0x8fd3ff,fog:[0xbfe6ff,80,210],hemi:[0xffffff,0xd8c08a,.55],amb:[0xffffff,.14],sun:[0xfff4e0,.66],
+  defs:[[0,0,6,.4,2.3,'net'],[-10,5,.6,.6,2.7,'umbrella'],[-18,-6,2.4,2.4,.9,'boat'],[-6,12,1,2,.6,'lounger'],[-22,12,1.2,1.2,.9,'sandcastle'],
+   [-14,-14,.8,.8,6,'palm'],[-26,-2,2.2,3,1.7,'rock'],[-12,18.5,1.6,1.2,1.0,'cooler'],[-4,-7,1.6,1.2,1.0,'cooler'],[-24,-16,.6,.6,2.7,'umbrella'],
+   [-16,5,1,2,.6,'lounger'],[-28,16,2,2,1.4,'rock'],[-8,-18,.8,.8,6,'palm']]},
+ park:{icon:'🌳',key:'mPark',ground:drawPark,decor:decorPark,wall:['KHÔNG GIẪM','LÊN CỎ 🌱','#f6f1e2','#1e5631','#1e5631'],
+  sky:0xb7e0ff,fog:[0xd6ecff,70,175],hemi:[0xfff3d6,0x6a8a50,.5],amb:[0xffffff,.12],sun:[0xffd9a8,.64],
+  defs:[[0,0,4,4,1.0,'fountain'],[-10,-6,3,1,.6,'bench'],[-10,6,3,1,.6,'bench'],[-16,0,1.4,6,1.0,'hedge'],[-20,-12,2,2,.7,'tree'],[-24,10,2,2,.7,'tree'],
+   [-6,-14,3,1.6,2.3,'slide'],[-27,-17,2.4,1,1.4,'swing'],[-12,16,1.2,1.2,1.0,'trash'],[-4,7,.6,.6,3.4,'lamppost'],[-28,4,3,2,2.0,'kiosk'],
+   [-13,-18.5,4,.8,1.3,'lowwall'],[-6,18,3.5,1.2,1.0,'hedge']]}
+};
+const MAP_IDS=Object.keys(MAPS);
+const baseTex=texOf(baseC,false);
+function disposeWorld(){if(!world)return;const keep=new Set([...Object.values(MC),...Object.values(MBC)]);
+  world.traverse(o=>{if(!o.isMesh&&!o.isSprite)return;if(o.geometry&&o.geometry!==BOX)o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(!m||keep.has(m))return;if(m.map&&m.map!==paintTex&&m.map!==baseTex)m.map.dispose();m.dispose();});});
+  scene.remove(world);world=null;}
+function buildMap(id){if(!MAPS[id])id='school';const map=MAPS[id];disposeWorld();flagMesh=null;
+  world=new THREE.Group();scene.add(world);BUILD=world;
+  bctx.clearRect(0,0,baseC.width,baseC.height);map.ground();baseTex.needsUpdate=true;
+  scene.background=new THREE.Color(map.sky);scene.fog=new THREE.Fog(map.fog[0],map.fog[1],map.fog[2]);
+  if(hemiL){hemiL.color.setHex(map.hemi[0]);hemiL.groundColor.setHex(map.hemi[1]);hemiL.intensity=map.hemi[2];}
+  if(ambL){ambL.color.setHex(map.amb[0]);ambL.intensity=map.amb[1];}sun.color.setHex(map.sun[0]);sun.intensity=map.sun[1];
+  const edge=new THREE.Mesh(new THREE.PlaneGeometry(HX*2+1.4,HZ*2+1.4),M(id==='park'?0x6aa64a:id==='beach'?0xe2c98d:id==='market'?0x3a3940:0xcbbb98));edge.rotation.x=-Math.PI/2;edge.position.y=-.01;edge.receiveShadow=true;world.add(edge);
+  const g1=new THREE.Mesh(new THREE.PlaneGeometry(HX*2,HZ*2),new THREE.MeshLambertMaterial({map:baseTex}));g1.rotation.x=-Math.PI/2;g1.receiveShadow=true;world.add(g1);
+  const pm=new THREE.MeshLambertMaterial({map:paintTex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
+  const pl=new THREE.Mesh(new THREE.PlaneGeometry(HX*2,HZ*2),pm);pl.rotation.x=-Math.PI/2;pl.position.y=.012;pl.receiveShadow=true;pl.renderOrder=1;world.add(pl);
+  [1,2].forEach(t=>{const s=TEAM[t].spawn;const r=new THREE.Mesh(new THREE.RingGeometry(2.6,3.2,24),new THREE.MeshBasicMaterial({color:TEAM[t].hex,transparent:true,opacity:.85}));r.rotation.x=-Math.PI/2;r.position.set(s.x,.03,s.z);world.add(r);
+    box(2.2,.18,2.2,s.x,.09,s.z,0xffffff);box(1.6,.2,1.6,s.x,.2,s.z,TEAM[t].hex);});
+  symDefs(map.defs);OB.forEach(o=>buildObstacle(o,map));markBlocked();
+  map.decor();
+  mergeStatic(world);BUILD=scene;curMap=id;resetPaint();}
+
+
+/* ================= COLLISION ================= */
+function inObst(x,z,m){for(const o of OB)if(Math.abs(x-o.x)<o.w/2+m&&Math.abs(z-o.z)<o.d/2+m)return o;return null;}
+function resolveCircle(p,r){
+  for(const o of OB){const hx=o.w/2+r,hz=o.d/2+r,dx=p.x-o.x,dz=p.z-o.z;if(Math.abs(dx)<hx&&Math.abs(dz)<hz){const ox=hx-Math.abs(dx),oz=hz-Math.abs(dz);if(ox<oz)p.x+=(dx<0?-1:1)*ox;else p.z+=(dz<0?-1:1)*oz;}}
+  p.x=clamp(p.x,-HX+r,HX-r);p.z=clamp(p.z,-HZ+r,HZ-r);}
+function segBox(x1,z1,x2,z2,o,m){let t0=0,t1=1;const d=[x2-x1,z2-z1],p=[x1,z1],mn=[o.x-o.w/2-m,o.z-o.d/2-m],mx=[o.x+o.w/2+m,o.z+o.d/2+m];
+  for(let a=0;a<2;a++){if(Math.abs(d[a])<1e-6){if(p[a]<mn[a]||p[a]>mx[a])return false;}else{let ta=(mn[a]-p[a])/d[a],tb=(mx[a]-p[a])/d[a];if(ta>tb){const t=ta;ta=tb;tb=t;}t0=Math.max(t0,ta);t1=Math.min(t1,tb);if(t0>t1)return false;}}return true;}
+function los(a,b){for(const o of OB)if(o.h>=1.25&&segBox(a.x,a.z,b.x,b.z,o,0))return false;return true;}
+function ray3(o,d,mn,mx){let t0=0,t1=1e9;for(let a=0;a<3;a++){const oa=a===0?o.x:a===1?o.y:o.z,da=a===0?d.x:a===1?d.y:d.z;if(Math.abs(da)<1e-8){if(oa<mn[a]||oa>mx[a])return -1;}else{let ta=(mn[a]-oa)/da,tb=(mx[a]-oa)/da;if(ta>tb){const t=ta;ta=tb;tb=t;}t0=Math.max(t0,ta);t1=Math.min(t1,tb);if(t0>t1)return -1;}}return t0;}
+
+/* ================= MERGE (giảm draw call) ================= */
+function mergeGeos(list,world){let vc=0,ic=0;const gs=list.map(m=>{const g=m.geometry.clone();g.applyMatrix4(world?m.matrixWorld:m.matrix);vc+=g.attributes.position.count;ic+=g.index?g.index.count:g.attributes.position.count;return g;});
+  const pos=new Float32Array(vc*3),nor=new Float32Array(vc*3),uv=new Float32Array(vc*2),idx=new Uint32Array(ic);let vo=0,io=0;
+  for(const g of gs){const n=g.attributes.position.count;pos.set(g.attributes.position.array,vo*3);if(g.attributes.normal)nor.set(g.attributes.normal.array,vo*3);if(g.attributes.uv)uv.set(g.attributes.uv.array,vo*2);
+    if(g.index){const a=g.index.array;for(let i=0;i<a.length;i++)idx[io+i]=a[i]+vo;io+=a.length;}else{for(let i=0;i<n;i++)idx[io+i]=vo+i;io+=n;}vo+=n;g.dispose();}
+  const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(pos,3));G.setAttribute('normal',new THREE.BufferAttribute(nor,3));G.setAttribute('uv',new THREE.BufferAttribute(uv,2));G.setIndex(new THREE.BufferAttribute(idx,1));G.computeBoundingSphere();return G;}
+function mergeable(o){return o.isMesh&&!o.userData.noMerge&&!Array.isArray(o.material)&&!o.material.transparent&&o.geometry.attributes.position;}
+function mergeStatic(root){root.updateMatrixWorld(true);const groups=new Map();
+  root.traverse(o=>{if(!mergeable(o))return;const k=o.material.uuid+'|'+(o.castShadow?1:0)+(o.receiveShadow?1:0);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);});
+  let before=0,after=0;groups.forEach(list=>{before+=list.length;if(list.length<2){after++;return;}const m=new THREE.Mesh(mergeGeos(list,true),list[0].material);m.castShadow=list[0].castShadow;m.receiveShadow=list[0].receiveShadow;
+    list.forEach(o=>o.parent&&o.parent.remove(o));root.add(m);after++;});
+  console.log('[SplashWars] static meshes',before,'->',after);}
+function mergeChildren(par){par.updateMatrix();const groups=new Map();par.children.forEach(o=>{if(!mergeable(o))return;o.updateMatrix();const k=o.material.uuid+'|'+(o.castShadow?1:0);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);});
+  groups.forEach(list=>{if(list.length<2)return;const m=new THREE.Mesh(mergeGeos(list,false),list[0].material);m.castShadow=list[0].castShadow;m.receiveShadow=list[0].receiveShadow;list.forEach(o=>par.remove(o));par.add(m);});}
+/* ================= PERF: độ nét tự động ================= */
+let quality=ls.get('sc_q')||'auto',prCur=1,fpsAvg=60,fpsAcc=0,fpsN=0,fpsT=0;
+function prCap(){return quality==='low'?.75:quality==='high'?Math.min(devicePixelRatio,2):Math.min(devicePixelRatio,IS_TOUCH?1.5:2);}
+function applyQuality(){prCur=quality==='low'?.75:Math.min(prCap(),IS_TOUCH&&SMALL?1.15:prCap());renderer.setPixelRatio(prCur);resize();}
+function perfTick(dt){fpsAcc+=dt;fpsN++;fpsT+=dt;if(fpsT<1.5)return;fpsAvg=fpsN/fpsAcc;fpsAcc=0;fpsN=0;fpsT=0;const fv=$('fpsV');if(fv)fv.textContent=Math.round(fpsAvg)+' FPS';
+  if(quality!=='auto'||state!=='play'||paused)return;const cap=prCap();
+  if(fpsAvg<44&&prCur>.6){prCur=Math.max(.6,prCur-.15);renderer.setPixelRatio(prCur);resize();}
+  else if(fpsAvg>57&&prCur<cap-.01){prCur=Math.min(cap,prCur+.1);renderer.setPixelRatio(prCur);resize();}}
+function buzz(ms){if(!MOBILE||!navigator.vibrate)return;try{navigator.vibrate(ms);}catch(_){}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='play'&&!ended&&!paused&&countdown<=0)togglePause(true);if(AC&&AC.state==='running')AC.suspend();}else if(AC&&AC.state==='suspended')AC.resume();});
+/* ================= CHARACTERS ================= */
+const NAMES=[['Tuấn',0],['Hùng',0],['Lan',1],['Mai',1],['Nam',0],['Hoa',1],['Khoa',0],['Vy',1],['Long',0],['Trang',1],['Đức',0],['Minh',0],['Thảo',1],['Bình',0],['Ngọc',1],['Phúc',0],['Quân',0],['Linh',1]];
+const HAIRS=[['Tóc ngắn',0],['Tóc mái',1],['Tóc dựng',2],['Đầu đinh',3],['Tóc dài',4],['Mũ lưỡi trai',5]];
+const DIFFS=[['Dễ',.35],['Vừa',.62],['Khó',.88]];
+const SKIN=0xf2c48d;
+function makeChar(team,style,hairCol,parent){
+  const g=new THREE.Group(),body=new THREE.Group();g.add(body);
+  const shirt=TEAM[team].hex,dark=TEAM[team].dark,pants=0x26335a,hair=hairCol;
+  const legL=new THREE.Group();legL.position.set(-.18,.75,0);body.add(legL);box(.3,.75,.32,0,-.375,0,pants,legL);box(.32,.12,.4,0,-.69,-.04,0x1b1b1b,legL);
+  const legR=new THREE.Group();legR.position.set(.18,.75,0);body.add(legR);box(.3,.75,.32,0,-.375,0,pants,legR);box(.32,.12,.4,0,-.69,-.04,0x1b1b1b,legR);
+  box(.8,.8,.44,0,1.15,0,shirt,body);box(.82,.1,.46,0,.8,0,0x3a2a1a,body);box(.06,.5,.02,0,1.15,-.225,0xffffff,body);
+  box(.36,.16,.06,0,1.44,-.24,0xd62828,body);box(.14,.22,.05,0,1.3,-.25,0xd62828,body);
+  const armL=new THREE.Group();armL.position.set(-.53,1.5,0);body.add(armL);box(.24,.7,.26,0,-.33,0,shirt,armL);box(.22,.14,.24,0,-.72,0,SKIN,armL);
+  const armR=new THREE.Group();armR.position.set(.53,1.5,0);armR.rotation.x=1.35;body.add(armR);box(.24,.7,.26,0,-.33,0,shirt,armR);box(.22,.14,.24,0,-.72,0,SKIN,armR);
+  box(.2,.62,.24,0,-.86,-.12,dark,armR);box(.11,.2,.11,0,-1.24,-.12,0xffd23f,armR);box(.12,.18,.3,0,-.7,-.3,dark,armR);
+  box(.46,.6,.24,0,1.2,.34,dark,body);box(.34,.4,.02,0,1.22,.465,shirt,body);box(.2,.1,.2,0,1.55,.34,0xffffff,body);
+  box(.7,.7,.7,0,1.9,0,SKIN,body);
+  box(.1,.14,.02,-.15,1.92,-.351,0x161616,body);box(.1,.14,.02,.15,1.92,-.351,0x161616,body);box(.16,.04,.02,0,1.76,-.351,0x9a4a3a,body);
+  box(.08,.05,.02,-.25,1.82,-.352,0xf09a8a,body,false);box(.08,.05,.02,.25,1.82,-.352,0xf09a8a,body,false);
+  if(style!==3&&style!==5){box(.74,.16,.74,0,2.3,0,hair,body);box(.74,.5,.12,0,2.02,.32,hair,body);box(.06,.3,.62,-.37,2.1,.03,hair,body);box(.06,.3,.62,.37,2.1,.03,hair,body);}
+  if(style===1||style===4)box(.74,.14,.1,0,2.17,-.34,hair,body);
+  if(style===2)for(let i=0;i<5;i++)box(.18,.24,.18,rand(-.25,.25),2.45,rand(-.25,.25),hair,body);
+  if(style===3){box(.72,.06,.72,0,2.27,0,hair,body);box(.72,.3,.06,0,2.1,.34,hair,body);}
+  if(style===4){box(.76,.95,.14,0,1.8,.34,hair,body);box(.07,.75,.5,-.38,1.92,.08,hair,body);box(.07,.75,.5,.38,1.92,.08,hair,body);box(.14,.14,.14,.3,2.32,.3,0xff4f7a,body);}
+  if(style===5){box(.76,.2,.76,0,2.33,0,dark,body);box(.62,.06,.34,0,2.25,-.52,dark,body);box(.74,.3,.1,0,2.08,.33,hair,body);box(.14,.1,.02,0,2.35,-.385,0xffffff,body,false);}
+  const puddle=new THREE.Mesh(new THREE.CircleGeometry(.75,14),new THREE.MeshBasicMaterial({color:shirt}));puddle.rotation.x=-Math.PI/2;puddle.position.y=.05;puddle.visible=false;g.add(puddle);
+  const eyesP=new THREE.Group();eyesP.position.y=.1;puddle.add(eyesP);
+  mergeChildren(body);g.scale.setScalar(S);(parent||scene).add(g);
+  return {g,body,legL,legR,armL,armR,puddle};
+}
+function labelSprite(text,bg,fg,w,h,sx,sy){const c=cv(w,h),x=c.getContext('2d');const t=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false}));sp.scale.set(sx,sy,1);sp.renderOrder=5;
+  const o={sp,c,x,t,set(txt,b,f){x.clearRect(0,0,w,h);x.font=`800 ${h*.5}px ${FONT}`;const tw=Math.min(w-8,x.measureText(txt).width+24);x.fillStyle=b;rr(x,(w-tw)/2,4,tw,h-8,(h-8)/2);x.fill();x.lineWidth=4;x.strokeStyle='#1d2340';x.stroke();x.fillStyle=f;x.textAlign='center';x.textBaseline='middle';x.fillText(txt,w/2,h/2+2);t.needsUpdate=true;}};
+  o.set(text,bg,fg);return o;}
+
+const QK=['Tô màu nè!','Về chỗ đi bạn ơi!','Trực nhật đi nha!','Lớp mình là số 1!','Hihi trúng rồi!','Áo trắng hết rồi kìa!','Cho chừa nè!'];
+const QD=['Ơ kìa!','Mách cô giáo!','Ăn gian!','Đợi đấy!','Áo của tui!!','Huhu mẹ mắng…','Chưa xong đâu!'];
+const QS=['Lên lên!','Tô hết sân đi!','Theo tui!','Sơn nè sơn nè!'];
+let chars=[],player=null;
+function createChar(team,name,style,hairCol,isPlayer,skill){
+  const c={team,name,isPlayer,skill:skill||.6,pos:new THREE.Vector3(),vy:0,yaw:TEAM[team].yaw,hp:100,ink:100,special:0,alive:true,respawnT:0,prot:0,swim:false,hidden:false,
+    fireCd:0,bombCd:0,points:0,kills:0,deaths:0,sinceHit:9,walkT:0,moving:0,lastX:0,lastZ:0,spotT:-9,bubbleT:0,
+    model:makeChar(team,style,hairCol),ai:{think:0,target:null,retarget:0,mode:'paint',enemy:null,strafe:1,strafeT:0,bombT:rand(4,9),specT:rand(2,6),sweep:rand(0,6),stuckT:0,sx:0,sz:0,turn:Math.random()<.5?1:-1,fireOn:1,fireT:0,refillPt:null}};
+  c.tag=labelSprite(name,isPlayer?'#ffe14d':TEAM[team].color,isPlayer?'#1d2340':'#fff',256,48,2.6,.5);c.tag.sp.position.y=2.95;c.model.g.add(c.tag.sp);
+  c.bub=labelSprite('',"#fff",'#1d2340',384,64,3.6,.6);c.bub.sp.position.y=3.6;c.bub.sp.visible=false;c.model.g.add(c.bub.sp);
+  chars.push(c);return c;}
+function say(c,txt){if(!c.alive&&!txt)return;c.bub.set(txt,'#fff','#1d2340');c.bub.sp.visible=true;c.bubbleT=2.2;}
+function spawnChar(c,first){const s=TEAM[c.team].spawn;let x,z,tries=0;do{x=s.x+rand(-2.4,2.4);z=s.z+rand(-1.6,1.6);tries++;}while(tries<20&&chars.some(o=>o!==c&&o.alive&&Math.hypot(o.pos.x-x,o.pos.z-z)<.9));
+  c.pos.set(x,0,z);c.vy=0;c.yaw=TEAM[c.team].yaw;c.hp=100;c.ink=100;c.alive=true;c.prot=first?0:2.2;c.swim=false;c.hidden=false;c.sinceHit=9;c.model.g.visible=true;c.ai.mode='paint';c.ai.target=null;c.ai.retarget=0;
+  if(c.isPlayer){cam.yaw=c.yaw;cam.pitch=-.12;}}
+
+/* ================= PROJECTILES & FX ================= */
+const bullets=[],bombs=[],parts=[];
+const BMAT=[null,new THREE.MeshBasicMaterial({color:TEAM[1].hex}),new THREE.MeshBasicMaterial({color:TEAM[2].hex})];
+const BGEO=new THREE.BoxGeometry(.24,.24,.24);
+const bPool=[];function getB(team){let m=bPool.pop();if(!m){m=new THREE.Mesh(BGEO,BMAT[team]);scene.add(m);}m.material=BMAT[team];m.visible=true;return m;}
+const pPool=[];const PGEO=new THREE.BoxGeometry(.16,.16,.16);
+function burst(x,y,z,team,n,sp){for(let i=0;i<n;i++){if(parts.length>(IS_TOUCH?110:260))break;let m=pPool.pop();if(!m){m=new THREE.Mesh(PGEO,BMAT[team]);scene.add(m);}m.material=BMAT[team];m.visible=true;m.position.set(x,y,z);const s=rand(.6,1.4);m.scale.setScalar(s);
+  parts.push({m,vx:rand(-1,1)*sp,vy:rand(.4,1.4)*sp,vz:rand(-1,1)*sp,life:rand(.4,.8)});}}
+function fwd(yaw){return {x:-Math.sin(yaw),z:-Math.cos(yaw)};}
+function localToWorld(c,ox,oy,oz){const cs=Math.cos(c.yaw),sn=Math.sin(c.yaw);return new THREE.Vector3(c.pos.x+(ox*cs+oz*sn)*S,c.pos.y+oy*S,c.pos.z+(-ox*sn+oz*cs)*S);}
+const BSPEED=30,BRANGE=13;
+function tryFire(c,target,jit){
+  if(c.fireCd>0)return false;if(c.ink<1.2){if(c.isPlayer&&c.fireCd<=0){c.fireCd=.25;tone(200,150,.05,'square',.04);}return false;}
+  c.fireCd=.1;c.ink-=1.25;const mz=localToWorld(c,.53,1.3,-1.0);
+  const d=new THREE.Vector3(target.x-mz.x,target.y-mz.y,target.z-mz.z).normalize();const j=jit||.025;d.x+=rand(-j,j);d.y+=rand(-j,j)*.6;d.z+=rand(-j,j);d.normalize();
+  const m=getB(c.team);m.position.copy(mz);bullets.push({p:mz,v:d.multiplyScalar(BSPEED),team:c.team,src:c,dist:0,trail:1.2,m});
+  if(c.isPlayer||Math.hypot(c.pos.x-player.pos.x,c.pos.z-player.pos.z)<14)SFX.shot();return true;}
+function throwBomb(c,vel,big){const p=localToWorld(c,.3,1.6,-.5);const m=new THREE.Mesh(BOX,BMAT[c.team]);m.scale.setScalar(big?.85:.45);m.position.copy(p);m.castShadow=true;scene.add(m);
+  const st=box(big?.9:.48,big?.2:.1,big?.9:.48,0,0,0,0xffffff,m,false);st.scale.set(1.04,.25,1.04);
+  bombs.push({p,v:vel,team:c.team,src:c,big,m,t:0});SFX.throw();}
+function bombAt(c,tx,tz,big){const p=localToWorld(c,.3,1.6,-.5);const dx=tx-p.x,dz=tz-p.z,dist=Math.hypot(dx,dz);const T=clamp(dist/13,.45,1.15),g=22;throwBomb(c,new THREE.Vector3(dx/T,(0-p.y+.5*g*T*T)/T,dz/T),big);}
+function explode(b){const R=b.big?5.6:3.1;paint(b.p.x,b.p.z,R,b.team,b.src);burst(b.p.x,.4,b.p.z,b.team,b.big?40:18,b.big?9:6);
+  const dPl=Math.hypot(b.p.x-player.pos.x,b.p.z-player.pos.z);SFX.boom(clamp(1.3-dPl/30,.2,1));if(dPl<10)shake=Math.max(shake,b.big?.6:.3);
+  const DR=b.big?4.4:2.8,DM=b.big?160:80;
+  for(const c of chars){if(!c.alive||c.team===b.team)continue;const d=Math.hypot(c.pos.x-b.p.x,c.pos.z-b.p.z);if(d<DR)damage(c,DM*(1-d/DR*.55),b.src);}
+  scene.remove(b.m);}
+let shake=0;
+function damage(t,amt,src){if(!t.alive||t.prot>0||state!=='play')return;t.hp-=amt;t.sinceHit=0;
+  if(src&&src.isPlayer){SFX.hit();hitMark=.15;buzz(12);}if(t.isPlayer){SFX.hurt();hurtFlash=.3;buzz(35);}
+  if(t.hp<=0)kill(t,src);}
+function kill(t,src){t.alive=false;t.hp=0;t.respawnT=4.5;t.deaths++;t.model.g.visible=false;t.hidden=false;
+  const kt=src?src.team:3-t.team;paint(t.pos.x,t.pos.z,2.1,kt,src);burst(t.pos.x,1,t.pos.z,kt,26,7);SFX.splat(1.5);
+  if(src){src.kills++;if(!src.isPlayer&&Math.random()<.55)say(src,pick(tr('qk')));}
+  if(!t.isPlayer&&Math.random()<.35){/* death quote shown on respawn */t.ai.deathQuote=pick(tr('qd'));}
+  addFeed(src,t);
+  if(src&&src.isPlayer){SFX.kill();buzz([30,40,60]);showMsg(tr('ko',{n:t.name.toUpperCase()}),1,TEAM[player.team].color,true);}
+  if(t.isPlayer){buzz(150);$('deadT').textContent=src?tr('deadBy',{n:src.name}):tr('dead');$('deadOv').classList.remove('hide');}}
+function addFeed(src,t){const f=$('feed');const d=document.createElement('div');d.className='fi';
+  const n=(c)=>`<span style="color:${c.isPlayer?'#ffe14d':TEAM[c.team].color}">${esc(c.name)}</span>`;d.innerHTML=src?`${n(src)} 🎨 ${n(t)}`:`${n(t)} ${esc(tr('splat'))}`;f.prepend(d);while(f.children.length>5)f.lastChild.remove();setTimeout(()=>d.remove(),4500);}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+
+function updateBullets(dt){
+  for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];const step=BSPEED*dt;
+    if(b.dist>BRANGE)b.v.y-=30*dt;b.p.addScaledVector(b.v,dt);b.dist+=step;b.m.position.copy(b.p);b.m.rotation.x+=dt*10;
+    b.trail-=step;if(b.trail<=0){b.trail=1.6;if(b.p.y<3.2)paint(b.p.x,b.p.z,.38,b.team,b.src);}
+    let done=false;
+    if(Math.abs(b.p.x)>HX||Math.abs(b.p.z)>HZ){done=true;}
+    else if(b.p.y<=.05){paint(b.p.x,b.p.z,.95,b.team,b.src);if(Math.random()<.35)burst(b.p.x,.1,b.p.z,b.team,2,2.5);done=true;}
+    else{const o=inObst(b.p.x,b.p.z,0);if(o&&b.p.y<o.h+.05){const back=b.p.clone().addScaledVector(b.v,-dt*1.2);paint(clamp(back.x,-HX,HX),clamp(back.z,-HZ,HZ),.7,b.team,b.src);done=true;}
+      else for(const c of chars){if(!c.alive||c.team===b.team)continue;const dy=b.p.y-(c.pos.y+(c.hidden?.15:.85));if(Math.abs(dy)>(c.hidden?.45:1))continue;
+        if(Math.hypot(b.p.x-c.pos.x,b.p.z-c.pos.z)<(c.hidden?.6:.62)){damage(c,b.src.isPlayer?11:8.5*(.7+(b.src.skill||.6)*.4),b.src);burst(b.p.x,b.p.y,b.p.z,b.team,4,3);done=true;break;}}}
+    if(done){b.m.visible=false;bPool.push(b.m);bullets.splice(i,1);}}
+  for(let i=bombs.length-1;i>=0;i--){const b=bombs[i];b.v.y-=22*dt;b.p.addScaledVector(b.v,dt);b.t+=dt;b.m.position.copy(b.p);b.m.rotation.x+=dt*8;b.m.rotation.z+=dt*5;
+    let ex=b.p.y<=.25||b.t>3;const o=inObst(b.p.x,b.p.z,.1);if(o&&b.p.y<o.h+.2)ex=true;if(Math.abs(b.p.x)>HX||Math.abs(b.p.z)>HZ){b.p.x=clamp(b.p.x,-HX+.5,HX-.5);b.p.z=clamp(b.p.z,-HZ+.5,HZ-.5);ex=true;}
+    if(ex){explode(b);bombs.splice(i,1);}}
+  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.vy-=18*dt;p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;p.life-=dt;
+    if(p.m.position.y<.05){p.m.position.y=.05;p.vx*=.5;p.vz*=.5;p.vy=0;}if(p.life<=0){p.m.visible=false;pPool.push(p.m);parts.splice(i,1);}}}
+
+/* ================= MOVEMENT ================= */
+function commonMove(c,mx,mz,dt,firing,jump){
+  const o=ownerAt(c.pos.x,c.pos.z),onOwn=o===c.team,onEnemy=o!==0&&o!==c.team,grounded=c.pos.y<=.001;
+  let sp=5.4;if(c.swim)sp=onOwn?10.5:(onEnemy?2:3.2);else if(onEnemy)sp=2.8;if(firing&&!c.swim)sp*=.72;if(!c.isPlayer)sp*=.92;
+  const l=Math.hypot(mx,mz);if(l>1){mx/=l;mz/=l;}
+  c.pos.x+=mx*sp*dt;c.pos.z+=mz*sp*dt;
+  if(jump&&grounded&&!c.swim){c.vy=7.5;}
+  c.vy-=24*dt;c.pos.y+=c.vy*dt;if(c.pos.y<0){c.pos.y=0;c.vy=0;}
+  resolveCircle(c.pos,.42);
+  const es=TEAM[3-c.team].spawn,dx=c.pos.x-es.x,dz=c.pos.z-es.z,dd=Math.hypot(dx,dz);if(dd<3.6){c.pos.x=es.x+dx/(dd||1)*3.6;c.pos.z=es.z+dz/(dd||1)*3.6;}
+  for(const k of chars){if(k===c||!k.alive)continue;const ax=c.pos.x-k.pos.x,az=c.pos.z-k.pos.z,ad=Math.hypot(ax,az);if(ad<.75&&ad>.001){c.pos.x+=ax/ad*(.75-ad)*.5;c.pos.z+=az/ad*(.75-ad)*.5;}}
+  c.hidden=c.swim&&onOwn&&c.pos.y<.05;
+  if(c.hidden)c.ink=Math.min(100,c.ink+42*dt);else if(!firing)c.ink=Math.min(100,c.ink+(c.swim?4:6)*dt);
+  if(onEnemy&&c.pos.y<.05&&c.prot<=0&&c.hp>25){c.hp=Math.max(25,c.hp-11*dt);c.sinceHit=Math.min(c.sinceHit,.5);}
+  c.sinceHit+=dt;if(c.sinceHit>1.6&&!onEnemy)c.hp=Math.min(100,c.hp+(c.hidden?45:22)*dt);
+  c.moving=l>.1?Math.min(1,l):0;
+  return {onOwn,onEnemy};}
+function updateModel(c,dt){const m=c.model;if(!c.alive){m.g.visible=false;return;}m.g.visible=true;
+  m.g.position.set(c.pos.x,c.pos.y,c.pos.z);m.g.rotation.y=c.yaw;
+  m.body.visible=!c.hidden;m.puddle.visible=c.hidden;
+  if(c.hidden){m.puddle.scale.setScalar(1+Math.sin(gameTime*10+c.walkT)*.08);c.tag.sp.visible=c.isPlayer||c.team===player.team;}
+  else c.tag.sp.visible=true;
+  const crouch=c.swim&&!c.hidden;m.body.scale.y+=((crouch?.62:1)-m.body.scale.y)*Math.min(1,dt*15);
+  c.walkT+=dt*(c.moving?11:0);const sw=Math.sin(c.walkT)*.7*c.moving;m.legL.rotation.x=sw;m.legR.rotation.x=-sw;m.armL.rotation.x=-sw*.8;
+  if(c.prot>0){m.body.visible=!c.hidden&&(Math.floor(gameTime*12)%2===0);}
+  if(c.bubbleT>0){c.bubbleT-=dt;if(c.bubbleT<=0)c.bub.sp.visible=false;}}
+
+/* ================= AI ================= */
+function findEnemy(c){let best=null,bd=17;for(const e of chars){if(e.team===c.team||!e.alive)continue;const d=Math.hypot(e.pos.x-c.pos.x,e.pos.z-c.pos.z);if(d>=bd)continue;if(e.hidden&&d>3.2)continue;
+  const es=TEAM[e.team].spawn;if(Math.hypot(e.pos.x-es.x,e.pos.z-es.z)<3.8)continue;if(!los(c.pos,e.pos))continue;bd=d;best=e;}return best;}
+function notOwnScore(team,x,z,r){let s=0;for(let a=-r;a<=r;a+=1)for(let b=-r;b<=r;b+=1){const i=cellIdx(x+a,z+b);if(i>=0&&!blocked[i]&&owner[i]!==team)s+=owner[i]?1.4:1;}return s;}
+function pickTarget(c){let best=null,bs=-1e9;const es=TEAM[3-c.team].spawn;
+  for(let k=0;k<12;k++){const x=rand(-HX+2,HX-2),z=rand(-HZ+2,HZ-2);if(inObst(x,z,.8))continue;if(Math.hypot(x-es.x,z-es.z)<5)continue;
+    const d=Math.hypot(x-c.pos.x,z-c.pos.z);const s=notOwnScore(c.team,x,z,3)-d*.55+rand(0,4);if(s>bs){bs=s;best={x,z};}}
+  return best||{x:0,z:0};}
+function steer(c,mx,mz){const l=Math.hypot(mx,mz);if(l<.01)return [0,0];const base=Math.atan2(mx,mz);
+  for(const off of [0,.45,-.45,.9,-.9,1.4,-1.4,2,-2,2.6,-2.6]){const a=base+off*c.ai.turn;const tx=c.pos.x+Math.sin(a)*1.3,tz=c.pos.z+Math.cos(a)*1.3;
+    if(!inObst(tx,tz,.45)&&Math.abs(tx)<HX-.4&&Math.abs(tz)<HZ-.4)return [Math.sin(a)*l,Math.cos(a)*l];}return [mx,mz];}
+function faceTo(c,tx,tz,dt,rate){const ty=Math.atan2(-(tx-c.pos.x),-(tz-c.pos.z));let d=ty-c.yaw;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;c.yaw+=d*Math.min(1,dt*(rate||12));return Math.abs(d);}
+function updateBot(c,dt){
+  const ai=c.ai;ai.think-=dt;
+  if(ai.think<=0){ai.think=rand(.12,.25)+(1-c.skill)*.15;ai.enemy=findEnemy(c);if(ai.enemy&&ai.enemy.team!==player.team)ai.enemy.spotT=gameTime;}
+  if(c.ink<10&&ai.mode!=='refill'){ai.mode='refill';ai.refillPt=null;}
+  if(ai.mode==='refill'&&c.ink>85)ai.mode='paint';
+  let e=ai.enemy&&ai.enemy.alive&&!(ai.enemy.hidden&&Math.hypot(ai.enemy.pos.x-c.pos.x,ai.enemy.pos.z-c.pos.z)>3.2)?ai.enemy:null;
+  let mx=0,mz=0,firing=false,aim=null;c.swim=false;
+  if(ai.mode==='refill'){const o=ownerAt(c.pos.x,c.pos.z);
+    if(o===c.team){c.swim=true;if(e){const dx=c.pos.x-e.pos.x,dz=c.pos.z-e.pos.z;mx=dx;mz=dz;}else{mx=Math.sin(gameTime+ai.sweep)*.3;mz=Math.cos(gameTime*.7+ai.sweep)*.3;}}
+    else{if(!ai.refillPt){let best=null,bd=1e9;for(let k=0;k<40;k++){const x=c.pos.x+rand(-10,10),z=c.pos.z+rand(-10,10);if(ownerAt(x,z)===c.team&&!inObst(x,z,.5)){const d=Math.hypot(x-c.pos.x,z-c.pos.z);if(d<bd){bd=d;best={x,z};}}}ai.refillPt=best||{...TEAM[c.team].spawn};}
+      mx=ai.refillPt.x-c.pos.x;mz=ai.refillPt.z-c.pos.z;c.swim=Math.hypot(mx,mz)<1.5;if(Math.hypot(mx,mz)<.8)ai.refillPt=null;}
+  }else if(e){const dx=e.pos.x-c.pos.x,dz=e.pos.z-c.pos.z,d=Math.hypot(dx,dz)||1;
+    ai.strafeT-=dt;if(ai.strafeT<=0){ai.strafe=Math.random()<.5?1:-1;ai.strafeT=rand(.6,1.6);}
+    const want=6+c.skill*3;const app=d>want+2?1:d<want-2?-.8:0;
+    mx=dx/d*app+(-dz/d)*ai.strafe*.85;mz=dz/d*app+(dx/d)*ai.strafe*.85;
+    const err=(1-c.skill)*1.6+.25;aim={x:e.pos.x+rand(-err,err)+(e.pos.x-e.lastX)*.15/Math.max(dt,.001)*.0,y:e.pos.y+(e.hidden?.15:.9)+rand(-err,err)*.4,z:e.pos.z+rand(-err,err)};
+    firing=d<BRANGE+3&&c.ink>1.2;}
+  else{ai.retarget-=dt;if(!ai.target||ai.retarget<=0||Math.hypot(ai.target.x-c.pos.x,ai.target.z-c.pos.z)<1.6){ai.target=pickTarget(c);ai.retarget=rand(2.5,5);}
+    mx=ai.target.x-c.pos.x;mz=ai.target.z-c.pos.z;const l=Math.hypot(mx,mz)||1;mx/=l;mz/=l;
+    ai.fireT-=dt;if(ai.fireT<=0){ai.fireOn=Math.random()<.82?1:0;ai.fireT=rand(.5,1.4);}
+    if(ai.fireOn&&c.ink>18){const a=Math.atan2(mx,mz)+Math.sin(gameTime*2.4+ai.sweep)*.75;const dd=4.5+Math.sin(gameTime*1.7+ai.sweep)*2;aim={x:c.pos.x+Math.sin(a)*dd,y:0,z:c.pos.z+Math.cos(a)*dd};firing=true;}
+    if(c.ink<30&&ownerAt(c.pos.x,c.pos.z)===c.team&&Math.random()<.02){c.swim=true;}
+    if(!firing&&ownerAt(c.pos.x,c.pos.z)===c.team&&ownerAt(c.pos.x+mx*1.5,c.pos.z+mz*1.5)===c.team)c.swim=true;}
+  const st=steer(c,mx,mz);
+  if(aim&&firing){const off=faceTo(c,aim.x,aim.z,dt,10+c.skill*8);if(off<.35&&!c.swim)tryFire(c,aim,.03+(1-c.skill)*.05);}
+  else if(Math.hypot(st[0],st[1])>.1)faceTo(c,c.pos.x+st[0],c.pos.z+st[1],dt,8);
+  commonMove(c,st[0],st[1],dt,firing&&!c.swim,false);
+  // bombs
+  ai.bombT-=dt;if(ai.bombT<=0&&c.ink>60&&ai.mode!=='refill'){ai.bombT=rand(7,13)-c.skill*3;
+    if(e){const d=Math.hypot(e.pos.x-c.pos.x,e.pos.z-c.pos.z);if(d>4&&d<15){bombAt(c,e.pos.x,e.pos.z,false);c.ink-=55;}}
+    else if(ai.target){const d=Math.hypot(ai.target.x-c.pos.x,ai.target.z-c.pos.z);if(d>4&&d<14){bombAt(c,ai.target.x,ai.target.z,false);c.ink-=55;}}}
+  if(c.special>=100){ai.specT-=dt;if(e||ai.specT<=0){const t=e?e.pos:{x:c.pos.x+fwd(c.yaw).x*9,z:c.pos.z+fwd(c.yaw).z*9};bombAt(c,clamp(t.x,-HX+1,HX-1),clamp(t.z,-HZ+1,HZ-1),true);c.special=0;ai.specT=rand(1,5);if(Math.random()<.6)say(c,tr('botBig'));}}
+  // stuck
+  ai.stuckT+=dt;if(ai.stuckT>1.2){if(Math.hypot(c.pos.x-ai.sx,c.pos.z-ai.sz)<.6&&!c.swim){ai.target=pickTarget(c);ai.turn*=-1;}ai.sx=c.pos.x;ai.sz=c.pos.z;ai.stuckT=0;}}
+
+/* ================= INPUT ================= */
+const keys={};let clickShot=false,mouseFire=false,wantBomb=false,wantSpec=false,wantJump=false,locked=false;
+const cam={yaw:0,pitch:-.12,dist:4.8};
+const joy={id:null,ox:0,oy:0,x:0,y:0},look={id:null,lx:0,ly:0},touch={fire:false,swim:false,fireId:null,flx:0,fly:0};
+const KMAP={w:'KeyW',a:'KeyA',s:'KeyS',d:'KeyD',q:'KeyQ',e:'KeyE',f:'KeyF',p:'KeyP',m:'KeyM',' ':'Space',Shift:'ShiftLeft',Escape:'Escape',Enter:'Enter',ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight'};
+function kc(e){if(e.code&&e.code!=='Unidentified')return e.code;const k=e.key&&e.key.length===1?e.key.toLowerCase():e.key;return KMAP[k]||e.key;}
+addEventListener('keydown',e0=>{let e=e0;const code=kc(e0);kdT[code]=performance.now();keys[code]=true;e={code,preventDefault:()=>e0.preventDefault()};if(state==='play'){if(e.code==='KeyQ')wantBomb=true;if(e.code==='KeyE')wantSpec=true;if(e.code==='Space')wantJump=true;if(e.code==='KeyP')togglePause();if(e.code==='KeyM')toggleMusic();
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();}
+  if(e.code==='Enter'&&e0.target.tagName!=='SELECT'&&!$('menu').classList.contains('hide'))startGame();});
+const kdT={};addEventListener('keyup',e=>{const c=kc(e),held=performance.now()-(kdT[c]||0);if(held<90){setTimeout(()=>{if(performance.now()-(kdT[c]||0)>=90)keys[c]=false;},90-held);}else keys[c]=false;});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;mouseFire=false;});
+canvas.addEventListener('mousedown',e=>{if(state!=='play'||paused||MOBILE)return;initAudio();if(e.button===0){mouseFire=true;clickShot=true;}if(e.button===2)wantBomb=true;
+  if(!locked&&canvas.requestPointerLock){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(err){}}});
+addEventListener('mouseup',e=>{if(e.button===0)mouseFire=false;});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('pointerlockchange',()=>{const was=locked;locked=document.pointerLockElement===canvas;if(was&&!locked&&state==='play'&&!paused&&countdown<=0)togglePause(true);});
+addEventListener('mousemove',e=>{if(state!=='play'||paused)return;if(locked||mouseFire){rot(e.movementX*.0024*LS/1.15,e.movementY*.0024*LS/1.15);}});
+function rot(dx,dy){cam.yaw-=dx;cam.pitch=clamp(cam.pitch-dy,-.75,.55);}
+function cap(el,e){try{el.setPointerCapture(e.pointerId);}catch(_){}}
+function bindHold(id,on,off){const el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();cap(el,e);el.style.transform='scale(.92)';on(e);});
+  const up=e=>{el.style.transform='';off&&off(e);};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('contextmenu',e=>e.preventDefault());}
+bindHold('tFire',e=>{touch.fire=true;clickShot=true;touch.fireId=e.pointerId;touch.flx=e.clientX;touch.fly=e.clientY;},()=>{touch.fire=false;touch.fireId=null;});
+bindHold('tSwim',()=>{touch.swim=true;},()=>{touch.swim=false;});
+bindHold('tJump',()=>{wantJump=true;});bindHold('tBomb',()=>{wantBomb=true;});bindHold('tSpec',()=>{wantSpec=true;});
+bindHold('tPause',()=>{togglePause();});bindHold('tFull',()=>{goFull();});
+let LS=clamp(+(ls.get('sc_sens')||1.15),.4,2.4);// look sensitivity multiplier
+$('tFire').addEventListener('pointermove',e=>{if(e.pointerId!==touch.fireId)return;rot((e.clientX-touch.flx)*.006*LS,(e.clientY-touch.fly)*.005*LS);touch.flx=e.clientX;touch.fly=e.clientY;});
+const jz=$('joyZone'),jb=$('joyBase'),jk=$('joyKnob');
+jz.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();cap(jz,e);joy.id=e.pointerId;joy.ox=e.clientX;joy.oy=e.clientY;joy.x=joy.y=0;jb.classList.remove('idle');jb.style.display='block';jb.style.left=(e.clientX-60)+'px';jb.style.top=(e.clientY-60)+'px';jk.style.transform='';});
+jz.addEventListener('pointermove',e=>{if(e.pointerId!==joy.id)return;let dx=e.clientX-joy.ox,dy=e.clientY-joy.oy;const l=Math.hypot(dx,dy);if(l>55){dx*=55/l;dy*=55/l;}joy.x=dx/55;joy.y=dy/55;jk.style.transform=`translate(${dx}px,${dy}px)`;});
+function joyIdle(){jb.style.display='block';jb.classList.add('idle');jb.style.left='calc(34px + env(safe-area-inset-left,0px))';jb.style.top=(innerHeight-160)+'px';jk.style.transform='';}
+const jend=e=>{if(e.pointerId!==joy.id)return;joy.id=null;joy.x=joy.y=0;joyIdle();};addEventListener('resize',()=>{if(joy.id===null)joyIdle();});jz.addEventListener('pointerup',jend);jz.addEventListener('pointercancel',jend);
+const lz=$('lookZone');
+lz.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();cap(lz,e);look.id=e.pointerId;look.lx=e.clientX;look.ly=e.clientY;});
+lz.addEventListener('pointermove',e=>{if(e.pointerId!==look.id)return;rot((e.clientX-look.lx)*.006*LS,(e.clientY-look.ly)*.005*LS);look.lx=e.clientX;look.ly=e.clientY;});
+const lend=e=>{if(e.pointerId===look.id)look.id=null;};lz.addEventListener('pointerup',lend);lz.addEventListener('pointercancel',lend);
+function goFull(){const d=document.documentElement;try{if(document.fullscreenElement){document.exitFullscreen();return;}const r=(d.requestFullscreen||d.webkitRequestFullscreen||function(){}).call(d);
+  const lock=()=>{try{const o=screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape');if(o&&o.catch)o.catch(()=>{});}catch(_){}};if(r&&r.then)r.then(lock,()=>{});else lock();}catch(_){}}
+let portrait=false;function checkRotate(){portrait=MOBILE&&IS_TOUCH&&innerHeight>innerWidth&&state==='play';$('rotate').classList.toggle('hide',!portrait);}
+addEventListener('resize',checkRotate);addEventListener('orientationchange',()=>setTimeout(checkRotate,200));
+
+/* ================= PLAYER ================= */
+const camDir=new THREE.Vector3(),camPos=new THREE.Vector3();
+function computeCam(){const c=player,cp=Math.cos(cam.pitch);camDir.set(-Math.sin(cam.yaw)*cp,Math.sin(cam.pitch),-Math.cos(cam.yaw)*cp);
+  const rx=Math.cos(cam.yaw),rz=-Math.sin(cam.yaw);const hy=c.pos.y+(c.hidden?.6:1.75);
+  camPos.set(c.pos.x+rx*.75-camDir.x*cam.dist,hy+.35-camDir.y*cam.dist,c.pos.z+rz*.75-camDir.z*cam.dist);
+  if(camPos.y<.35)camPos.y=.35;camPos.x=clamp(camPos.x,-HX+.3,HX-.3);camPos.z=clamp(camPos.z,-HZ+.3,HZ-.3);}
+function aimPoint(){let t=60;const o=camPos,d=camDir;
+  if(d.y<-1e-4){const tg=-o.y/d.y;if(tg>0)t=Math.min(t,tg);}
+  for(const ob of OB){const tt=ray3(o,d,[ob.x-ob.w/2,0,ob.z-ob.d/2],[ob.x+ob.w/2,ob.h,ob.z+ob.d/2]);if(tt>cam.dist+.3&&tt<t)t=tt;}
+  for(const c of chars){if(c===player||!c.alive||c.team===player.team)continue;const tt=ray3(o,d,[c.pos.x-.4,c.pos.y,c.pos.z-.4],[c.pos.x+.4,c.pos.y+(c.hidden?.3:1.8),c.pos.z+.4]);if(tt>cam.dist&&tt<t)t=tt;}
+  return {x:o.x+d.x*t,y:o.y+d.y*t,z:o.z+d.z*t};}
+function assist(){let best=null,bs=.22;for(const e of chars){if(e.team===player.team||!e.alive||(e.hidden&&Math.hypot(e.pos.x-player.pos.x,e.pos.z-player.pos.z)>3.2))continue;
+  const dx=e.pos.x-player.pos.x,dz=e.pos.z-player.pos.z,d=Math.hypot(dx,dz);if(d>15||d<.5)continue;const ty=Math.atan2(-dx,-dz);let df=ty-cam.yaw;while(df>Math.PI)df-=Math.PI*2;while(df<-Math.PI)df+=Math.PI*2;
+  if(Math.abs(df)<bs&&los(player.pos,e.pos)){bs=Math.abs(df);best={p:{x:e.pos.x,y:e.pos.y+(e.hidden?.15:.9),z:e.pos.z},yaw:ty};}}return best;}
+function updatePlayer(c,dt){
+  if(!c.alive)return;
+  let f=0,s=0;if(keys.KeyW||keys.ArrowUp)f+=1;if(keys.KeyS||keys.ArrowDown)f-=1;if(keys.KeyD||keys.ArrowRight)s+=1;if(keys.KeyA||keys.ArrowLeft)s-=1;f-=joy.y;s+=joy.x;
+  const fx=-Math.sin(cam.yaw),fz=-Math.cos(cam.yaw),rx=Math.cos(cam.yaw),rz=-Math.sin(cam.yaw);
+  const mx=fx*f+rx*s,mz=fz*f+rz*s;c.yaw=cam.yaw;
+  c.swim=!!(keys.ShiftLeft||keys.ShiftRight||touch.swim);
+  const firing=(mouseFire||clickShot||touch.fire||keys.KeyF)&&!c.swim;if(firing)clickShot=false;
+  const r=commonMove(c,mx,mz,dt,firing,wantJump);wantJump=false;
+  computeCam();
+  if(firing){let a=aimPoint();if(MOBILE){const as=assist();if(as){a=as.p;let d=as.yaw-cam.yaw;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;cam.yaw+=d*Math.min(1,dt*4);}}tryFire(c,a,.022);}
+  if(wantBomb){wantBomb=false;if(c.ink>=55){c.ink-=55;const v=camDir.clone().multiplyScalar(15);v.y+=5.5;throwBomb(c,v,false);}else{showMsg(t('noInk'),.9,'#ff4d4d');}}
+  if(wantSpec){wantSpec=false;if(c.special>=100){c.special=0;const v=camDir.clone().multiplyScalar(18);v.y+=7;throwBomb(c,v,true);showMsg(t('bigBomb'),1.1,'#ffd23f',true);}}
+  if(c.hidden&&Math.random()<dt*6)SFX.swim();}
+
+/* ================= HUD ================= */
+let hitMark=0,hurtFlash=0,msgT=0;
+function showMsg(t,dur,col,small){const m=$('msg');m.textContent=t;m.style.color=col||'#fff';m.style.fontSize=small?'clamp(26px,5vw,46px)':'';m.style.opacity=1;msgT=dur||1.2;}
+function showSub(t){const s=$('sub');s.textContent=t;s.style.opacity=t?1:0;}
+function buildRoster(){['A','B'].forEach((k,i)=>{const el=$('ros'+k);el.innerHTML='';chars.filter(c=>c.team===i+1).forEach(c=>{const d=document.createElement('div');d.className='ri'+(c.isPlayer?' me':'');d.style.background=TEAM[c.team].color;d.textContent=c.name[0].toUpperCase();d.title=c.name;c.rosEl=d;el.appendChild(d);});});}
+const mctx=$('mini').getContext('2d');let miniT=0;
+function drawMini(){const W=180,H=135,sx=W/(HX*2),sz=H/(HZ*2);mctx.drawImage(baseC,0,0,W,H);mctx.drawImage(paintC,0,0,W,H);
+  mctx.fillStyle='rgba(40,40,60,.75)';for(const o of OB)mctx.fillRect((o.x-o.w/2+HX)*sx,(o.z-o.d/2+HZ)*sz,o.w*sx,o.d*sz);
+  for(const c of chars){if(!c.alive||c===player)continue;const mine=c.team===player.team;if(!mine&&gameTime-c.spotT>1.2)continue;
+    mctx.fillStyle=TEAM[c.team].color;mctx.strokeStyle=mine?'#fff':'#1d2340';mctx.lineWidth=2;mctx.beginPath();mctx.arc((c.pos.x+HX)*sx,(c.pos.z+HZ)*sz,4,0,6.28);mctx.fill();mctx.stroke();}
+  if(player.alive){const x=(player.pos.x+HX)*sx,y=(player.pos.z+HZ)*sz,a=player.yaw;mctx.save();mctx.translate(x,y);mctx.rotate(-a);mctx.fillStyle='#ffe14d';mctx.strokeStyle='#1d2340';mctx.lineWidth=2;
+    mctx.beginPath();mctx.moveTo(0,-7);mctx.lineTo(5,5);mctx.lineTo(-5,5);mctx.closePath();mctx.fill();mctx.stroke();mctx.restore();}}
+function fmt(t){t=Math.max(0,Math.ceil(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');}
+function updateHUD(dt){const p=player;
+  $('hpF').style.width=p.hp+'%';$('hpF').style.background=p.hp<35?'#ff4d4d':'#3ccf5a';$('inkF').style.width=p.ink+'%';$('spF').style.width=p.special+'%';
+  const rdy=p.special>=100;$('spBox').classList.toggle('ready',rdy);$('spLbl').textContent=rdy?(MOBILE?t('spMob'):t('spPc')):t('sp');$('tSpec').classList.toggle('ready',rdy);
+  $('inkWarn').classList.toggle('hide',!(p.alive&&p.ink<8));$('cross').classList.toggle('low',p.ink<8);
+  $('cross').style.transform=hitMark>0?'scale(1.4) rotate(45deg)':'';
+  const tm=$('timer');tm.textContent=countdown>0?fmt(timeLeft):fmt(timeLeft);tm.classList.toggle('warn',timeLeft<=30&&timeLeft>0);
+  const a=counts[1]/totalCells*100,b=counts[2]/totalCells*100;$('covA').style.width=a+'%';$('covB').style.width=b+'%';$('pA').textContent=a.toFixed(0)+'%';$('pB').textContent=b.toFixed(0)+'%';
+  for(const c of chars)if(c.rosEl)c.rosEl.classList.toggle('dead',!c.alive);
+  if(!p.alive){$('deadC').textContent=t('respawn',{s:Math.ceil(p.respawnT)});}
+  miniT-=dt;if(miniT<=0){miniT=IS_TOUCH?.3:.15;drawMini();}
+  if(msgT>0){msgT-=dt;if(msgT<=0)$('msg').style.opacity=0;}}
+
+/* ================= GAME FLOW ================= */
+let state='menu',paused=false,timeLeft=MATCH_TIME,countdown=0,gameTime=0,lastCD=0,warned30=false,ended=false;
+let selMap=ls.get('sc_map')||'school';if(selMap!=='random'&&!MAPS[selMap])selMap='school';
+function menuSplats(){resetPaint();for(let i=0;i<40;i++)paint(rand(-HX,HX),rand(-HZ,HZ),rand(.8,2.6),i%2?1:2,null);}
+let selHair=+(ls.get('sc_hair')||0),selDiff=+(ls.get('sc_diff')||1);
+function buildMenu(){$('nameIn').value=ls.get('sc_name')||'';
+  const ho=$('hairOpts');HAIRS.forEach(([n],i)=>{const b=document.createElement('button');b.className='opt'+(i===selHair?' on':'');b.textContent=n;b.onclick=()=>{selHair=i;[...ho.children].forEach((x,j)=>x.classList.toggle('on',j===i));SFX.click();};ho.appendChild(b);});
+  const dop=$('diffOpts');DIFFS.forEach(([n],i)=>{const b=document.createElement('button');b.className='opt'+(i===selDiff?' on':'');b.textContent=n;b.onclick=()=>{selDiff=i;[...dop.children].forEach((x,j)=>x.classList.toggle('on',j===i));SFX.click();};dop.appendChild(b);});
+  const hco=$('hairCOpts');HAIRC.forEach(([n,col],i)=>{const b=document.createElement('button');b.className='hc'+(i===selHairC?' on':'');b.title=n;b.style.background='#'+col.toString(16).padStart(6,'0');b.onclick=()=>{selHairC=i;[...hco.children].forEach((x,j)=>x.classList.toggle('on',j===i));SFX.click();rebuildPreview();};hco.appendChild(b);});
+  [...ho.children].forEach(b=>b.addEventListener('click',rebuildPreview));
+  const mo=$('modeOpts');[['pc',false],['phone',true]].forEach(([n,v])=>{const b=document.createElement('button');b.className='opt'+(v===MOBILE?' on':'');b.textContent=n;b.onclick=()=>{setMode(v);[...mo.children].forEach(x=>x.classList.toggle('on',x===b));SFX.click();};mo.appendChild(b);});
+  $('nameIn').addEventListener('input',()=>{if(pvTag)pvTag.set($('nameIn').value.trim()||t('you'),'#ffe14d','#1d2340');});
+  const ls2=$('langSel');LANGS.forEach(([c,n])=>{const o=document.createElement('option');o.value=c;o.textContent=n;ls2.appendChild(o);});ls2.value=LANG;
+  ls2.onchange=()=>{LANG=ls2.value;ls.set('sc_lang',LANG);applyLang();SFX.click();};
+  const si=$('sensIn');si.value=LS;$('sensV').textContent=LS.toFixed(1);si.oninput=()=>{LS=+si.value;$('sensV').textContent=LS.toFixed(1);ls.set('sc_sens',LS);};
+  const qo=$('qualOpts');['auto','low','high'].forEach(q=>{const b=document.createElement('button');b.className='opt'+(q===quality?' on':'');b.dataset.q=q;b.onclick=()=>{quality=q;ls.set('sc_q',q);[...qo.children].forEach(x=>x.classList.toggle('on',x===b));applyQuality();SFX.click();};qo.appendChild(b);});
+  const mpo=$('mapOpts');[...MAP_IDS,'random'].forEach(id=>{const b=document.createElement('button');b.className='opt'+(id===selMap?' on':'');b.dataset.m=id;b.onclick=()=>{selMap=id;ls.set('sc_map',id);[...mpo.children].forEach(x=>x.classList.toggle('on',x===b));SFX.click();if(id!=='random'&&id!==curMap){buildMap(id);menuSplats();}};mpo.appendChild(b);});
+  joyIdle();applyQuality();
+  setMode(MOBILE);applyLang();initPreview();}
+function applyLang(){const L=I18N[LANG]||I18N.en;document.documentElement.lang=LANG;
+  document.querySelectorAll('[data-i]').forEach(el=>el.textContent=t(el.dataset.i));document.querySelectorAll('[data-ih]').forEach(el=>el.innerHTML=t(el.dataset.ih));
+  TEAM[1].name=t('teamA');TEAM[2].name=t('teamB');
+  $('tagline').textContent='HiHi · '+t('tagline',{A:TEAM[1].name,B:TEAM[2].name});$('pvTeam').textContent=TEAM[1].name.toUpperCase();
+  $('nameIn').placeholder=t('namePh');
+  [...$('hairOpts').children].forEach((b,i)=>b.textContent=t('hs')[i]);[...$('diffOpts').children].forEach((b,i)=>b.textContent=t('df')[i]);
+  [...$('hairCOpts').children].forEach((b,i)=>b.title=t('hc')[i]);const mb=$('modeOpts').children;if(mb.length){mb[0].textContent=t('pc');mb[1].textContent=t('phone');}
+  const rtl=LANG==='ar';document.querySelectorAll('.card').forEach(c=>c.dir=rtl?'rtl':'ltr');$('help').dir='ltr';
+  [...$('mapOpts').children].forEach(b=>{const id=b.dataset.m;b.textContent=id==='random'?'🎲 '+t('mRandom'):MAPS[id].icon+' '+t(MAPS[id].key);});
+  [...$('qualOpts').children].forEach(b=>b.textContent=t({auto:'qAuto',low:'qLow',high:'qHigh'}[b.dataset.q]));
+  updAudioBtns();updInkWarn();if(pvTag&&!$('nameIn').value.trim())pvTag.set(t('you'),'#ffe14d','#1d2340');}
+function setMode(m){MOBILE=m;document.body.classList.toggle('mob',m);updInkWarn();}
+function updInkWarn(){$('inkWarn').textContent=t('inkWarn',{k:MOBILE?t('swimMob'):'Shift'});}
+const HAIRC=[['Nâu',0x5a3218],['Đen',0x1a1a1a],['Vàng hoe',0xd9a441],['Hồng',0xff6fa8],['Xanh dương',0x3a8cff],['Bạc',0xd8dde3]];
+let selHairC=clamp(+(ls.get('sc_hairc')||0),0,5);
+/* ---- 3D preview ---- */
+let pvR=null,pvScene=null,pvCam=null,pvModel=null,pvTag=null,pvYaw=Math.PI+.5,pvDrag=null,pvT=0,pvJump=0;
+function initPreview(){const c=$('pv');try{pvR=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});}catch(e){return;}pvR.setPixelRatio(Math.min(devicePixelRatio,2));
+  pvScene=new THREE.Scene();pvScene.add(new THREE.HemisphereLight(0xffffff,0x9a8a70,.7));pvScene.add(new THREE.AmbientLight(0xffffff,.15));const dl=new THREE.DirectionalLight(0xffffff,.65);dl.position.set(3,6,5);pvScene.add(dl);
+  pvCam=new THREE.PerspectiveCamera(30,1,.1,60);
+  const pad=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.25,.22,28),M(0xffffff));pad.position.y=-.11;pvScene.add(pad);
+  const sp=new THREE.Mesh(new THREE.CircleGeometry(1,24),new THREE.MeshBasicMaterial({color:TEAM[1].hex}));sp.rotation.x=-Math.PI/2;sp.position.y=.005;pvScene.add(sp);
+  for(let i=0;i<7;i++){const d=new THREE.Mesh(new THREE.CircleGeometry(rand(.08,.18),10),sp.material);const a=rand(0,6.28);d.rotation.x=-Math.PI/2;d.position.set(Math.cos(a)*rand(1.05,1.2),.006,Math.sin(a)*rand(1.05,1.2));pvScene.add(d);}
+  rebuildPreview();
+  const box=$('pvBox');let lx=0;box.addEventListener('pointerdown',e=>{pvDrag=e.pointerId;lx=e.clientX;try{box.setPointerCapture(e.pointerId);}catch(_){}box.style.cursor='grabbing';});
+  box.addEventListener('pointermove',e=>{if(pvDrag!==e.pointerId)return;pvYaw+=(e.clientX-lx)*.012;lx=e.clientX;});
+  const up=()=>{pvDrag=null;box.style.cursor='';};box.addEventListener('pointerup',up);box.addEventListener('pointercancel',up);
+  box.addEventListener('dblclick',()=>{pvJump=.01;});}
+function rebuildPreview(){if(!pvScene)return;if(pvModel)pvScene.remove(pvModel.g);pvModel=makeChar(1,selHair,HAIRC[selHairC][1],pvScene);pvModel.g.scale.setScalar(1);
+  pvTag=labelSprite($('nameIn').value.trim()||t('you'),'#ffe14d','#1d2340',256,48,2,.38);pvTag.sp.position.y=2.85;pvModel.g.add(pvTag.sp);pvJump=.01;}
+function renderPreview(dt){if(!pvR||!pvModel||$('menu').classList.contains('hide'))return;const c=$('pv'),w=c.clientWidth,hh=c.clientHeight;if(!w||!hh)return;
+  const dpr=pvR.getPixelRatio();if(c.width!==Math.round(w*dpr)||c.height!==Math.round(hh*dpr))pvR.setSize(w,hh,false);
+  pvCam.aspect=w/hh;const fit=w/hh<.75?7.2:6.2;pvCam.position.set(0,1.75,fit);pvCam.lookAt(0,1.2,0);pvCam.updateProjectionMatrix();
+  pvT+=dt;if(pvDrag===null)pvYaw+=dt*.55;const m=pvModel;m.g.rotation.y=pvYaw;
+  if(pvJump>0){pvJump+=dt;const t=pvJump/.45;m.g.position.y=t<1?Math.sin(t*Math.PI)*.5:0;if(t>=1)pvJump=0;}
+  m.armL.rotation.x=Math.sin(pvT*2)*.25;m.body.position.y=Math.abs(Math.sin(pvT*2))*.04;m.legL.rotation.x=0;m.legR.rotation.x=0;
+  pvR.render(pvScene,pvCam);}
+function setupMatch(){
+  chars.forEach(c=>scene.remove(c.model.g));chars=[];
+  bullets.forEach(b=>{b.m.visible=false;bPool.push(b.m);});bullets.length=0;bombs.forEach(b=>scene.remove(b.m));bombs.length=0;parts.forEach(p=>{p.m.visible=false;pPool.push(p.m);});parts.length=0;
+  resetPaint();[1,2].forEach(t=>paint(TEAM[t].spawn.x,TEAM[t].spawn.z,3.6,t,null));
+  const nm=($('nameIn').value.trim()||t('you')).slice(0,12);ls.set('sc_name',nm);ls.set('sc_hair',selHair);ls.set('sc_diff',selDiff);ls.set('sc_hairc',selHairC);
+  const pool=NAMES.slice().sort(()=>Math.random()-.5).filter(n=>n[0].toLowerCase()!==nm.toLowerCase());const base=DIFFS[selDiff][1];
+  player=createChar(1,nm,selHair,HAIRC[selHairC][1],true,1);
+  for(let i=0;i<7;i++){const [n,girl]=pool[i];const team=i<3?1:2;const st=girl?pick([4,4,1]):pick([0,1,2,3,5]);createChar(team,n,st,pick([0x1a1a1a,0x2b1a10,0x3b2414,0x1a1a1a]),false,clamp(base+rand(-.12,.12),.2,.97));}
+  chars.forEach(c=>spawnChar(c,true));buildRoster();
+  timeLeft=MATCH_TIME;countdown=3.2;lastCD=4;gameTime=0;warned30=false;ended=false;paused=false;nextNote=0;step=0;
+  $('deadOv').classList.add('hide');$('feed').innerHTML='';showSub('');
+}
+function startGame(){initAudio();SFX.click();$('menu').classList.add('hide');$('result').classList.add('hide');$('pause').classList.add('hide');$('hud').classList.remove('hide');$('touch').classList.toggle('hide',!MOBILE);if(MOBILE&&IS_TOUCH&&!document.fullscreenElement)goFull();
+  const mid=selMap==='random'?pick(MAP_IDS.filter(x=>x!==curMap)):selMap;if(mid!==curMap)buildMap(mid);
+  setupMatch();state='play';checkRotate();SFX.drum();showSub(curMap==='school'?t('startSub'):'📍 '+MAPS[curMap].icon+' '+t(MAPS[curMap].key));}
+function togglePause(force){if(state!=='play'||ended)return;paused=force===true?true:!paused;$('pause').classList.toggle('hide',!paused);mouseFire=false;touch.fire=false;
+  if(paused&&document.exitPointerLock&&locked)document.exitPointerLock();}
+function toggleMusic(){musicOn=!musicOn;ls.set('sc_music',musicOn?'1':'0');updAudioBtns();}
+$('playBtn').onclick=startGame;$('againBtn').onclick=startGame;
+$('resumeBtn').onclick=()=>{paused=false;$('pause').classList.add('hide');SFX.click();};
+$('quitBtn').onclick=()=>{toMenu();};$('menuBtn').onclick=()=>{toMenu();};
+$('musicBtn').onclick=toggleMusic;$('sfxBtn').onclick=()=>{sfxOn=!sfxOn;ls.set('sc_sfx',sfxOn?'1':'0');updAudioBtns();};
+function updAudioBtns(){$('musicBtn').textContent=t('music')+': '+(musicOn?t('on'):t('off'));$('sfxBtn').textContent=t('sfx')+': '+(sfxOn?t('on'):t('off'));}
+function toMenu(){state='menu';checkRotate();paused=false;['pause','result','hud','touch'].forEach(i=>$(i).classList.add('hide'));$('menu').classList.remove('hide');if(locked&&document.exitPointerLock)document.exitPointerLock();}
+function endMatch(){ended=true;mouseFire=false;touch.fire=false;if(locked&&document.exitPointerLock)document.exitPointerLock();showMsg(t('timeUp'),2,'#fff');SFX.drum();
+  setTimeout(()=>{state='end';checkRotate();$('hud').classList.add('hide');$('touch').classList.add('hide');
+    const a=counts[1]/totalCells*100,b=counts[2]/totalCells*100,win=a>=b?1:2,pw=win===player.team;
+    $('resTitle').textContent=(a===b?t('draw'):t('win',{t:TEAM[win].name.toUpperCase()}));$('resTitle').style.color=a===b?'#ffd23f':TEAM[win].color;
+    $('resSub').textContent=a===b?t('drawSub'):pw?t('winSub'):t('loseSub');
+    const rA=$('rA'),rB=$('rB');rA.style.width='0';rB.style.width='0';rA.textContent='';rB.textContent='';
+    setTimeout(()=>{rA.style.width=a+'%';rB.style.width=b+'%';rA.textContent=a.toFixed(1)+'%';rB.textContent=b.toFixed(1)+'%';},250);
+    const rows=chars.slice().sort((x,y)=>y.points-x.points);const mvp=rows[0];
+    $('resTable').innerHTML='<tr>'+t('cols').map(x=>`<th>${esc(x)}</th>`).join('')+'</tr>'+rows.map(c=>`<tr class="${c.isPlayer?'me':''}"><td style="text-align:left"><span class="dot" style="background:${TEAM[c.team].color}"></span>${esc(c.name)}${c===mvp?' ⭐':''}</td><td>${Math.round(c.points*.25)} m²</td><td>${c.kills}</td><td>${c.deaths}</td></tr>`).join('');
+    $('result').classList.remove('hide');pw?SFX.win():SFX.lose();},2200);}
+
+/* ================= LOOP ================= */
+let last=performance.now(),orbit=0;
+function frame(now){requestAnimationFrame(frame);let dt=(now-last)/1000;last=now;perfTick(Math.min(dt,.25));if(dt>.05)dt=.05;
+  if(flagMesh){const pa=flagMesh.geometry.attributes.position;for(let i=0;i<pa.count;i++){const x=pa.getX(i);pa.setZ(i,Math.sin(now*.004+x*2.2)*.12*(x+1.05));}pa.needsUpdate=true;}
+  renderPreview(dt);
+  if(state==='play'&&!paused&&!portrait){gameTime+=dt;
+    if(countdown>0){countdown-=dt;const n=Math.ceil(countdown);if(n!==lastCD&&n>0){lastCD=n;showMsg(String(n),.8,'#fff');SFX.tick();}if(countdown<=0){showMsg(t('go'),1,'#ffd23f');showSub('');tone(660,1320,.25,'square',.1);}
+      computeCam();}
+    else if(!ended){timeLeft-=dt;if(timeLeft<=30&&!warned30){warned30=true;showMsg(t('last30'),1.4,'#ff4d4d');}if(timeLeft<=10&&Math.ceil(timeLeft)!==lastCD){lastCD=Math.ceil(timeLeft);SFX.tick();}
+      if(timeLeft<=0){timeLeft=0;endMatch();}
+      for(const c of chars){c.lastX=c.pos.x;c.lastZ=c.pos.z;c.fireCd-=dt;if(c.prot>0)c.prot-=dt;
+        if(!c.alive){c.respawnT-=dt;if(c.respawnT<=0){spawnChar(c,false);if(c.isPlayer)$('deadOv').classList.add('hide');else if(c.ai.deathQuote){say(c,c.ai.deathQuote);c.ai.deathQuote=null;}else if(Math.random()<.15)say(c,pick(tr('qs')));}continue;}
+        if(c.isPlayer)updatePlayer(c,dt);else updateBot(c,dt);}
+      updateBullets(dt);}
+    else{updateBullets(dt);}
+    for(const c of chars)updateModel(c,dt);
+    if(player.alive||countdown>0){computeCam();}
+    else{// death cam: look from above toward spawn
+      camPos.lerp(new THREE.Vector3(player.pos.x,14,player.pos.z+(player.team===1?10:-10)),Math.min(1,dt*2));}
+    camera.position.copy(camPos);if(shake>0){shake-=dt;camera.position.x+=rand(-1,1)*shake*.4;camera.position.y+=rand(-1,1)*shake*.4;}
+    if(player.alive||countdown>0)camera.lookAt(camPos.x+camDir.x*10,camPos.y+camDir.y*10,camPos.z+camDir.z*10);else camera.lookAt(player.pos.x,0,player.pos.z);
+    hitMark-=dt;if(hurtFlash>0){hurtFlash-=dt;}
+    updateHUD(dt);musicTick();}
+  else if(state==='menu'||state==='end'){orbit+=dt*.08;camera.position.set(Math.sin(orbit)*44,24,Math.cos(orbit)*36);camera.lookAt(0,0,0);
+    if(state==='menu')for(const c of chars)updateModel(c,dt);}
+  else if(paused){/* frozen */}
+  paintUpT-=dt;if(paintDirty&&paintUpT<=0){paintTex.needsUpdate=true;paintDirty=false;paintUpT=IS_TOUCH?.1:.035;}
+  renderer.domElement.style.filter=hurtFlash>0?`saturate(1.6) hue-rotate(-10deg)`:'';
+  renderer.render(scene,camera);}
+
+/* ================= BOOT ================= */
+function boot(){buildMap(selMap==='random'?'school':selMap);buildMenu();menuSplats();
+  // decorative paint on menu background
+
+  requestAnimationFrame(t=>{last=t;frame(t);});}
+let booted=false;const go=()=>{if(booted)return;booted=true;boot();};
+if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load(`800 20px "Baloo 2"`),document.fonts.load(`700 20px "Baloo 2"`)]).then(go,go);setTimeout(go,2500);}else go();
+</script>
+</body>
+</html>

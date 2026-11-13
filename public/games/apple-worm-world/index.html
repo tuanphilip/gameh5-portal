@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script id="gamehihi-fresh-runtime">(function(w){"use strict";var V="d6ce50eec2ce";function fresh(u){if(typeof u!=="string"||!u||/^(?:data:|blob:|mailto:|tel:|javascript:|#)/i.test(u)||/^(?:https?:)?\/\//i.test(u)||/(?:[?&])ghv=/.test(u)){return u;}var h="",i=u.indexOf("#");if(i>=0){h=u.slice(i);u=u.slice(0,i);}u+=(u.indexOf("?")<0?"?":"&")+"ghv="+encodeURIComponent(V);return u+h;}w.GameHiHiFresh={version:V,url:fresh};var f=w.fetch;if(typeof f==="function"){w.fetch=function(input,init){if(typeof input==="string"){input=fresh(input);}return f.call(this,input,init);};}function patch(proto,prop){if(!proto){return;}var d=Object.getOwnPropertyDescriptor(proto,prop);if(!d||!d.get||!d.set||!d.configurable){return;}try{Object.defineProperty(proto,prop,{configurable:true,enumerable:d.enumerable,get:d.get,set:function(v){d.set.call(this,fresh(v));}});}catch(e){}}patch(w.HTMLImageElement&&w.HTMLImageElement.prototype,"src");patch(w.HTMLScriptElement&&w.HTMLScriptElement.prototype,"src");patch(w.HTMLAudioElement&&w.HTMLAudioElement.prototype,"src");patch(w.HTMLVideoElement&&w.HTMLVideoElement.prototype,"poster");})(window);</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2a7fe0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description" content="Apple Worm World - a cute fantasy worm puzzle game. Eat apples, grow longer and fill the goal pattern across 100 levels in 5 magical worlds.">
+  <title>Apple Worm World</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg?ghv=d6ce50eec2ce">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;display=swap">
+  <link rel="stylesheet" href="css/style.css?ghv=d6ce50eec2ce">
+<script>window.GameHiHiDirectEventScoreConfig={"enabled":true,"loggedIn":false,"restUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/score","restNonce":"","guestNonce":"87d800e719c30b51fd2c5cf4076190fc91c89d9a06f7f317a9527dbcf25fa750","ajaxUrl":"https:\/\/gamehihi.com\/wp-admin\/admin-ajax.php","ajaxNonce":"5caf1c3107","contextNonce":"87d800e719c30b51fd2c5cf4076190fc91c89d9a06f7f317a9527dbcf25fa750","gameId":2511,"seasonKey":"block-puzzle-01","initialScore":0,"initialTotalScore":0,"scoreLabel":"\u0110i\u1ec3m s\u1ef1 ki\u1ec7n","currentUserName":"GameHiHi-Play-17202","currentUserAvatar":"","caroMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/matchmake","caroRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/create","caroRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/room\/join","caroStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/state","caroMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/move","caroLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/leave","caroRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/caro\/rematch","ludoMatchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/matchmake","ludoRoomCreateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/create","ludoRoomJoinUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/room\/join","ludoStateUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/state","ludoRollUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/roll","ludoMoveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/move","ludoLeaveUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/leave","ludoRematchUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/co-ca-ngua\/rematch","analyticsUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/track","analyticsEventUrl":"https:\/\/gamehihi.com\/wp-json\/gamehihi-event\/v1\/analytics\/event","analyticsNonce":"","analyticsUserId":0,"analyticsPlayerRef":"GameHiHi-Play-17202","analyticsUserScore":0,"analyticsUserAgeGroup":"","analyticsRegisteredSource":"","analyticsProfileComplete":0,"analyticsHasEmail":0,"analyticsHasPhone":0,"analyticsHasName":0,"gameSlug":"apple-worm-world","gameName":"Apple Worm World","ga4MeasurementId":"G-DP9PLYTXS7","ga4MasterEnabled":1,"ga4MasterMeasurementId":"G-5CDYMXDTW0","analyticsSourceSite":"https:\/\/gamehihi.com\/gamehihi-play\/","analyticsSchemaVersion":"2.0.56"};(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  var best=Number(cfg.initialScore||0), total=Number(cfg.initialTotalScore||0), pending=-1, pendingMode='', busy=false, timer=0;
+  function parseResponse(r){return r.json().then(function(j){if(!r.ok||j&&j.success===false)throw j;return j&&j.data?j.data:j;});}
+  function viaAjax(score,mode){
+    if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+    var body=new URLSearchParams();
+    body.set('action','gamehihi_event_save_score'); body.set('_ajax_nonce',cfg.ajaxNonce);
+    body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score)); body.set('mode',mode||'');
+    body.set('context_nonce',cfg.contextNonce||cfg.guestNonce||'');
+    return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+  }
+  function viaRest(score,mode){
+    if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+    return fetch(cfg.restUrl,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,context_nonce:cfg.contextNonce||cfg.guestNonce})}).then(parseResponse);
+  }
+  function flush(){
+    if(busy||pending<0||!cfg.enabled)return;
+    var score=pending, mode=pendingMode; pending=-1; busy=true;
+    viaAjax(score,mode).catch(function(){return viaRest(score,mode);})
+      .then(function(j){best=Math.max(best,Number(j.best_score||0));if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);try{window.dispatchEvent(new CustomEvent('gamehihi:event-score-saved',{detail:{score:best,totalScore:total,gameId:Number(cfg.gameId)||0}}));}catch(e){} if(window.console&&console.info)console.info('[GameHiHi Event Score] saved',j);})
+      .catch(function(e){if(window.console&&console.error)console.error('[GameHiHi Event Score] save failed',e);})
+      .finally(function(){busy=false;if(pending>=0)flush();});
+  }
+  window.GameHiHiDirectEventScore=function(payload){
+    if(!payload||payload.type!=='gamehihi:event-score'||!cfg.enabled)return;
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    if(!payload.final&&score<=best)return;
+    pending=Math.max(pending,score); pendingMode=String(payload.mode||'').slice(0,50);
+    clearTimeout(timer); timer=setTimeout(flush,payload.final?0:250);
+  };
+  // v1.3.0: Mỗi lần game kết thúc gọi API ngay và tạo 1 bản ghi lịch sử.
+  window.GameHiHiEndGame=function(payload){
+    payload=payload||{};
+    if(!cfg.enabled) return Promise.reject({message:'Event disabled'});
+    var score=Math.max(0,Math.floor(Number(payload.score)||0));
+    var mode=String(payload.mode||'').slice(0,50);
+    var result=String(payload.result||'').slice(0,20);
+    var meta=payload.meta&&typeof payload.meta==='object'?payload.meta:{};
+    function ajax(){
+      if(!cfg.ajaxUrl||!cfg.ajaxNonce) return Promise.reject({message:'AJAX unavailable'});
+      var body=new URLSearchParams();
+      body.set('action','gamehihi_event_end_game'); body.set('_ajax_nonce',cfg.ajaxNonce);
+      body.set('game_id',String(Number(cfg.gameId)||0)); body.set('score',String(score));
+      body.set('mode',mode); body.set('result',result); body.set('meta',JSON.stringify(meta));
+      body.set('guest_nonce',cfg.guestNonce||'');
+      return fetch(cfg.ajaxUrl,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},body:body.toString()}).then(parseResponse);
+    }
+    function rest(){
+      if(!cfg.restUrl||(!cfg.restNonce&&!cfg.guestNonce)) return Promise.reject({message:'REST unavailable'});
+      var url=String(cfg.restUrl).replace(/\/score\/?$/,'/end-game');
+      return fetch(url,{method:'POST',credentials:'same-origin',headers:cfg.restNonce?{'Content-Type':'application/json','X-WP-Nonce':cfg.restNonce}:{'Content-Type':'application/json'},body:JSON.stringify({game_id:Number(cfg.gameId),score:score,mode:mode,result:result,meta:meta,guest_nonce:cfg.guestNonce})}).then(parseResponse);
+    }
+    return ajax().catch(function(){return rest();}).then(function(j){
+      best=Math.max(best,Number(j.best_score||0));
+      if(j&&j.total_score!=null)total=Math.max(0,Number(j.total_score)||0);
+      try{window.dispatchEvent(new CustomEvent('gamehihi:end-game-saved',{detail:j}));}catch(e){}
+      if(window.console&&console.info)console.info('[GameHiHi EndGame] saved',j);
+      return j;
+    }).catch(function(e){if(window.console&&console.error)console.error('[GameHiHi EndGame] save failed',e);throw e;});
+  };
+  window.GameHiHiEventScoreDebug={config:cfg,getBest:function(){return best;},getTotal:function(){return total;},flush:flush};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  if(!cfg.analyticsUrl||!cfg.gameId) return;
+  function randomKey(prefix){
+    var a=new Uint8Array(16); try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    var h=''; for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2); return prefix+h;
+  }
+  function getVisitor(){
+    var k='gh_visitor_v1',v='';
+    try{v=localStorage.getItem(k)||''; if(!v){v=randomKey('v_');localStorage.setItem(k,v);}}catch(e){v=randomKey('v_');}
+    return v.slice(0,64);
+  }
+  function acquisition(){
+    var landing=location.href, ref=document.referrer||'';
+    try{
+      if(window.top!==window.self && window.top.location.origin===location.origin){
+        landing=window.top.location.href;
+        ref=window.top.document.referrer||ref;
+        var saved=window.top.sessionStorage.getItem('gh_acq_v1');
+        if(saved){var o=JSON.parse(saved); if(o&&o.landing)landing=String(o.landing); if(o&&typeof o.referrer==='string')ref=o.referrer;}
+      }
+    }catch(e){}
+    return {landing:String(landing||'').slice(0,1000),referrer:String(ref||'').slice(0,1000)};
+  }
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua) || (/android/i.test(ua)&&!/mobile/i.test(ua))) return 'Tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'Mobile';
+    return 'Desktop';
+  }
+  var visitor=getVisitor(), session=randomKey('s_'), acq=acquisition();
+  var activeMs=0,playMs=0,last=performance.now(),started=false,lastSent={a:-1,p:-1,s:-1},sending=false,pending=false;
+  function accrue(){
+    var now=performance.now(),delta=Math.max(0,Math.min(5000,now-last)); last=now;
+    if(!document.hidden){activeMs+=delta;if(started)playMs+=delta;}
+  }
+  function markStarted(){accrue();started=true;}
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',markStarted,{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,markStarted,{passive:true,once:true});});
+  }
+  document.addEventListener('visibilitychange',function(){accrue(); if(document.hidden)flush(true);},{passive:true});
+  window.addEventListener('blur',accrue,{passive:true}); window.addEventListener('focus',function(){last=performance.now();},{passive:true});
+  function payload(){
+    accrue();
+    return {session_key:session,visitor_key:visitor,game_id:Number(cfg.gameId)||0,active_seconds:Math.min(28800,Math.floor(activeMs/1000)),play_seconds:Math.min(28800,Math.floor(playMs/1000)),started:started?1:0,landing_url:acq.landing,referrer:acq.referrer,language:String(navigator.language||'').slice(0,16),platform:platform(),logged_in:cfg.loggedIn?1:0};
+  }
+  function changed(d){return d.active_seconds!==lastSent.a||d.play_seconds!==lastSent.p||d.started!==lastSent.s;}
+  function remember(d){lastSent={a:d.active_seconds,p:d.play_seconds,s:d.started};}
+  function flush(beacon){
+    var d=payload(); if(!changed(d))return;
+    if(sending){pending=true;return;}
+    if(beacon && navigator.sendBeacon){
+      try{var blob=new Blob([JSON.stringify(d)],{type:'application/json'}); if(navigator.sendBeacon(cfg.analyticsUrl,blob)){remember(d);return;}}catch(e){}
+    }
+    sending=true;
+    var headers={'Content-Type':'application/json'}; if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    fetch(cfg.analyticsUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:JSON.stringify(d)})
+      .then(function(r){if(r.ok)remember(d);})
+      .catch(function(){})
+      .finally(function(){sending=false;if(pending){pending=false;flush(false);}});
+  }
+  setTimeout(function(){flush(false);},2500);
+  setInterval(function(){flush(false);},30000);
+  window.addEventListener('pagehide',function(){flush(true);},{passive:true});
+  window.addEventListener('beforeunload',function(){flush(true);},{passive:true});
+  window.GameHiHiAnalyticsDebug={flush:flush,visitor:visitor,session:session};
+})();(function(){
+  'use strict';
+  var cfg=window.GameHiHiDirectEventScoreConfig||{};
+  function validMid(v){v=String(v||'').trim().toUpperCase();return /^G-[A-Z0-9]{4,20}$/.test(v)?v:'';}
+  var gameMid=validMid(cfg.ga4MeasurementId), masterMid=Number(cfg.ga4MasterEnabled)?validMid(cfg.ga4MasterMeasurementId):'';
+  var targets=[];
+  [gameMid,masterMid].forEach(function(id){if(id&&targets.indexOf(id)<0)targets.push(id);});
+  if(!targets.length) return;
+
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+  var script=document.createElement('script');
+  script.async=true;
+  script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(targets[0]);
+  document.head.appendChild(script);
+
+  function platform(){
+    var ua=navigator.userAgent||'';
+    if(/ipad|tablet|playbook|silk/i.test(ua)||(/android/i.test(ua)&&!/mobile/i.test(ua))) return 'tablet';
+    if(/mobi|iphone|ipod|android/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  function visitorId(){
+    var key='gh_visitor_v1',v='';
+    try{
+      v=localStorage.getItem(key)||'';
+      if(!v){v='v_'+sessionId().replace(/^gs_/,'');localStorage.setItem(key,v);}
+    }catch(e){v='v_'+sessionId().replace(/^gs_/,'');}
+    return String(v||'').slice(0,64);
+  }
+  function sessionId(){
+    var a=new Uint8Array(12),h='';
+    try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    for(var j=0;j<a.length;j++)h+=('0'+a[j].toString(16)).slice(-2);
+    return 'gs_'+h;
+  }
+  function cleanMeta(meta){
+    var out={},count=0;
+    if(!meta||typeof meta!=='object')return out;
+    Object.keys(meta).forEach(function(raw){
+      if(count>=20)return;
+      var key=String(raw||'').toLowerCase().replace(/[^a-z0-9_]/g,'_').replace(/^_+|_+$/g,'').slice(0,30);
+      if(!key)return;
+      var val=meta[raw];
+      if(typeof val==='number'&&isFinite(val)){out['game_'+key]=val;count++;return;}
+      if(typeof val==='boolean'){out['game_'+key]=val?1:0;count++;return;}
+      if(typeof val==='string'){out['game_'+key]=val.slice(0,100);count++;}
+    });
+    return out;
+  }
+  function merge(a,b){var o={},k;for(k in a)if(Object.prototype.hasOwnProperty.call(a,k))o[k]=a[k];for(k in b)if(Object.prototype.hasOwnProperty.call(b,k))o[k]=b[k];return o;}
+
+  var uid=Math.max(0,Math.floor(Number(cfg.analyticsUserId)||0));
+  var userScore=Math.max(0,Math.floor(Number(cfg.analyticsUserScore)||0));
+  var ageGroup=String(cfg.analyticsUserAgeGroup||'').slice(0,20);
+  var registeredSource=String(cfg.analyticsRegisteredSource||'').slice(0,40);
+  var gameSession=sessionId();
+  var common={
+    game_id:String(Number(cfg.gameId)||0),
+    game_slug:String(cfg.gameSlug||''),
+    game_name:String(cfg.gameName||document.title||''),
+    player_type:cfg.loggedIn?'logged_in':'guest',
+    player_ref:String(cfg.analyticsPlayerRef||''),
+    user_total_score:userScore,
+    source_site:String(cfg.analyticsSourceSite||location.hostname||'').slice(0,80),
+    platform:platform(),
+    language:String(navigator.language||'').slice(0,16),
+    game_session_id:gameSession,
+    game_url:String(location.pathname||'').slice(0,200),
+    page_path:String((location.pathname||'')+(location.search||'')).slice(0,300),
+    analytics_schema_version:String(cfg.analyticsSchemaVersion||'2.0.56')
+  };
+  var vid=visitorId(); if(vid)common.game_visitor_id=vid;
+  if(uid>0){
+    common.wp_user_id=String(uid);
+    if(ageGroup) common.user_age_group=ageGroup;
+    if(registeredSource) common.user_registered_source=registeredSource;
+    common.user_profile_complete=Number(cfg.analyticsProfileComplete)?1:0;
+    common.user_has_email=Number(cfg.analyticsHasEmail)?1:0;
+    common.user_has_phone=Number(cfg.analyticsHasPhone)?1:0;
+    common.user_has_name=Number(cfg.analyticsHasName)?1:0;
+  }
+
+  gtag('js',new Date());
+  gtag('set',common);
+  targets.forEach(function(id){
+    var c={send_page_view:false};
+    if(uid>0)c.user_id=String(uid);
+    gtag('config',id,c);
+  });
+
+  var localSeq=0;
+  var localEventNames={page_view:1,game_view:1,game_start:1,game_score:1,score_submit:1,game_end:1,game_engaged_60s:1,game_exit:1};
+  function logLocal(name,data){
+    if(!cfg.analyticsEventUrl||!localEventNames[name])return;
+    localSeq++;
+    var payload={
+      event_key:(gameSession+'_'+localSeq+'_'+name).slice(0,96),
+      event_name:name,
+      session_key:gameSession,
+      visitor_key:String(common.game_visitor_id||''),
+      game_id:Number(cfg.gameId)||0,
+      game_slug:String(common.game_slug||''),
+      game_name:String(common.game_name||''),
+      player_type:String(common.player_type||''),
+      source_site:String(common.source_site||''),
+      platform:String(common.platform||''),
+      language:String(common.language||''),
+      game_url:String(common.game_url||''),
+      page_path:String(common.page_path||''),
+      score:Math.max(0,Math.floor(Number(data.score)||0)),
+      play_time_seconds:Math.max(0,Math.floor(Number(data.play_time_seconds)||0)),
+      meta:data
+    };
+    var body=JSON.stringify(payload),headers={'Content-Type':'application/json'};
+    if(cfg.analyticsNonce)headers['X-WP-Nonce']=cfg.analyticsNonce;
+    if(name==='game_exit'&&navigator.sendBeacon){
+      try{if(navigator.sendBeacon(cfg.analyticsEventUrl,new Blob([body],{type:'application/json'})))return;}catch(e){}
+    }
+    try{fetch(cfg.analyticsEventUrl,{method:'POST',credentials:'same-origin',keepalive:true,headers:headers,body:body}).catch(function(){});}catch(e){}
+  }
+  function send(name,params){
+    params=params&&typeof params==='object'?params:{};
+    var data=merge(common,params);
+    targets.forEach(function(id){
+      var d=merge(data,{send_to:id});
+      try{gtag('event',name,d);}catch(e){}
+    });
+    logLocal(name,data);
+  }
+
+  send('page_view',{page_location:location.href,page_title:document.title,page_referrer:document.referrer||''});
+  send('game_view',{page_location:location.href,page_title:document.title});
+
+  var started=false,startAt=0,exitSent=false,lastSubmitScore=null,lastSubmitAt=0;
+  function playSeconds(){return startAt?Math.max(0,Math.floor((Date.now()-startAt)/1000)):0;}
+  function start(source){
+    if(started) return;
+    started=true; startAt=Date.now();
+    send('game_start',{start_source:String(source||'interaction'),play_time_seconds:0});
+    setTimeout(function(){if(started)send('game_engaged_60s',{play_time_seconds:60});},60000);
+  }
+  if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+    window.addEventListener('gamehihi:game-start',function(){start('game_started');},{once:true});
+  }else{
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){
+    window.addEventListener(ev,function(){start(ev);},{passive:true,once:true});
+  });
+  }
+
+  function submitScore(score,mode,meta,source){
+    score=Math.max(0,Math.floor(Number(score)||0));
+    var now=Date.now();
+    if(lastSubmitScore===score && now-lastSubmitAt<3000)return;
+    lastSubmitScore=score;lastSubmitAt=now;
+    var data=merge({score:score,mode:String(mode||'').slice(0,50),play_time_seconds:playSeconds(),submit_source:String(source||'game')},cleanMeta(meta));
+    send('score_submit',data);
+  }
+
+  var originalScore=window.GameHiHiDirectEventScore;
+  if(typeof originalScore==='function'){
+    window.GameHiHiDirectEventScore=function(payload){
+      payload=payload||{}; start('score');
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      var data=merge({score:score,mode:String(payload.mode||'').slice(0,50),final:payload.final?1:0,play_time_seconds:playSeconds()},cleanMeta(payload.meta));
+      send('game_score',data); // giữ event cũ để không gãy report hiện tại
+      if(payload.final)submitScore(score,payload.mode,payload.meta,'final_score');
+      return originalScore.apply(this,arguments);
+    };
+  }
+
+  var originalEnd=window.GameHiHiEndGame;
+  if(typeof originalEnd==='function'){
+    window.GameHiHiEndGame=function(payload){
+      payload=payload||{}; start('end_game');
+      if(cfg.gameSlug==='pho-ha-noi'||cfg.gameSlug==='oc-dem-hihi'||cfg.gameSlug==='net-co-hihi'||cfg.gameSlug==='1-ngay-lam-cho-hihi'||cfg.gameSlug==='mot-ngay-lam-cho-hihi'||cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let'||cfg.gameSlug==='mot-ngay-lam-thu-ky'||cfg.gameSlug==='o-to-bay'||cfg.gameSlug==='chao-long-anh-beo'||cfg.gameSlug==='tiem-pho-dau-ngo'){
+        return Promise.resolve(originalEnd.apply(this,arguments)).then(function(j){
+          if(j&&j.saved){
+            var actual=Math.max(0,Math.floor(Number(j.score)||0));
+            var data=merge({score:actual,mode:String(payload.mode||'').slice(0,50),result:String(payload.result||'').slice(0,40),play_time_seconds:playSeconds(),submit_source:((cfg.gameSlug==='hihi-trap-run'||cfg.gameSlug==='la-het-trong-toa-let')?'level_saved':(cfg.gameSlug==='o-to-bay'?'round_saved':'day_saved'))},cleanMeta(payload.meta));
+            send('game_score',data);
+            send('score_submit',data);
+            send('game_end',data);
+          }
+          return j;
+        });
+      }
+      var score=Math.max(0,Math.floor(Number(payload.score)||0));
+      submitScore(score,payload.mode,payload.meta,'end_game');
+      var data=merge({
+        score:score,
+        mode:String(payload.mode||'').slice(0,50),
+        result:String(payload.result||'').slice(0,40),
+        play_time_seconds:playSeconds()
+      },cleanMeta(payload.meta));
+      send('game_end',data);
+      return originalEnd.apply(this,arguments);
+    };
+  }
+
+  function sendExit(){
+    if(exitSent) return; exitSent=true;
+    send('game_exit',{started:started?1:0,play_time_seconds:playSeconds(),transport_type:'beacon'});
+  }
+  window.addEventListener('pagehide',sendExit,{passive:true});
+  window.addEventListener('beforeunload',sendExit,{passive:true});
+
+  window.GameHiHiGA4={measurementId:gameMid,masterMeasurementId:masterMid,targets:targets.slice(),userId:uid,sessionId:gameSession,send:send,start:start,submitScore:submitScore};
+})();</script>
+</head>
+<body>
+<div id="root">
+  <div id="stage" class="stage">
+
+    <!-- ============ LOADING ============ -->
+    <section id="scr-loading" class="screen active">
+      <div class="loading-inner">
+        <img class="loading-logo" src="assets/logo.svg?ghv=d6ce50eec2ce" alt="Apple Worm World">
+        <div class="loadbar"><div class="loadbar-fill" id="load-fill"></div></div>
+        <div class="load-text outline" data-i18n="loading">Loading...</div>
+      </div>
+    </section>
+
+    <!-- ============ MAIN MENU ============ -->
+    <section id="scr-menu" class="screen bg-menu">
+      <div class="sky-clouds"><i class="cl cl1"></i><i class="cl cl2"></i><i class="cl cl3"></i></div>
+      <div class="topbar">
+        <div class="coin-pill"><img src="assets/icons/coin.svg?ghv=d6ce50eec2ce" alt=""><span class="coin-count">0</span></div>
+        <button class="btn-round sm" data-act="fullscreen" data-i18n-title="fullscreen"><img src="assets/icons/fullscreen.svg?ghv=d6ce50eec2ce" alt=""></button>
+      </div>
+      <div class="menu-side left">
+        <button class="tile-btn" data-act="settings"><img src="assets/icons/gear.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="settings">Settings</span></button>
+        <button class="tile-btn" data-act="shop"><img src="assets/icons/shop.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="shop">Shop</span></button>
+      </div>
+      <div class="menu-side right">
+        <button class="tile-btn" data-act="leaderboard"><img src="assets/icons/trophy.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="leaderboard">Leaderboard</span></button>
+        <button class="tile-btn" data-act="daily"><img src="assets/icons/gift.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="daily">Daily Reward</span><i class="badge" id="daily-badge" hidden>!</i></button>
+      </div>
+      <div class="menu-center">
+        <img class="menu-logo" src="assets/logo.svg?ghv=d6ce50eec2ce" alt="Apple Worm World">
+        <canvas class="mascot" id="menu-mascot"></canvas>
+        <button class="btn btn-green btn-play" data-act="play"><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="play">PLAY</span></button>
+      </div>
+      <div class="menu-bottom">
+        <button class="btn-round" data-act="howto" data-i18n-title="howToPlay"><img src="assets/icons/question.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <button class="btn-round" data-act="map" data-i18n-title="worldMap"><img src="assets/icons/map-glyph.svg?ghv=d6ce50eec2ce" alt=""></button>
+      </div>
+      <div class="wood-sign"><span data-i18n="menuBubble">Help the little worm fill the goal!</span></div>
+    </section>
+
+    <!-- ============ WORLD MAP ============ -->
+    <section id="scr-map" class="screen bg-menu">
+      <header class="scr-head">
+        <button class="btn-round" data-act="back-menu"><img src="assets/icons/back.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <div class="plaque"><span data-i18n="worldMap">World Map</span></div>
+        <div class="coin-pill"><img src="assets/icons/coin.svg?ghv=d6ce50eec2ce" alt=""><span class="coin-count">0</span></div>
+      </header>
+      <div class="map-area" id="map-area">
+        <svg class="map-path" id="map-path" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="wood-sign map-sign"><span data-i18n="manyWorlds">Many worlds, many challenges!</span></div>
+    </section>
+
+    <!-- ============ LEVEL SELECT ============ -->
+    <section id="scr-levels" class="screen">
+      <header class="scr-head">
+        <button class="btn-round" data-act="back-menu"><img src="assets/icons/back.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <div class="plaque"><span data-i18n="selectLevel">Select Level</span></div>
+        <button class="btn-round" data-act="map"><img src="assets/icons/map-glyph.svg?ghv=d6ce50eec2ce" alt=""></button>
+      </header>
+      <div class="world-banner">
+        <img class="world-island" id="lv-island" src="assets/map/island1.svg?ghv=d6ce50eec2ce" alt="">
+        <div class="world-name outline" id="lv-world-name">Green Forest</div>
+        <div class="world-stars"><img src="assets/icons/star.svg?ghv=d6ce50eec2ce" alt=""><b id="lv-world-stars">0/30</b></div>
+      </div>
+      <div class="level-pager">
+        <button class="btn-round nav" data-act="world-prev"><img src="assets/icons/back.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <div class="level-grid" id="level-grid"></div>
+        <button class="btn-round nav" data-act="world-next"><img src="assets/icons/next.svg?ghv=d6ce50eec2ce" alt=""></button>
+      </div>
+      <div class="dots" id="world-dots"></div>
+    </section>
+
+    <!-- ============ GAME ============ -->
+    <section id="scr-game" class="screen">
+      <canvas id="board-canvas"></canvas>
+      <div id="board-area" class="board-area"></div>
+      <div class="hud">
+        <div class="hud-group">
+          <button class="btn-sq" data-act="pause"><img src="assets/icons/pause.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="level-plaque" id="hud-level">LEVEL 1</div>
+          <div class="starbar" id="hud-stars">
+            <div class="starbar-track"><div class="starbar-fill" id="hud-starfill"></div></div>
+            <img class="sb sb1" src="assets/icons/star.svg?ghv=d6ce50eec2ce" alt=""><img class="sb sb2" src="assets/icons/star.svg?ghv=d6ce50eec2ce" alt=""><img class="sb sb3" src="assets/icons/star.svg?ghv=d6ce50eec2ce" alt="">
+          </div>
+        </div>
+        <div class="hud-group right">
+          <button class="btn-pill green" data-act="hint"><img src="assets/icons/lightbulb.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="hint">Hint</span></button>
+          <button class="btn-pill" data-act="undo"><img src="assets/icons/undo.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="undo">Undo</span></button>
+          <button class="btn-pill" data-act="restart"><img src="assets/icons/restart.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="reset">Reset</span></button>
+          <button class="btn-sq" data-act="sound"><img id="hud-sound" src="assets/icons/sound-on.svg?ghv=d6ce50eec2ce" alt=""></button>
+        </div>
+      </div>
+      <aside class="side-panel">
+        <div class="side-card goal-card">
+          <div class="side-title" data-i18n="goal">Goal</div>
+          <canvas id="goal-preview"></canvas>
+          <div class="len-row"><img src="assets/icons/crown.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="length">Length</span><b id="hud-length">2/4</b></div>
+          <div class="len-bar"><div class="len-fill" id="hud-lenfill"></div></div>
+        </div>
+        <div class="side-card stats-card">
+          <div class="stat"><img src="assets/items/food.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="food">Food</span><b id="hud-food">0</b></div>
+          <div class="stat"><img src="assets/icons/next.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="moves">Moves</span><b id="hud-moves">0</b></div>
+          <div class="stat"><img src="assets/icons/star.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="time">Time</span><b id="hud-time">00:00</b></div>
+        </div>
+        <div class="buffs" id="hud-buffs">
+          <div class="buff" id="buff-shield" hidden><img src="assets/items/shield.svg?ghv=d6ce50eec2ce" alt=""><b>0</b></div>
+          <div class="buff" id="buff-speed" hidden><img src="assets/items/speed.svg?ghv=d6ce50eec2ce" alt=""><b>0</b></div>
+          <div class="buff" id="buff-heart" hidden><img src="assets/items/heart.svg?ghv=d6ce50eec2ce" alt=""><b>0</b></div>
+        </div>
+      </aside>
+      <div class="dpad" id="dpad" hidden>
+        <button class="dp up" data-dir="0"><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <button class="dp right" data-dir="1"><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <button class="dp down" data-dir="2"><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" alt=""></button>
+        <button class="dp left" data-dir="3"><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" alt=""></button>
+      </div>
+    </section>
+
+    <!-- ============ MODALS ============ -->
+    <div id="modal-layer" class="modal-layer" hidden>
+      <div class="modal-backdrop"></div>
+
+      <!-- How to play -->
+      <div class="modal" id="m-howto" hidden>
+        <div class="panel panel-wide">
+          <div class="plaque"><span data-i18n="howToPlay">How to Play</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="pages" id="howto-pages">
+            <div class="page" data-page="0">
+              <div class="howto-cards">
+                <div class="card howto-card"><canvas class="howto-art" data-art="move"></canvas><b data-i18n="htpMoveT"></b><small data-i18n="htpMoveD"></small></div>
+                <div class="card howto-card"><canvas class="howto-art" data-art="food"></canvas><b data-i18n="htpFoodT"></b><small data-i18n="htpFoodD"></small></div>
+                <div class="card howto-card"><canvas class="howto-art" data-art="goal"></canvas><b data-i18n="htpGoalT"></b><small data-i18n="htpGoalD"></small></div>
+              </div>
+              <div class="note" data-i18n="htpNote"></div>
+            </div>
+            <div class="page" data-page="1" hidden>
+              <div class="section-label outline" data-i18n="controls">Controls</div>
+              <div class="ctrl-cards">
+                <div class="card ctrl-card"><img src="assets/controls/arrows.svg?ghv=d6ce50eec2ce" alt=""><b data-i18n="ctrlArrows"></b><small data-i18n="desktop"></small></div>
+                <div class="card ctrl-card"><img src="assets/controls/wasd.svg?ghv=d6ce50eec2ce" alt=""><b data-i18n="ctrlWasd"></b><small data-i18n="desktop"></small></div>
+                <div class="card ctrl-card"><img src="assets/controls/swipe.svg?ghv=d6ce50eec2ce" alt=""><b data-i18n="ctrlSwipe"></b><small data-i18n="mobile"></small></div>
+                <div class="card ctrl-card"><img src="assets/controls/gamepad.svg?ghv=d6ce50eec2ce" alt=""><b data-i18n="ctrlPad"></b><small data-i18n="padNote"></small></div>
+              </div>
+              <div class="note" data-i18n="shortcuts"></div>
+            </div>
+            <div class="page" data-page="2" hidden>
+              <div class="section-label outline" data-i18n="gameElements">Game Elements</div>
+              <div class="el-grid" id="el-grid"></div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <div class="dots small" id="howto-dots"></div>
+            <button class="btn btn-green" data-act="howto-next" data-primary><span id="howto-next-label" data-i18n="next">Next</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New element intro -->
+      <div class="modal" id="m-intro" hidden>
+        <div class="panel panel-small">
+          <div class="plaque"><span data-i18n="newElement">New!</span></div>
+          <div class="intro-body">
+            <div class="intro-icon"><img id="intro-img" src="assets/items/food.svg?ghv=d6ce50eec2ce" alt=""></div>
+            <div class="intro-text">
+              <h3 class="outline" id="intro-title"></h3>
+              <p id="intro-desc"></p>
+            </div>
+          </div>
+          <div class="panel-foot center"><button class="btn btn-green" data-act="close" data-primary><span data-i18n="gotIt">GOT IT!</span></button></div>
+        </div>
+      </div>
+
+      <!-- Pause -->
+      <div class="modal" id="m-pause" hidden>
+        <div class="panel panel-small">
+          <div class="plaque"><span data-i18n="paused">Paused</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="pause-body">
+            <button class="btn btn-green wide" data-act="close" data-primary><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="resume">Resume</span></button>
+            <div class="row-btns">
+              <button class="btn btn-blue" data-act="restart"><img src="assets/icons/restart.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="restart">Restart</span></button>
+              <button class="btn btn-blue" data-act="howto"><img src="assets/icons/question.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="howToPlay">How to Play</span></button>
+            </div>
+            <div class="row-btns">
+              <button class="btn btn-blue" data-act="levels"><img src="assets/icons/list.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="levels">Levels</span></button>
+              <button class="btn btn-blue" data-act="home"><img src="assets/icons/home.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="home">Home</span></button>
+            </div>
+            <div class="row-btns toggles">
+              <button class="toggle-chip" data-act="toggle-music"><img src="assets/icons/music.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="music">Music</span><i class="toggle" data-toggle="musicOn"></i></button>
+              <button class="toggle-chip" data-act="toggle-sfx"><img src="assets/icons/sfx.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="sfx">Sound Effects</span><i class="toggle" data-toggle="sfxOn"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level complete -->
+      <div class="modal" id="m-complete" hidden>
+        <div class="result-wrap">
+          <div class="result-stars" id="result-stars">
+            <img class="rs rs1" src="assets/icons/star-empty.svg?ghv=d6ce50eec2ce" alt=""><img class="rs rs2" src="assets/icons/star-empty.svg?ghv=d6ce50eec2ce" alt=""><img class="rs rs3" src="assets/icons/star-empty.svg?ghv=d6ce50eec2ce" alt="">
+          </div>
+          <div class="result-title win outline" data-i18n="levelComplete">Level Complete!</div>
+          <div class="result-body">
+            <canvas class="result-mascot" id="win-mascot"></canvas>
+            <div class="stats-box">
+              <div class="stats-head" id="res-level">Level 1</div>
+              <div class="stats-row"><img src="assets/icons/next.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="moves">Moves</span><b id="res-moves">0</b></div>
+              <div class="stats-row"><img src="assets/icons/star.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="time">Time</span><b id="res-time">00:00</b></div>
+              <div class="stats-row"><img src="assets/icons/trophy.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="score">Score</span><b id="res-score">0</b></div>
+              <div class="stats-coins"><img src="assets/icons/coin.svg?ghv=d6ce50eec2ce" alt=""><b id="res-coins">+0</b><i class="new-best" id="res-best" hidden data-i18n="newBest">New Best!</i></div>
+            </div>
+          </div>
+          <div class="result-btns">
+            <button class="btn-round big" data-act="home"><img src="assets/icons/home.svg?ghv=d6ce50eec2ce" alt=""></button>
+            <button class="btn-round big" data-act="replay"><img src="assets/icons/restart.svg?ghv=d6ce50eec2ce" alt=""></button>
+            <button class="btn btn-green btn-next" data-act="next" data-primary><span data-i18n="next">Next</span><img src="assets/icons/next.svg?ghv=d6ce50eec2ce" alt=""></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game over -->
+      <div class="modal" id="m-gameover" hidden>
+        <div class="result-wrap">
+          <div class="ribbon"><span data-i18n="gameOver">Game Over</span></div>
+          <canvas class="result-mascot sad" id="lose-mascot"></canvas>
+          <div class="lose-card">
+            <b class="outline" data-i18n="dontGiveUp">Don't give up!</b>
+            <small id="lose-reason"></small>
+          </div>
+          <div class="result-btns">
+            <button class="btn-round big" data-act="home"><img src="assets/icons/home.svg?ghv=d6ce50eec2ce" alt=""></button>
+            <button class="btn btn-blue" data-act="undo-over" id="lose-undo"><img src="assets/icons/undo.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="undo">Undo</span></button>
+            <button class="btn btn-green" data-act="replay" data-primary><img src="assets/icons/restart.svg?ghv=d6ce50eec2ce" alt=""><span data-i18n="tryAgain">Try Again</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="modal" id="m-settings" hidden>
+        <div class="panel">
+          <div class="plaque"><span data-i18n="settings">Settings</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="panel-body">
+            <div class="card settings-card">
+              <div class="set-row"><img src="assets/icons/music.svg?ghv=d6ce50eec2ce" class="ico" alt=""><span data-i18n="music">Music</span><input type="range" min="0" max="100" data-slider="music"><i class="toggle" data-toggle="musicOn" data-act="toggle-music"></i></div>
+              <div class="set-row"><img src="assets/icons/sfx.svg?ghv=d6ce50eec2ce" class="ico" alt=""><span data-i18n="sfx">Sound Effects</span><input type="range" min="0" max="100" data-slider="sfx"><i class="toggle" data-toggle="sfxOn" data-act="toggle-sfx"></i></div>
+              <div class="set-row"><img src="assets/icons/vibration.svg?ghv=d6ce50eec2ce" class="ico" alt=""><span data-i18n="vibration">Vibration</span><div class="grow"></div><i class="toggle" data-toggle="vibration" data-act="toggle-vibration"></i></div>
+              <div class="set-row"><img src="assets/icons/play.svg?ghv=d6ce50eec2ce" class="ico" alt=""><span data-i18n="dpad">On-screen D-pad</span><div class="grow"></div><i class="toggle" data-toggle="dpad" data-act="toggle-dpad"></i></div>
+              <div class="set-row"><img src="assets/icons/globe.svg?ghv=d6ce50eec2ce" class="ico" alt=""><span data-i18n="language">Language</span><div class="grow"></div>
+                <div class="lang-picker"><button class="mini-arrow" data-act="lang-prev"><img src="assets/icons/back.svg?ghv=d6ce50eec2ce" alt=""></button><b id="lang-name">English</b><button class="mini-arrow" data-act="lang-next"><img src="assets/icons/next.svg?ghv=d6ce50eec2ce" alt=""></button></div>
+              </div>
+            </div>
+            <div class="row-btns">
+              <button class="btn btn-blue small" data-act="privacy"><span data-i18n="privacy">Privacy Policy</span></button>
+              <button class="btn btn-blue small" data-act="moregames"><span data-i18n="moreGames">More Games</span></button>
+              <button class="btn btn-red small" data-act="reset-progress"><span data-i18n="resetProgress">Reset Progress</span></button>
+            </div>
+            <div class="version">Apple Worm World · v<span id="version"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shop -->
+      <div class="modal" id="m-shop" hidden>
+        <div class="panel panel-wide">
+          <div class="plaque"><span data-i18n="shop">Shop</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="shop-top">
+            <div class="tabs">
+              <button class="tab active" data-act="shop-tab" data-tab="skins"><span data-i18n="skins">Skins</span></button>
+              <button class="tab" data-act="shop-tab" data-tab="trails"><span data-i18n="trails">Trails</span></button>
+            </div>
+            <div class="coin-pill"><img src="assets/icons/coin.svg?ghv=d6ce50eec2ce" alt=""><span class="coin-count">0</span></div>
+          </div>
+          <div class="panel-body shop-grid" id="shop-grid"></div>
+        </div>
+      </div>
+
+      <!-- Daily reward -->
+      <div class="modal" id="m-daily" hidden>
+        <div class="panel">
+          <div class="plaque"><span data-i18n="daily">Daily Reward</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="panel-body">
+            <div class="daily-grid" id="daily-grid"></div>
+          </div>
+          <div class="panel-foot center column">
+            <button class="btn btn-green" data-act="claim" id="daily-claim" data-primary><span data-i18n="claim">Claim</span></button>
+            <div class="daily-note outline" id="daily-note"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="modal" id="m-leaderboard" hidden>
+        <div class="panel">
+          <div class="plaque"><span data-i18n="leaderboard">Leaderboard</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="tabs center">
+            <button class="tab active" data-act="lb-tab" data-tab="global"><span data-i18n="global">Global</span></button>
+            <button class="tab" data-act="lb-tab" data-tab="friends"><span data-i18n="friends">Friends</span></button>
+          </div>
+          <div class="panel-body card lb-list" id="lb-list"></div>
+          <div class="lb-me card" id="lb-me"></div>
+        </div>
+      </div>
+
+      <!-- Generic info / confirm -->
+      <div class="modal" id="m-info" hidden>
+        <div class="panel panel-small">
+          <div class="plaque"><span id="info-title">Info</span></div>
+          <button class="close-btn" data-act="close"><img src="assets/icons/close.svg?ghv=d6ce50eec2ce" alt=""></button>
+          <div class="panel-body"><p class="info-text" id="info-text"></p></div>
+          <div class="panel-foot center" id="info-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <canvas id="fx-canvas"></canvas>
+  </div>
+</div>
+
+<script src="js/config.js?ghv=d6ce50eec2ce"></script>
+<script src="js/i18n.js?ghv=d6ce50eec2ce"></script>
+<script src="js/storage.js?ghv=d6ce50eec2ce"></script>
+<script src="js/audio.js?ghv=d6ce50eec2ce"></script>
+<script src="js/engine.js?ghv=d6ce50eec2ce"></script>
+<script src="js/solver.js?ghv=d6ce50eec2ce"></script>
+<script src="js/levels.js?ghv=d6ce50eec2ce"></script>
+<script src="js/solutions.js?ghv=d6ce50eec2ce"></script>
+<script src="js/assets.js?ghv=d6ce50eec2ce"></script>
+<script src="js/snake-art.js?ghv=d6ce50eec2ce"></script>
+<script src="js/particles.js?ghv=d6ce50eec2ce"></script>
+<script src="js/renderer.js?ghv=d6ce50eec2ce"></script>
+<script src="js/input.js?ghv=d6ce50eec2ce"></script>
+<script src="js/game.js?ghv=d6ce50eec2ce"></script>
+<script src="js/ui.js?ghv=d6ce50eec2ce"></script>
+<script src="js/main.js?ghv=d6ce50eec2ce"></script>
+</body>
+</html>

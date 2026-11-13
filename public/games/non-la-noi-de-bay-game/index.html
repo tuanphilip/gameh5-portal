@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <meta name="author" content="Chromium runner contributors; Vietnamese ASR model by hynt; sherpa-onnx by Xiaomi and contributors">
+  <link rel="license" href="./licenses.html">
+  <link rel="preload" as="font" type="font/woff2" href="./fonts/noto-sans/noto-sans-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="./fonts/noto-sans/noto-sans-vietnamese.woff2" crossorigin>
+  <link rel="stylesheet" href="./fonts/noto-sans/font.css">
+  <title>Nón lá · Nói để bay</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script src="js/runner.js" defer></script>
+  <script src="js/main.mjs" type="module"></script>
+</head>
+<body class="game-page">
+  <main>
+    <a class="credits" href="./licenses.html" aria-label="Nguồn và giấy phép" title="Nguồn và giấy phép"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 9v6M10 5v1"/></svg></a>
+    <section id="game" aria-label="Nón lá né cột điện và dây điện">
+      <div class="score"><label class="player" title="Tên hiện trên bảng xếp hạng"><span aria-hidden="true">👤</span><input id="player-name" maxlength="24" placeholder="Nhập tên để lên BXH" autocomplete="nickname" enterkeyhint="done" spellcheck="false" aria-label="Tên người chơi"></label><span class="score-value"><span id="score-bonus" class="score-bonus" aria-hidden="true"></span><span id="score" aria-label="Điểm">0000</span></span></div>
+      <div class="field">
+        <div id="runner" class="interstitial-wrapper"><span class="icon icon-offline" hidden></span></div>
+        <div id="countdown" class="countdown" role="status" hidden><strong id="countdown-number"></strong><span id="countdown-label"></span></div>
+        <div id="mic-gate" class="mic-gate" data-mic="prompt" hidden>
+          <p class="mic-title"><span class="mic-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></span><span id="mic-title">Game cần micro để nghe bạn nói</span></p>
+          <p id="mic-detail" class="mic-detail">Bấm nút dưới đây rồi chọn <b>Cho phép</b> trong thông báo của trình duyệt.</p>
+          <div class="mic-actions"><button id="mic-button" class="pill" type="button">🎤 Bật micro</button><button id="mic-reload" class="pill ghost" type="button" hidden>↻ Tải lại trang</button></div>
+        </div>
+        <div id="name-gate" class="mic-gate name-gate" hidden>
+          <p class="mic-title"><span class="mic-icon" aria-hidden="true">👤</span><span>Bạn tên gì?</span></p>
+          <p class="mic-detail">Tên sẽ hiện trên <b>bảng xếp hạng</b>. Không nhập tên thì điểm không lên BXH.</p>
+          <form id="name-form" class="name-form">
+            <input id="name-gate-input" maxlength="24" placeholder="Tên của bạn" autocomplete="nickname" enterkeyhint="go" spellcheck="false" aria-label="Tên của bạn">
+            <div class="mic-actions"><button class="pill" type="submit">Lưu &amp; chơi</button><button id="name-skip" class="pill ghost" type="button">Chơi không tên</button></div>
+          </form>
+        </div>
+      </div>
+      <div id="prompts" class="prompts" data-required="jump">
+        <div class="prompt-heading"><span id="action-label">↑ NHẢY</span><span id="timing-label">Chờ nhịp</span></div>
+        <div class="prompt-grid">
+          <div id="jump-prompt" class="prompt-command"><span class="command-action" aria-label="Nhảy">↑ <span class="action-name">NHẢY</span></span><h1 id="phrase" class="phrase-text">Lá non</h1></div>
+          <div id="reverse-prompt" class="prompt-command"><span class="command-action" aria-label="Cúi">↓ <span class="action-name">CÚI</span></span><h2 id="reverse-phrase" class="phrase-text">Ná lon</h2></div>
+        </div>
+        <div id="timing-track" class="timing-track" role="progressbar" aria-label="Thời gian tới chướng ngại" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span id="timing-fill"></span></div>
+      </div>
+      <div id="heard" class="heard"><span id="mic-level" aria-hidden="true"></span><p id="transcript" aria-label="Lời máy nhận" aria-live="polite"></p></div>
+      <div id="loading-status" class="loading-status" role="status" hidden>
+        <p class="loading-heading"><span class="loading-spinner" aria-hidden="true"></span><span id="loading-title"></span><span id="loading-percent" aria-hidden="true"></span></p>
+        <progress id="loading-progress" max="100" aria-label="Tiến độ tải nhận giọng"></progress>
+        <p id="loading-detail" class="loading-detail"></p>
+      </div>
+      <div class="controls"><button id="reload-mic" class="text" type="button" title="Nạp lại micro và bộ nhận giọng (dùng khi nói mà game không nhận)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 10a6.5 6.5 0 1 1-1.9-4.6"/><path d="M16.8 2.8v3.4h-3.4"/><rect x="8.4" y="6.4" width="3.2" height="5.6" rx="1.6"/><path d="M7 11a3 3 0 0 0 6 0"/></svg><span>Nạp lại mic</span></button><button id="start-button" aria-label="Chơi" disabled>▶</button><button id="fullscreen-button" class="small" type="button" aria-label="Toàn màn hình" title="Toàn màn hình (F)" hidden><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg></button></div>
+      <p id="score-status" class="score-status" role="status" hidden></p>
+      <p id="error-message" role="alert" hidden></p>
+    </section>
+  </main>
+  <div id="offline-resources" hidden><img id="offline-resources-1x" alt="" src="assets/sprite-1x.png"><img id="offline-resources-2x" alt="" src="assets/sprite-2x.png"></div>
+</body>
+</html>

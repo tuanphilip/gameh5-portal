@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#fff7ea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Nói Ngọng</title>
+<meta name="description" content="Nói Ngọng – game chạy bằng giọng nói: nói CHUẨN để nhảy, nói NGỌNG để cúi! Thử thách L/N, TR/CH, S/X, R/D/GI, T/TH, N/NG, hỏi/ngã siêu lầy.">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  /* iPhone Safari tự phóng to chữ khi khung bị xoay/thu nhỏ → chữ to hơn ô chứa và đè lên nhau. Khoá cỡ chữ đúng thiết kế. */
+  html{-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;text-size-adjust:100%}
+  body{background:#2b2118;font-family:"Baloo 2","Nunito","Segoe UI",system-ui,sans-serif;color:#3b2a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+  /* #app = sân khấu game; JS đặt width/height theo vùng chứa đo được. transform giúp overlay "fixed" bám theo sân khấu */
+  #app{width:100%;height:100%;padding:10px;display:flex;flex-direction:column;gap:10px;position:relative;background:#fff7ea;overflow:hidden;transform:translateZ(0)}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .brand{font-weight:900;font-size:clamp(18px,calc(var(--sw,800px)*.042),26px);letter-spacing:.3px;color:#e2552b}
+  .brand span{color:#2f8f4e}
+  .hud{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .chip{background:#fff;border:2px solid #f0d9b5;border-radius:999px;padding:3px 10px;font-weight:800;font-size:14px;white-space:nowrap}
+  .chip.mic{border-color:#cfe8d5}
+  .chip.mic.off{border-color:#f3c2b5;color:#b5462a}
+  #wrap{position:relative;width:100%;flex:1 1 auto;min-height:0;border-radius:18px;overflow:hidden;box-shadow:0 6px 0 #ead2ad,0 10px 30px rgba(120,70,20,.15);background:#ffd9a8}
+  canvas{width:100%;height:100%;display:block;touch-action:none}
+  #prompts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pbtn{border:none;border-radius:16px;padding:10px 8px 8px;cursor:pointer;font-family:inherit;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,.15);transition:transform .08s;color:#fff}
+  .pbtn:active,.pbtn.flash{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.15)}
+  .pbtn .lbl{display:block;font-size:12px;font-weight:800;opacity:.9;text-transform:uppercase;letter-spacing:.6px}
+  .pbtn b{display:block;font-size:clamp(20px,calc(var(--sw,800px)*.054),32px);line-height:1.15;font-weight:900;margin:2px 0}
+  #pUp{background:linear-gradient(#3fb36a,#2a9152)}
+  #pDown{background:linear-gradient(#ff8a3d,#e8622a)}
+  #heard{min-height:24px;text-align:center;font-weight:700;font-size:15px;color:#7a5a3a}
+  #heard em{font-style:normal;color:#e2552b}
+  #meter{height:8px;border-radius:9px;background:#f3e3c9;overflow:hidden;display:none}
+  #meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3fb36a,#ffcc33,#e8622a);transition:width .05s}
+  #meter.show{display:block}
+  .overlay{position:absolute;inset:0;background:rgba(255,247,234,.94);display:flex;align-items:center;justify-content:center;padding:16px;z-index:5;border-radius:18px}
+  .overlay.hide{display:none}
+  .card{max-width:560px;width:100%;text-align:center;margin:auto 0}
+  .overlay{align-items:flex-start;overflow-y:auto}
+  .card h1{font-size:clamp(28px,calc(var(--sw,800px)*.07),46px);line-height:1;color:#e2552b;font-weight:900}
+  .card h1 span{color:#2f8f4e}
+  .card p{margin:10px 0;font-size:15px;line-height:1.45}
+  .ex{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  .ex div{background:#fff;border-radius:12px;padding:8px;border:2px solid #f0d9b5;font-size:14px}
+  .ex b{font-size:18px}
+  .modes{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .mbtn{border:none;border-radius:14px;padding:12px;font-family:inherit;font-weight:900;font-size:17px;cursor:pointer;color:#fff;background:#e2552b;box-shadow:0 5px 0 #b8401d}
+  .mbtn small{display:block;font-weight:700;font-size:12px;opacity:.9}
+  .mbtn.g{background:#2f8f4e;box-shadow:0 5px 0 #20693a}
+  .mbtn.y{background:#d99a1e;box-shadow:0 5px 0 #a87412}
+  .mbtn:active{transform:translateY(4px);box-shadow:none}
+  .big{font-size:48px;font-weight:900;color:#2f8f4e;line-height:1.1}
+  .note{font-size:12px;color:#9a7b5a}
+  .err{color:#b5462a;font-weight:800}
+  .cats{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+  .cat{border:2px solid #f0d9b5;background:#fff;color:#3b2a1a;border-radius:999px;padding:5px 11px;font-weight:800;font-family:inherit;font-size:13px;cursor:pointer}
+  .cat.on{background:#2f8f4e;color:#fff;border-color:#2f8f4e}
+  #fsBtn{cursor:pointer;font-family:inherit}
+  .micbox{margin:10px auto 0;max-width:470px;background:#fff;border:2px dashed #cfe8d5;border-radius:14px;padding:8px 10px;font-size:13.5px;line-height:1.4}
+  .micbox.bad{border-color:#f3c2b5;background:#fff4ef}
+  .micbox.ok{border-style:solid}
+  .micbtn{border:none;border-radius:999px;padding:8px 16px;margin:4px 3px 2px;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;color:#fff;background:#2f8f4e;box-shadow:0 3px 0 #20693a}
+  .micbtn.alt{background:#e2552b;box-shadow:0 3px 0 #b8401d}
+  .micbtn:active{transform:translateY(2px);box-shadow:none}
+  .micbtn[hidden]{display:none}
+  .asrbox{margin:8px auto 0;max-width:470px;background:#fffdf6;border:2px dashed #f1d58a;border-radius:14px;padding:8px 10px;font-size:13.5px;line-height:1.4}
+  .asrbox.ok{border-style:solid;border-color:#cfe8d5;background:#fff}
+  .asrbox.bad{border-color:#f3c2b5;background:#fff4ef}
+  .asrbar{height:8px;border-radius:9px;background:#f3e3c9;overflow:hidden;margin:6px 4px 2px}
+  .asrbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffcc33,#3fb36a);transition:width .2s}
+  .asrbar.busy i{width:35%!important;animation:asrbusy 1.1s ease-in-out infinite alternate}
+  @keyframes asrbusy{from{margin-left:0}to{margin-left:65%}}
+  .asrbar[hidden],.asrbox [hidden]{display:none}
+  .micbtn.gold{background:#d99a12;box-shadow:0 3px 0 #a87406}
+  .asrbox a{color:#b8401d}
+  html.tiny .asrbox{padding:5px 8px;font-size:12.5px}
+  /* ===== SẢNH / CHAT / BXH ===== */
+  .chip.lob{cursor:pointer;font-family:inherit;background:#2f8f4e;color:#fff;border-color:#2f8f4e;position:relative}
+  .chip.lob .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#9ff0b5;margin-right:4px;vertical-align:middle}
+  .badge{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;border-radius:9px;background:#e2552b;color:#fff;font-size:11px;line-height:17px;text-align:center;font-style:normal;padding:0 4px}
+  .badge:empty{display:none}
+  .mbtn.lobby{background:#5b4bd1;box-shadow:0 5px 0 #3f329e;width:100%;margin-top:8px}
+  .panel{position:absolute;top:0;right:0;bottom:0;width:min(380px,100%);z-index:8;background:#fffaf1;border-left:3px solid #f0d9b5;box-shadow:-8px 0 30px rgba(80,40,10,.18);display:flex;flex-direction:column;border-radius:16px 0 0 16px;overflow:hidden}
+  .panel.hide,.toast.hide{display:none}
+  .ptabs{display:flex;gap:4px;padding:8px 8px 0;background:#fff1dc}
+  .ptabs button{flex:1;border:none;border-radius:12px 12px 0 0;padding:8px 4px;font-family:inherit;font-weight:900;font-size:14px;background:#f5e3c6;color:#7a5a3a;cursor:pointer;position:relative}
+  .ptabs button.on{background:#fffaf1;color:#3b2a1a}
+  .ptabs #panelClose{flex:0 0 40px;background:transparent}
+  .pbody{flex:1;min-height:0;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+  .pbody.hide{display:none}
+  .netst{font-size:12.5px;color:#7a5a3a;font-weight:700}
+  .netst.bad{color:#b5462a}
+  .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .pin{flex:1;min-width:0;border:2px solid #f0d9b5;border-radius:10px;padding:7px 9px;font-family:inherit;font-size:14px;font-weight:700;background:#fff;color:#3b2a1a;user-select:text;-webkit-user-select:text}
+  .sbtn{border:none;border-radius:10px;padding:7px 12px;font-family:inherit;font-weight:900;font-size:13.5px;cursor:pointer;color:#fff;background:#2f8f4e;box-shadow:0 3px 0 #20693a}
+  .sbtn.o{background:#e2552b;box-shadow:0 3px 0 #b8401d}
+  .sbtn.gr{background:#b9a58a;box-shadow:0 3px 0 #8f7c63}
+  .sbtn:disabled{opacity:.45;cursor:default}
+  .sbtn:active:not(:disabled){transform:translateY(2px);box-shadow:none}
+  .seg{display:inline-flex;background:#f5e3c6;border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap}
+  .seg button{border:none;background:transparent;border-radius:8px;padding:5px 9px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;color:#7a5a3a}
+  .seg button.on{background:#fff;color:#3b2a1a;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .outch{background:#fff4ef;border:2px dashed #f3c2b5;border-radius:12px;padding:8px;font-weight:800}
+  .outch[hidden]{display:none}
+  .plist{display:flex;flex-direction:column;gap:6px}
+  .pl{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #f0d9b5;border-radius:12px;padding:7px 9px}
+  .pl .nm{flex:1;min-width:0;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pl .st{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px;background:#e6f5ea;color:#2a9152;white-space:nowrap}
+  .pl .st.solo{background:#fff1dc;color:#b5762a}
+  .pl .st.match{background:#fde4dc;color:#b5462a}
+  .pl.me{border-color:#9fd3ae;background:#f3fbf5}
+  .empty{color:#9a7b5a;font-size:13px;text-align:center;padding:10px}
+  .clist{flex:1;min-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+  .msg{background:#fff;border-radius:12px;padding:6px 9px;border:1.5px solid #f0d9b5;word-wrap:break-word;line-height:1.35}
+  .msg b{color:#2f8f4e}
+  .msg.me{background:#eef8f1;border-color:#cfe8d5;align-self:flex-end;max-width:90%}
+  .msg.sys{background:transparent;border:none;color:#9a7b5a;font-size:12.5px;text-align:center;padding:2px}
+  .msg time{font-size:11px;color:#b39b80;margin-left:4px}
+  .lblist{list-style:none;display:flex;flex-direction:column;gap:5px}
+  .lblist li{display:flex;gap:8px;align-items:center;background:#fff;border:1.5px solid #f0d9b5;border-radius:10px;padding:6px 9px;font-weight:800}
+  .lblist li .rk{width:28px;text-align:center;font-weight:900;color:#9a7b5a}
+  .lblist li:nth-child(1) .rk,.lblist li:nth-child(2) .rk,.lblist li:nth-child(3) .rk{font-size:17px}
+  .lblist li .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lblist li .s{color:#e2552b;font-weight:900}
+  .lblist li.me{background:#eef8f1;border-color:#9fd3ae}
+  .lbme{font-weight:800;color:#2f8f4e;font-size:13px}
+  .toast{position:absolute;left:50%;top:54px;transform:translateX(-50%);z-index:9;background:#3b2a1a;color:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);width:min(420px,calc(100% - 20px));text-align:center;font-weight:800;font-size:15px}
+  .toast .row{justify-content:center;margin-top:8px}
+  html,body{overscroll-behavior:none}
+  button{touch-action:manipulation;-webkit-touch-callout:none}
+  canvas{-webkit-touch-callout:none}
+  .brand,.chip{white-space:nowrap}
+
+  /* =====================================================================
+     BỐ CỤC THEO KÍCH THƯỚC THẬT CỦA VÙNG CHỨA (đo bằng ResizeObserver trong JS, KHÔNG dùng kích thước màn hình).
+     JS đặt cỡ #app (sân khấu) và gắn class lên <html>:
+       .fit169  – vùng chứa < 1400px: sân khấu giữ tỉ lệ 16:9, căn giữa
+       .fill    – vùng chứa ≥ 1400px, hoặc điện thoại nằm ngang: sân khấu phủ kín vùng chứa
+       .rot     – điện thoại cầm dọc mà trình duyệt không khoá xoay được: xoay sân khấu 90° bằng CSS
+       .compact – sân khấu hẹp (≤ 760) hoặc thấp (≤ 520)
+       .short   – sân khấu thấp (≤ 520): nút màu nổi trên khung chơi
+       .tiny    – sân khấu rất thấp (≤ 360)
+       .nobest / .nomic – thanh trên cùng hẹp
+     ===================================================================== */
+  html.fit169 #app{border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  html.rot body{display:block}
+  html.rot #app{position:fixed;top:0;left:0;transform-origin:0 0}
+
+  html:not(.compact) .modes{flex-direction:row;flex-wrap:wrap}
+  html:not(.compact) .modes .mbtn{flex:1 1 150px}
+  html:not(.compact) .card p{margin:6px 0}
+  html:not(.compact) .ex{margin:8px 0}
+
+  html.compact #app{gap:8px;padding:8px}
+  html.fill.compact #app{padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  html.compact .brand{font-size:18px}
+  html.compact .chip{font-size:12px;padding:2px 8px;border-width:1.5px}
+  html.compact .hud{gap:4px}
+  html.compact .overlay{position:fixed;inset:0;border-radius:0;padding:16px 14px}
+  /* nút thoát toàn màn hình nổi trên thẻ bắt đầu / kết thúc (thẻ che mất thanh trên cùng ở màn nhỏ) */
+  .fsx{position:absolute;top:max(6px,env(safe-area-inset-top));right:max(6px,env(safe-area-inset-right));z-index:10;border:2px solid #e8d2ad;background:#fff;color:#7a5a3a;border-radius:999px;padding:3px 10px;font:800 12px/1.4 inherit;font-family:inherit;cursor:pointer;opacity:.9}
+  .fsx[hidden]{display:none}
+  html.rot .fsx{top:6px;right:max(6px,env(safe-area-inset-bottom))}
+  html.compact .card h1{font-size:34px}
+  html.compact .card p{margin:6px 0;font-size:14px}
+  html.compact .ex{margin:6px 0}
+  html.compact .mbtn{padding:13px 10px;font-size:17px}
+  html.compact .big{font-size:56px}
+
+  /* sân khấu thấp: khung chơi chiếm gần hết, 2 nút màu nổi phía trên */
+  html.short #app{gap:4px}
+  html.short header{min-height:26px}
+  html.short .brand{font-size:16px}
+  html.short #wrap{flex:1 1 auto;min-height:0;border-radius:12px}
+  html.short #prompts{position:absolute;top:42px;left:16px;right:16px;grid-template-columns:auto auto;justify-content:space-between;pointer-events:none;z-index:3}
+  html.short .pbtn{pointer-events:auto;padding:6px 16px;min-width:150px;opacity:.94;border-radius:14px}
+  html.short .pbtn .lbl{font-size:10px}
+  html.short .pbtn b{font-size:22px}
+  html.short #heard{position:absolute;left:0;right:0;bottom:12px;z-index:3;pointer-events:none;font-size:12px;min-height:0;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+  html.short #heard em{color:#ffe08a}
+  html.short #heard .err{color:#fff}
+  html.short #meter{position:absolute;left:30%;right:30%;top:100px;z-index:3}
+  html.short .card h1{font-size:28px}
+  html.short .card p{font-size:13px}
+  html.short .modes{flex-direction:row;flex-wrap:wrap}
+  html.short .modes .mbtn{flex:1 1 150px;padding:9px 8px;font-size:15px}
+  html.fill.short #prompts{top:calc(max(8px,env(safe-area-inset-top)) + 38px);left:calc(max(8px,env(safe-area-inset-left)) + 8px);right:calc(max(8px,env(safe-area-inset-right)) + 8px)}
+  html.fill.short #heard{bottom:calc(max(8px,env(safe-area-inset-bottom)) + 4px)}
+
+  /* xoay bằng CSS: mép trái sân khấu nằm ở mép trên màn hình (tai thỏ), mép phải ở mép dưới (thanh Home) */
+  html.rot #app{padding:8px max(8px,env(safe-area-inset-bottom)) 8px max(8px,env(safe-area-inset-top))}
+  html.rot #prompts{top:44px;left:calc(max(8px,env(safe-area-inset-top)) + 8px);right:calc(max(8px,env(safe-area-inset-bottom)) + 8px)}
+  html.rot #heard{bottom:12px}
+  html.rot #meter{top:104px}
+  html.rot .overlay{padding:12px max(14px,env(safe-area-inset-bottom)) 12px max(14px,env(safe-area-inset-top))}
+
+  html.nobest #bestChip{display:none}
+  html.nomic #micChip{display:none}
+  html.nomic .brand{font-size:15px}
+  html.nomic #fsBtn{font-size:0;padding:2px 7px}
+  html.nomic #fsBtn::before{content:'⛶';font-size:13px}
+  html.tiny .ex{display:none}
+  html.tiny .card p{margin:4px 0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">💬 Nói <span>Ngọng</span></div>
+    <div class="hud">
+      <div class="chip" id="scoreChip">Điểm 0</div>
+      <div class="chip" id="bestChip">Kỷ lục 0</div>
+      <div class="chip mic off" id="micChip">⌨️ Phím</div>
+      <button class="chip lob" id="lobbyBtn" title="Bảng xếp hạng">🏆 Xếp hạng</button>
+      <button class="chip" id="fsBtn" hidden aria-label="Toàn màn hình" title="Toàn màn hình">⛶ Phóng to</button>
+    </div>
+  </header>
+
+  <div id="wrap">
+    <canvas id="c"></canvas>
+
+    <div class="overlay" id="startOv">
+      <div class="card">
+        <h1>Nói <span>Ngọng</span></h1>
+        <p>Bé Bong Bóng chạy trên bờ đê. <b>Nói CHUẨN</b> câu màu xanh để <b>NHẢY</b> qua bó rơm, cọc tre. <b>Nói NGỌNG</b> câu màu cam để <b>CÚI</b> chui dưới đàn cò, chùm diều (nhảy là va đấy)! Chọn kiểu ngọng:</p>
+        <div class="cats" id="cats"></div>
+        <div class="ex">
+          <div>↑ Nhảy: nói<br><b style="color:#2a9152" id="exUp">“Lên non”</b></div>
+          <div>↓ Cúi: nói<br><b style="color:#e8622a" id="exDown">“Nên lon”</b></div>
+        </div>
+        <div class="micbox" id="micBox">
+          <div id="micMsg">🎙️ Chế độ NÓI / HÉT cần micrô. Bấm nút dưới rồi chọn <b>“Cho phép”</b>.</div>
+          <button class="micbtn" id="micAsk">🎙️ Cấp quyền micrô</button>
+          <button class="micbtn alt" id="micOpen" hidden>↗️ Mở trò chơi ở thẻ mới</button>
+        </div>
+        <div class="asrbox" id="asrBox">
+          <div id="asrMsg">⚡ <b>Nạp giọng nói</b>: máy nhận lời ngay khi bạn vừa nói – nói là nhảy liền, không phải chờ. Chạy ngay trên máy, chỉ tải lần đầu (~30 MB).</div>
+          <div class="asrbar" id="asrBar" hidden><i></i></div>
+          <button class="micbtn gold" id="asrBtn">⚡ Nạp giọng nói</button>
+        </div>
+        <div class="modes">
+          <button class="mbtn g" data-mode="speech">🎙️ Chế độ NÓI<small id="speechSub">Nhận giọng tiếng Việt – nói chuẩn = nhảy, nói ngọng = cúi</small></button>
+          <button class="mbtn y" data-mode="shout">📣 Chế độ HÉT<small id="shoutSub">Hét to = nhảy · chạm/↓ = cúi</small></button>
+          <button class="mbtn" data-mode="keys"><span id="keysTitle">⌨️ Phím / Chạm</span><small id="keysSub">↑ hoặc phím cách = nhảy · ↓ = cúi · chạm nút màu</small></button>
+        </div>
+        <button class="mbtn lobby" id="lobbyBtn2">🏆 Bảng xếp hạng<small id="lobbySub">Kỷ lục mọi lúc · hôm nay</small></button>
+        <p class="note" id="startNote"></p>
+      </div>
+    </div>
+
+    <div class="overlay hide" id="overOv">
+      <div class="card">
+        <h1 id="overTitle">Ối, vấp rồi! 💥</h1>
+        <div class="big" id="finalScore">0</div>
+        <p id="overInfo"></p>
+        <div class="modes">
+          <button class="mbtn g" id="againBtn">🔁 Chơi lại</button>
+          <button class="mbtn y" id="modeBtn">🎛️ Đổi chế độ</button>
+          <button class="mbtn lobby" id="overLobby" style="margin-top:0">🏆 Xếp hạng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel" class="panel hide">
+    <div class="ptabs">
+      <button data-tab="lb" class="on">🏆 Xếp hạng</button>
+      <button id="panelClose" aria-label="Đóng">✕</button>
+    </div>
+    <div class="pbody" id="tab-lb">
+      <div class="netst" id="netSt">Đang kết nối máy chủ…</div>
+      <div class="row"><input class="pin" id="nameIn" maxlength="18" placeholder="Tên hiện trên bảng xếp hạng"><button class="sbtn" id="nameSave">Lưu tên</button></div>
+      <span class="seg" id="lbSeg"><button data-lb="all" class="on">🏆 Mọi lúc</button><button data-lb="today">📅 Hôm nay</button></span>
+      <div class="lbme" id="lbMe"></div>
+      <ol class="lblist" id="lbList"></ol>
+    </div>
+  </div>
+  <div id="toast" class="toast hide"></div>
+  <button id="fsX" class="fsx" hidden aria-label="Thu nhỏ">✕ Thu nhỏ</button>
+
+  <div id="meter"><i></i></div>
+  <div id="prompts">
+    <button class="pbtn" id="pUp"><span class="lbl">↑ Nói chuẩn → Nhảy</span><b id="tUp">Lên non</b></button>
+    <button class="pbtn" id="pDown"><span class="lbl" id="lDown">↓ Nói ngọng → Cúi</span><b id="tDown">Nên lon</b></button>
+  </div>
+  <div id="heard">Chọn chế độ để bắt đầu nhé!</div>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ================= PHRASES (các kiểu nói ngọng) ================= */
+const EASY = ['Lên non','Nước lũ','Lò nướng','Nằm lì','Năm lần','Lúa non','Long lanh','Lấp lánh','Lẩu nấm','Nắng lửa','Lo lắng','Nói láo','Lá lốt','Nồi lẩu','Lăn lóc','Nô nức','Nũng nịu','Lạnh lẽo','Lối nào','Nóng lòng','Lão nông','Nết na'];
+const HARD = ['Lên non lấy nước','Nàng lười nằm lì','Nắng lên lúa nở','Lợn lười lăn lóc','Nước lên lũ lớn','Lá lốt lẩu nấm','Lão nông lo lúa','Nồi lẩu nóng lắm'];
+
+function swapWord(w){
+  const m = w.match(/^([nNlL])(?![gGhH])/);
+  if(!m) return w;
+  const map = {n:'l',N:'L',l:'n',L:'N'};
+  return map[m[1]] + w.slice(1);
+}
+const swapLN = s => s.split(' ').map(swapWord).join(' ');
+
+// [câu chuẩn, câu ngọng]
+const CATS = {
+  ln:   {name:'L / N', tag:'L↔N', pairs: EASY.map(p=>[p,swapLN(p)]), hard: HARD.map(p=>[p,swapLN(p)])},
+  trch: {name:'TR / CH', tag:'TR→CH', pairs:[
+    ['Trời trong','Chời chong'],['Trâu trắng','Châu chắng'],['Trà chanh','Chà chanh'],['Trèo cây','Chèo cây'],
+    ['Trung thu','Chung thu'],['Trứng chiên','Chứng chiên'],['Tre xanh','Che xanh'],['Trăng tròn','Chăng chòn'],
+    ['Trường học','Chường học'],['Chạy trốn','Chạy chốn'],['Trái chuối','Chái chuối'],['Trống trường','Chống chường']]},
+  sx:   {name:'S / X', tag:'S→X', pairs:[
+    ['Sao sáng','Xao xáng'],['Sông sâu','Xông xâu'],['Sữa sạch','Xữa xạch'],['Sân sau','Xân xau'],
+    ['Say sưa','Xay xưa'],['Sợ sệt','Xợ xệt'],['Xe sang','Xe xang'],['Suối sâu','Xuối xâu'],
+    ['Sinh sống','Xinh xống'],['Sáng sớm','Xáng xớm'],['Sắc sảo','Xắc xảo']]},
+  rd:   {name:'R / D / GI', tag:'R,GI→D', pairs:[
+    ['Rồi rảnh','Dồi dảnh'],['Răng rụng','Dăng dụng'],['Rau răm','Dau dăm'],['Rổ rá','Dổ dá'],
+    ['Rừng rậm','Dừng dậm'],['Rực rỡ','Dực dỡ'],['Gió rét','Dó dét'],['Giàu rồi','Dàu dồi'],
+    ['Ra về','Da về'],['Gió reo','Dó deo'],['Rán giò','Dán dò']]},
+  tth:  {name:'T / TH', tag:'TH→T', pairs:[
+    ['Thích thú','Tích tú'],['Thơm thảo','Tơm tảo'],['Thỏ thẻ','Tỏ tẻ'],['Thật thà','Tật tà'],
+    ['Thùng thư','Tùng tư'],['Thịt thà','Tịt tà'],['Thanh thản','Tanh tản'],['Thầy thuốc','Tầy tuốc'],
+    ['Thả thính','Tả tính'],['Thứ ba','Tứ ba']]},
+  nng:  {name:'N / NG cuối', tag:'-N→-NG', pairs:[
+    ['Bàn ăn','Bàng ăng'],['Con lợn','Cong lợng'],['Ăn cơm','Ăng cơm'],['Bạn thân','Bạng thâng'],
+    ['Tiền vàng','Tiềng vàng'],['Đèn sáng','Đèng sáng'],['Lon sữa','Long sữa'],['Muốn ăn','Muống ăng'],
+    ['Cơn mưa','Cơng mưa'],['Bún chả','Búng chả'],['Hạt sen','Hạt seng']]},
+  hn:   {name:'Hỏi / Ngã', tag:'Hỏi↔Ngã', pairs:[
+    ['Nghỉ ngơi','Nghĩ ngơi'],['Mải mê','Mãi mê'],['Ngủ ngon','Ngũ ngon'],['Bảo vệ','Bão vệ'],
+    ['Sửa xe','Sữa xe'],['Lẻ loi','Lẽ loi'],['Cửa sổ','Cữa sỗ'],['Rủ rê','Rũ rê'],
+    ['Kể chuyện','Kễ chuyện'],['Ngã ba','Ngả ba'],['Sữa chua','Sửa chua']]},
+};
+const CAT_KEYS = Object.keys(CATS);
+let catSel = 'mix';
+try { const c = localStorage.getItem('vitngong_cat'); if(c && (c==='mix' || CATS[c])) catSel = c; } catch(e){}
+
+const strip = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9 ]/g,' ').trim();
+const tokens = s => strip(s).split(/\s+/).filter(Boolean);
+const fullNorm = s => s.toLowerCase().normalize('NFC').replace(/[^\p{L}\p{N} ]/gu,' ').trim();
+const ftokens = s => fullNorm(s).split(/\s+/).filter(Boolean);
+function diff(aT,bT){ const a=new Set(aT), b=new Set(bT); return [new Set([...a].filter(x=>!b.has(x))), new Set([...b].filter(x=>!a.has(x)))]; }
+
+let pair = null, lastPhrase = '';
+function pickPhrase(){
+  const key = catSel==='mix' ? CAT_KEYS[Math.floor(Math.random()*CAT_KEYS.length)] : catSel;
+  const cat = CATS[key];
+  const pool = (cat.hard && score > 400 && Math.random()<.5) ? cat.hard : cat.pairs;
+  let pr; do { pr = pool[Math.floor(Math.random()*pool.length)]; } while(pr[0]===lastPhrase && pool.length>1);
+  lastPhrase = pr[0];
+  const [p, ngong] = pr;
+  const [upF, downF] = diff(ftokens(p), ftokens(ngong));   // khớp đủ dấu (cần cho Hỏi/Ngã)
+  const [upS, downS] = diff(tokens(p), tokens(ngong));     // khớp bỏ dấu (dễ nhận hơn)
+  pair = {correct:p, ngong, key, upF, downF, upS, downS};
+  $('tUp').textContent = p; $('tDown').textContent = ngong;
+  $('lDown').textContent = '↓ Nói ngọng (' + cat.tag + ') → Cúi';
+}
+function renderCats(){
+  const box = $('cats'); box.innerHTML = '';
+  const opts = [['mix','🎲 Trộn hết']].concat(CAT_KEYS.map(k=>[k, CATS[k].name]));
+  for(const [k,label] of opts){
+    const b = document.createElement('button');
+    b.className = 'cat' + (k===catSel?' on':''); b.textContent = label;
+    b.addEventListener('click', () => { catSel = k; try{ localStorage.setItem('vitngong_cat',k);}catch(e){} renderCats(); });
+    box.appendChild(b);
+  }
+  const ex = catSel==='mix' ? CATS.trch.pairs[0] : CATS[catSel].pairs[0];
+  $('exUp').textContent = '“'+ex[0]+'”'; $('exDown').textContent = '“'+ex[1]+'”';
+}
+
+/* ================= DOM ================= */
+const $ = id => document.getElementById(id);
+const cv = $('c');
+let ctx = cv.getContext('2d', {alpha:false});
+let W = 800;
+const H = 420, GROUND = 340;
+let scale = 1, OX = 0, OY = 0;
+function resize(){
+  fitCards();
+  // dùng kích thước layout (không bị ảnh hưởng khi #app bị xoay bằng CSS transform)
+  const r = {width: cv.clientWidth, height: cv.clientHeight};
+  if(!r.width || !r.height) return;
+  const lowEnd = (navigator.hardwareConcurrency||8) <= 4 || (navigator.deviceMemory||8) <= 3;
+  const dpr = Math.min(window.devicePixelRatio||1, lowEnd ? 1.5 : 2);
+  cv.width = Math.round(r.width*dpr); cv.height = Math.round(r.height*dpr);
+  // keep logical height = 420, widen/narrow the world to fit the screen shape (fills the whole box)
+  W = Math.max(480, Math.min(1500, Math.round(H * r.width / r.height)));
+  scale = Math.min(cv.height / H, cv.width / W);
+  // leftover space (very tall or very wide boxes): center horizontally, sit on the bottom vertically
+  OX = Math.round((cv.width - W*scale)/2); OY = Math.round(cv.height - H*scale);
+  buildBg();
+}
+if(window.ResizeObserver) new ResizeObserver(resize).observe(document.getElementById('wrap'));
+
+/* ================= BỐ CỤC THEO VÙNG CHỨA (ResizeObserver) =================
+   Đo kích thước THẬT của vùng chứa game – khi nhúng iframe đó chính là khung iframe trên trang chủ –
+   bằng ResizeObserver trên <html>, không dùng screen.width/height hay media query theo màn hình.
+     • vùng chứa < 1400px  → sân khấu giữ tỉ lệ 16:9, căn giữa
+     • vùng chứa ≥ 1400px  → sân khấu phủ kín vùng chứa
+     • điện thoại nằm ngang → phủ kín vùng chứa (toàn màn trong iframe)
+     • điện thoại cầm dọc   → thử khoá xoay ngang (khi trình duyệt cho phép), không được thì xoay bằng CSS */
+const IS_PHONE = (() => {
+  const coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches;
+  const ua = navigator.userAgent || '';
+  return !!coarse && (/Android|iPhone|iPod|Mobile|Windows Phone/i.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh|iPad/.test(ua)));
+})();
+const LAY = {cw:0, ch:0, sw:0, sh:0, rot:false, fill:false};
+const DOC = document.documentElement, APP = document.getElementById('app');
+function applyLayout(cw, ch){
+  cw = Math.floor(cw); ch = Math.floor(ch);
+  if(cw < 10 || ch < 10) return;
+  const portrait = ch > cw;
+  const rot = IS_PHONE && portrait;            // trình duyệt không cho khoá xoay → xoay sân khấu bằng CSS
+  const W0 = rot ? ch : cw, H0 = rot ? cw : ch; // kích thước vùng chứa theo hướng nằm ngang của game
+  const fill = IS_PHONE || cw >= 1400;
+  let sw, sh;
+  if(fill){ sw = W0; sh = H0; }
+  else { sw = Math.min(W0, Math.floor(H0 * 16 / 9)); sh = Math.floor(sw * 9 / 16); }
+  if(LAY.cw === cw && LAY.ch === ch && LAY.sw === sw && LAY.sh === sh && LAY.rot === rot) return;
+  Object.assign(LAY, {cw, ch, sw, sh, rot, fill});
+  APP.style.width = sw + 'px'; APP.style.height = sh + 'px';
+  APP.style.transform = rot ? `translateX(${cw}px) rotate(90deg)` : '';
+  const cl = DOC.classList;
+  cl.toggle('rot', rot); cl.toggle('fill', fill); cl.toggle('fit169', !fill);
+  cl.toggle('compact', sw <= 760 || sh <= 520);
+  cl.toggle('short', sh <= 520);
+  cl.toggle('tiny', sh <= 360);
+  cl.toggle('nobest', sw <= 640);
+  cl.toggle('nomic', sw <= 540);
+  DOC.style.setProperty('--sw', sw + 'px');
+  DOC.dataset.layout = (fill ? 'fill' : '16:9') + (rot ? ' xoay' : '') + ` ${cw}x${ch} → ${sw}x${sh}`;
+  try{ resize(); }catch(e){}
+  try{ fitCards(); }catch(e){}
+}
+function measureLayout(){ applyLayout(DOC.clientWidth, DOC.clientHeight); }
+if(window.ResizeObserver){
+  new ResizeObserver(entries => {
+    const r = entries[entries.length-1].contentRect;
+    applyLayout(r.width, r.height);
+  }).observe(DOC);
+}
+window.addEventListener('resize', measureLayout);           // dự phòng cho trình duyệt cũ
+window.addEventListener('orientationchange', () => setTimeout(measureLayout, 250));
+// Xoay ngang tự động khi trình duyệt cho phép (Android: cần đang toàn màn hình). iPhone không hỗ trợ → CSS xoay.
+function tryLockLandscape(){
+  if(!IS_PHONE) return;
+  try{
+    const o = screen.orientation;
+    if(o && o.lock) o.lock('landscape').then(() => setTimeout(measureLayout, 200), () => {});
+  }catch(e){}
+}
+
+let best = 0;
+try { best = +localStorage.getItem('vitngong_best') || 0; } catch(e){}
+$('bestChip').textContent = 'Kỷ lục ' + best;
+
+/* ================= AUDIO FX ================= */
+let actx = null;
+function ac(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function beep(f1,f2,dur,type='square',vol=.12){
+  const a = ac(); if(!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1,a.currentTime);
+  o.frequency.exponentialRampToValueAtTime(Math.max(30,f2), a.currentTime+dur);
+  g.gain.setValueAtTime(vol,a.currentTime); g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur);
+}
+const sfx = {
+  jump(){ beep(420,900,.18,'square',.08); },
+  duck(){ beep(500,180,.16,'triangle',.12); },
+  quack(){ beep(700,380,.09,'sawtooth',.07); setTimeout(()=>beep(650,350,.1,'sawtooth',.07),100); },
+  hit(){ beep(300,60,.45,'sawtooth',.14); },
+  good(){ beep(660,990,.1,'sine',.1); setTimeout(()=>beep(990,1320,.12,'sine',.1),90); }
+};
+
+/* ================= GAME STATE ================= */
+let state = 'menu'; // menu | countdown | play | over
+let paused = false, resumeSpeech = false;
+let mode = 'keys';
+let score = 0, dist = 0, speed = 240, phrasesSaid = 0, funniest = '';
+let player, obstacles, particles, floats, nextObsW = 0, t = 0, runStart = 0, countT = 0;
+let bubble = null;            // lời thoại trên đầu nhân vật: {text, color, life, max, live}
+let rng = Math.random;        // thách đấu: dùng seed chung để 2 người gặp cùng chướng ngại vật
+let match = null;             // {id, opp:{pid,name}, os:{d,y,k,s,a}, at, gy, gd, ended, dead}
+let offsets = {cloud:0,hill:0,tree:0,field:0,ground:0};
+function mulberry32(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t2 = Math.imul(a ^ a >>> 15, 1 | a); t2 = t2 + Math.imul(t2 ^ t2 >>> 7, 61 | t2) ^ t2; return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296; }; }
+// tốc độ chỉ phụ thuộc quãng đường (v² = 240² + 10·d) → mọi máy chạy cùng một đường đua
+const spdAt = d => Math.min(470, Math.sqrt(57600 + 10*d));
+
+function resetGame(){
+  player = {x:120, y:GROUND, vy:0, onGround:true, duckT:0, runT:0, squash:0, jumpBuf:0, jumpSrc:''};
+  obstacles = []; particles = []; floats = []; bubble = null;
+  score = 0; dist = 0; speed = 240; phrasesSaid = 0; funniest = ''; nextObsW = 1250;
+  runStart = performance.now();
+  pickPhrase();
+  updateScore();
+}
+function updateScore(){ $('scoreChip').textContent = 'Điểm ' + score; }
+
+function doJump(src){
+  if(state!=='play') return;
+  if(paused){ resumeGame(); return; }
+  if(player.onGround){
+    player.vy = -720; player.onGround = false; player.duckT = 0; player.jumpBuf = 0;
+    sfx.jump(); flashBtn('pUp');
+    if(src==='voice') said(pair.correct, '#2a9152');
+    else talk(pair.correct, '#2a9152', .8);
+    pickPhrase();
+  } else { // đang trên không → nhớ lệnh, chạm đất là nhảy ngay (lệnh giọng nói không bị “nuốt”)
+    player.jumpBuf = .35; player.jumpSrc = src;
+  }
+}
+function doDuck(src){
+  if(state!=='play') return;
+  if(paused){ resumeGame(); return; }
+  player.duckT = 1.3; player.jumpBuf = 0;
+  if(!player.onGround) player.vy = Math.max(player.vy, 900); // fast fall
+  sfx.duck(); flashBtn('pDown');
+  if(src==='voice'){ said(pair.ngong, '#e8622a'); funniest = pair.ngong; }
+  else talk(pair.ngong, '#e8622a', .8);
+  pickPhrase();
+}
+function said(text,color){
+  phrasesSaid++; score += 50; updateScore(); sfx.good(); buzz(15);
+  talk(text, color, 1.1);
+  floats.push({x:player.x+70,y:player.y-120,text:'+50',color,life:1});
+}
+// hiện lời thoại trên đầu nhân vật
+function talk(text, color, dur, live){
+  bubble = {text: String(text), color: color || '#7a5a3a', life: dur || 1, max: dur || 1, live: !!live};
+}
+function buzz(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function flashBtn(id){ const b=$(id); b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),120); }
+
+/* ================= OBSTACLES ================= */
+const TYPES = [
+  {k:'rom', w:58,h:46, air:false},
+  {k:'coc', w:40,h:60, air:false},
+  {k:'chum',w:46,h:44, air:false},
+  {k:'co',  w:68, air:true},   // đàn cò bay thành cột
+  {k:'dieu',w:48, air:true},   // chùm diều treo thành cột
+];
+// Chướng ngại vật trên cao là một "bức tường" từ AIR_TOP xuống tới AIR_BOT:
+// đứng/nhảy đều va (đỉnh cú nhảy ~ y=115 vẫn nằm trong cột) → bắt buộc phải CÚI chui qua khe dưới.
+const AIR_BOT = GROUND - 38, AIR_TOP = 70;
+// đặt chướng ngại vật theo toạ độ đường đua (wx), không theo bề rộng màn hình → 2 máy khác cỡ màn hình vẫn giống nhau
+function spawnAt(wx){
+  const sc = wx/10;
+  const airChance = sc > 150 ? .38 : .22;
+  const wantAir = rng() < airChance;
+  const pool = TYPES.filter(o => wantAir ? o.air : !o.air);
+  const o = Object.assign({}, pool[Math.floor(rng()*pool.length)]);
+  o.wx = wx;
+  if(o.air){ o.y = AIR_TOP; o.h = AIR_BOT - AIR_TOP; }
+  else o.y = GROUND - o.h;
+  o.ph = rng()*6;
+  o.x = o.wx - dist + player.x;
+  obstacles.push(o);
+  const minT = Math.max(1.6, 2.6 - sc/1500), maxT = Math.max(2.4, 3.6 - sc/1200);
+  nextObsW = wx + spdAt(wx) * (minT + rng()*(maxT-minT));
+}
+function playerBox(){
+  const ducking = player.duckT>0 && player.onGround;
+  const h = ducking ? 28 : 54, w = ducking ? 62 : 46;
+  return {x:player.x - w/2 + 4, y:player.y - h + 2, w:w-8, h:h-4};
+}
+function hits(a,o){
+  const pad = 6;
+  return a.x < o.x+o.w-pad && a.x+a.w > o.x+pad && a.y < o.y+o.h-pad && a.y+a.h > o.y+pad;
+}
+
+/* ================= LOOP ================= */
+let last = performance.now();
+let loopSt = '';
+function loop(now){
+  // thời điểm khung hình có thể sớm hơn lúc vừa bấm bắt đầu/tiếp tục → không để thời gian âm (điểm bị -1)
+  const dt = Math.max(0, Math.min(.05,(now-last)/1000)); last = now; t += dt;
+  if(state !== loopSt){ loopSt = state; try{ fsLabel(); }catch(e){} }   // hiện/ẩn nút ✕ Thu nhỏ nổi theo màn hình
+  if(state==='play' && !paused) update(dt);
+  else {
+    if(state==='countdown'){ countT -= dt; if(countT <= 0) beginRun(); }
+    // idle scroll on menu
+    for(const k in offsets) offsets[k] += dt*60*({cloud:.05,hill:.15,tree:.35,field:.6,ground:1})[k];
+    if(player){ player.runT += dt; }
+  }
+  if(bubble){ bubble.life -= dt; if(bubble.life <= 0) bubble = null; }
+  if(match) updateGhost(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+function update(dt){
+  speed = spdAt(dist);
+  const dx = speed*dt;
+  dist += dx;
+  const newScore = Math.floor(dist/10) + phrasesSaid*50;
+  if(newScore!==score){ score = newScore; updateScore(); }
+  for(const k in offsets) offsets[k] += dx*({cloud:.05,hill:.15,tree:.35,field:.6,ground:1})[k];
+
+  // player
+  player.runT += dt*speed/240;
+  if(!player.onGround){
+    player.vy += 1500*dt; player.y += player.vy*dt;
+    if(player.y >= GROUND){
+      player.y = GROUND; player.vy=0; player.onGround = true; player.squash = .25; dust(player.x, GROUND, 8);
+      if(player.jumpBuf > 0){ const s = player.jumpSrc; player.jumpBuf = 0; doJump(s); }
+    }
+  }
+  if(player.jumpBuf>0) player.jumpBuf -= dt;
+  if(player.duckT>0) player.duckT -= dt;
+  if(player.squash>0) player.squash -= dt;
+  if(player.onGround && Math.random()<dt*10) dust(player.x-18, GROUND, 1);
+
+  // obstacles
+  while(nextObsW < dist + W + 160) spawnAt(nextObsW);
+  const pb = playerBox();
+  for(const o of obstacles){
+    o.x = o.wx - dist + player.x;
+    o.ph += dt*8;
+    if(hits(pb,o)){ gameOver(); return; }
+  }
+  obstacles = obstacles.filter(o => o.x > -80);
+
+  for(const p of particles){ p.x += p.vx*dt - dx*.6; p.y += p.vy*dt; p.vy += 300*dt; p.life -= dt; }
+  particles = particles.filter(p=>p.life>0);
+  for(const f of floats){ f.y -= 40*dt; f.life -= dt; }
+  floats = floats.filter(f=>f.life>0);
+  updateMeter();
+  if(match) netMatchTick();
+}
+function dust(x,y,n){
+  for(let i=0;i<n;i++) particles.push({x:x+Math.random()*10,y:y-2,vx:-40-Math.random()*60,vy:-60-Math.random()*80,life:.4+Math.random()*.3,r:2+Math.random()*3});
+}
+function gameOver(){
+  state = 'over'; sfx.hit(); buzz([60,40,120]);
+  for(let i=0;i<18;i++) particles.push({x:player.x,y:player.y-30,vx:(Math.random()-.5)*300,vy:-Math.random()*300,life:1,r:3,feather:true,c:i%4});
+  if(score>best){ best=score; try{ localStorage.setItem('vitngong_best',best);}catch(e){} }
+  $('bestChip').textContent = 'Kỷ lục ' + best;
+  $('finalScore').textContent = score;
+  let info = `Kỷ lục: <b>${best}</b> · Câu đã nói: <b>${phrasesSaid}</b>`;
+  info += `<br>Kiểu ngọng: <b>${catSel==='mix' ? 'Trộn hết' : CATS[catSel].name}</b>`;
+  if(funniest) info += `<br>Câu ngọng “đỉnh” nhất: <b style="color:#e8622a">“${funniest}”</b>`;
+  if(mode!=='speech') info += `<br><span class="note">Thử chế độ 🎙️ NÓI để được cộng +50 mỗi câu!</span>`;
+  info += `<br><span id="rankInfo" class="note">${net.ok ? '⏳ Đang gửi điểm lên bảng xếp hạng…' : ''}</span>`;
+  $('overInfo').innerHTML = info;
+  netSend({t:'score', score, dur:(performance.now()-runStart)/1000});
+  stopListening();
+  if(match && !match.ended){
+    match.dead = true;
+    netSend({t:'mdead', score, d:dist});
+    showMatchWaiting();
+    return;
+  }
+  setOverButtons('solo');
+  $('overTitle').textContent = 'Ối, vấp rồi! 💥';
+  setTimeout(()=>{ if(state==='over' && !match){ $('overOv').classList.remove('hide'); fitCards(); } }, 600);
+  netSend({t:'status', st:'idle'});
+}
+
+/* ================= DRAW ================= */
+/* ---------- background cache (vẽ sẵn 1 lần, mỗi khung chỉ dán ảnh) ---------- */
+let BG = null;
+function mkLayer(w, h, fn){
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.ceil(w*scale)); c.height = Math.max(1, Math.ceil(h*scale));
+  const g = c.getContext('2d'); g.setTransform(scale,0,0,scale,0,0);
+  const saved = ctx; ctx = g; try { fn(); } finally { ctx = saved; }
+  return {c, w, h};
+}
+function hillStrip(len, base, amp, width){
+  ctx.beginPath(); ctx.moveTo(0,H);
+  for(let x=0;x<=width;x+=8){ const u = x/len*Math.PI*2; ctx.lineTo(x, base - amp*(.6+.4*Math.sin(u))*(.7+.3*Math.sin(2*u+1))); }
+  ctx.lineTo(width,H); ctx.closePath(); ctx.fill();
+}
+function buildBg(){
+  const sun = Math.min(W-90, W*.78);
+  BG = {
+    sky: mkLayer(W, GROUND, () => {
+      const g = ctx.createLinearGradient(0,0,0,GROUND);
+      g.addColorStop(0,'#ffb877'); g.addColorStop(.55,'#ffd9a8'); g.addColorStop(1,'#fff0cf');
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,GROUND);
+      ctx.fillStyle = 'rgba(255,240,200,.6)'; circle(sun,110,62);
+      ctx.fillStyle = '#ffef9f'; circle(sun,110,44);
+    }),
+    hill1: {p:300, L: mkLayer(W+300, 290, () => { ctx.fillStyle = '#e9b98c'; hillStrip(300, 230, 40, W+300); })},
+    hill2: {p:220, L: mkLayer(W+220, 290, () => { ctx.fillStyle = '#d6a77b'; hillStrip(220, 255, 26, W+220); })},
+    trees: {p:510, L: mkLayer(W+510, 290, () => {
+      for(let k=-1; k*170 < W+510+170; k++){ const x = 85 + k*170, i = ((k%3)+3)%3; if(i===1) hut(x,282); else bamboo(x,284,i); }
+    })},
+    field: {p:24, L: mkLayer(W+24, 40, () => {
+      ctx.fillStyle = '#9ccc65'; ctx.fillRect(0,0,W+24,40);
+      ctx.fillStyle = '#86b84f';
+      for(let x=0; x < W+24; x += 24) for(let r=0;r<3;r++) ctx.fillRect(x + r*8, 4 + r*12, 3, 8);
+      ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(0,0,W+24,3);
+    })},
+    ground: {p:180, L: mkLayer(W+180, H-(GROUND-30), () => {
+      ctx.translate(0, -(GROUND-30));
+      ctx.fillStyle = '#c98b56'; ctx.fillRect(0,GROUND-20,W+180,H);
+      ctx.fillStyle = '#b5784a'; ctx.fillRect(0,GROUND-20,W+180,6);
+      ctx.fillStyle = '#d9a06b';
+      for(let x=0; x < W+180; x += 90){ ctx.fillRect(x, GROUND+18, 30, 4); ctx.fillRect(x+50, GROUND+40, 18, 3); }
+      ctx.fillStyle = '#6fa83f';
+      for(let x=0; x < W+180; x += 60) tuft(x+10, GROUND-18);
+      ctx.fillStyle = '#8fc7c9'; ctx.fillRect(0,H-26,W+180,26);
+    })},
+  };
+}
+function drawStrip(layer, off, y){ ctx.drawImage(layer.L.c, -mod(off, layer.p), y, layer.L.w, layer.L.h); }
+
+function draw(){
+  if(!BG) buildBg();
+  if(OX || OY){ ctx.setTransform(1,0,0,1,0,0); ctx.fillStyle = '#ffb877'; ctx.fillRect(0,0,cv.width,cv.height); }
+  ctx.setTransform(scale,0,0,scale,OX,OY);
+  if(OX){ ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,H); ctx.clip(); }
+  drawWorld();
+  if(OX) ctx.restore();
+}
+function drawWorld(){
+  ctx.drawImage(BG.sky.c, 0, 0, W, GROUND);
+  // clouds
+  ctx.fillStyle = '#fff4e4';
+  for(let i=0;i<4;i++){
+    const x = mod(i*260 - offsets.cloud, W+200) - 100, y = 50 + (i%2)*40;
+    cloud(x,y,1 + (i%3)*.2);
+  }
+  drawStrip(BG.hill1, offsets.hill, 0);
+  drawStrip(BG.hill2, offsets.hill*1.4+120, 0);
+  drawStrip(BG.trees, offsets.tree, 0);
+  drawStrip(BG.field, offsets.field, 280);
+  drawStrip(BG.ground, offsets.ground, GROUND-30);
+  // water ripples
+  ctx.fillStyle = 'rgba(255,255,255,.4)';
+  for(let x = -mod(offsets.ground*.8,70); x < W; x += 70) ctx.fillRect(x, H-16, 26, 3);
+
+  // obstacles
+  if(obstacles) for(const o of obstacles) drawObstacle(o);
+  // đối thủ (bóng mờ) + người chơi
+  if(match && match.os) drawGhost();
+  if(player) drawHero(player, false);
+  if(player && bubble) drawBubble();
+  // particles
+  if(particles) for(const p of particles){
+    ctx.globalAlpha = Math.max(0,Math.min(1,p.life*2));
+    ctx.fillStyle = p.feather ? ['#ffd23f','#e8473a','#3fb36a','#fffdf6'][p.c||0] : '#e2b98a';
+    if(p.feather){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.life*6); ellipse(0,0,5,2.5); ctx.restore(); }
+    else circle(p.x,p.y,p.r);
+  }
+  ctx.globalAlpha = 1;
+  if(floats) for(const f of floats){
+    ctx.globalAlpha = Math.min(1,f.life*1.5);
+    ctx.font = '900 22px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.textAlign='center';
+    ctx.lineWidth = 6; ctx.strokeStyle = '#fff'; ctx.strokeText(f.text,f.x,f.y);
+    ctx.fillStyle = f.color; ctx.fillText(f.text,f.x,f.y);
+  }
+  ctx.globalAlpha = 1;
+  if(paused && state==='play'){
+    ctx.fillStyle = 'rgba(59,42,26,.45)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center'; ctx.fillStyle='#fff';
+    ctx.font = '900 40px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.fillText('⏸ Tạm dừng', W/2, H/2-10);
+    ctx.font = '800 20px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.fillText('Chạm / bấm phím để chơi tiếp', W/2, H/2+26);
+  }
+  if(state==='countdown'){
+    const n = Math.ceil(countT);
+    ctx.fillStyle = 'rgba(59,42,26,.35)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign = 'center'; ctx.lineWidth = 10; ctx.strokeStyle = '#3b2a1a';
+    const sc = 1 + (countT - Math.floor(countT))*.4;
+    ctx.save(); ctx.translate(W/2, H/2); ctx.scale(sc, sc);
+    ctx.font = '900 96px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.fillStyle = '#ffd34d';
+    const txt = n > 0 ? String(n) : 'CHẠY!';
+    ctx.strokeText(txt, 0, 30); ctx.fillText(txt, 0, 30); ctx.restore();
+    if(match){
+      ctx.font = '900 24px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.fillStyle = '#fff'; ctx.lineWidth = 6;
+      const vs = '⚔️ Bạn đấu với ' + match.opp.name;
+      ctx.strokeText(vs, W/2, H/2 - 80); ctx.fillText(vs, W/2, H/2 - 80);
+    }
+  }
+  if(match && match.os && (state==='play' || state==='over')){ // bảng điểm trận đấu
+    const me = score, op = Math.floor(match.os.s || 0);
+    ctx.font = '900 17px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.textAlign = 'center';
+    const txt = '⚔️ Bạn ' + me + '  –  ' + op + ' ' + match.opp.name + (match.os.a ? '' : ' 💥');
+    const tw = ctx.measureText(txt).width + 24;
+    ctx.fillStyle = 'rgba(59,42,26,.78)'; rrect(W/2 - tw/2, H - 52, tw, 28, 14); ctx.fill();
+    ctx.fillStyle = me >= op ? '#9ff0b5' : '#ffd0b5'; ctx.fillText(txt, W/2, H - 32);
+  }
+  // hint arrow for upcoming obstacle
+  if(state==='play' && !paused && obstacles){
+    const nxt = obstacles.find(o=>o.x > player.x);
+    if(nxt && nxt.x < W && nxt.x - player.x < speed*1.6){
+      ctx.font = '900 18px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.textAlign='center';
+      const air = nxt.air;
+      ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,255,255,.85)';
+      ctx.fillStyle = air ? '#e8622a' : '#2a9152';
+      const hx = air ? nxt.x - 34 : nxt.x + nxt.w/2, hy = air ? nxt.y + nxt.h + 14 + Math.sin(t*10)*3 : nxt.y - 12 - Math.sin(t*10)*3;
+      const ht = air ? '↓ CÚI!' : '↑ NHẢY!';
+      ctx.strokeText(ht, hx, hy); ctx.fillText(ht, hx, hy);
+    }
+  }
+}
+function mod(a,n){ return ((a%n)+n)%n; }
+function circle(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+function ellipse(x,y,rx,ry,rot=0){ ctx.beginPath(); ctx.ellipse(x,y,rx,ry,rot,0,Math.PI*2); ctx.fill(); }
+function cloud(x,y,s){ circle(x,y,18*s); circle(x+20*s,y-8*s,22*s); circle(x+44*s,y,18*s); ctx.fillRect(x,y,44*s,16*s); }
+function hillLayer(off, base, amp, len){
+  ctx.beginPath(); ctx.moveTo(0,H);
+  for(let x=0;x<=W;x+=10){ const u=(x+off)/len*Math.PI*2; ctx.lineTo(x, base - amp*(.6+.4*Math.sin(u))*(.7+.3*Math.sin(u*.37+1))); }
+  ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+}
+function bamboo(x,y,i){
+  ctx.strokeStyle = '#6b8e3a'; ctx.lineWidth = 3;
+  for(let k=0;k<5;k++){
+    const bx = x + k*9 - 18, h = 70 + ((i*7+k*13)%30);
+    ctx.beginPath(); ctx.moveTo(bx,y); ctx.quadraticCurveTo(bx+6, y-h*.6, bx + 14 + Math.sin(t+k)*2, y-h); ctx.stroke();
+  }
+  ctx.fillStyle = '#7fa346';
+  for(let k=0;k<7;k++) ellipse(x - 20 + k*8, y - 72 - (k%3)*10, 16, 8, -.4 + (k%2)*.8);
+  ctx.fillStyle = '#93b957';
+  for(let k=0;k<4;k++) ellipse(x - 10 + k*10, y - 88 - (k%2)*8, 12, 6, .3);
+}
+function hut(x,y){
+  ctx.fillStyle = '#c8a46a'; ctx.fillRect(x-26,y-30,52,30);
+  ctx.fillStyle = '#8a6a3c'; ctx.fillRect(x-6,y-20,12,20);
+  ctx.fillStyle = '#e0bd6e'; ctx.beginPath(); ctx.moveTo(x-38,y-28); ctx.lineTo(x,y-58); ctx.lineTo(x+38,y-28); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#b8954c'; ctx.lineWidth = 1.5;
+  for(let k=-2;k<=2;k++){ ctx.beginPath(); ctx.moveTo(x+k*6,y-56+Math.abs(k)*4); ctx.lineTo(x+k*14,y-30); ctx.stroke(); }
+  ctx.fillStyle = '#7fa346'; ellipse(x+40,y-14,14,14);
+}
+function tuft(x,y){ ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+4,y-10); ctx.lineTo(x+7,y); ctx.lineTo(x+10,y-8); ctx.lineTo(x+13,y); ctx.closePath(); ctx.fill(); }
+
+function drawObstacle(o){
+  const {x,y,w,h} = o;
+  ctx.save();
+  if(o.k==='rom'){ // haystack
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x+w/2, y+h+2, w/2+4, 5);
+    ctx.fillStyle = '#e8b947';
+    ctx.beginPath(); ctx.moveTo(x,y+h); ctx.quadraticCurveTo(x+2,y+6,x+w/2,y); ctx.quadraticCurveTo(x+w-2,y+6,x+w,y+h); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#c99a2e'; ctx.lineWidth = 2;
+    for(let k=1;k<5;k++){ ctx.beginPath(); ctx.moveTo(x+k*w/5, y+h); ctx.lineTo(x+w/2+(k-2.5)*4, y+8); ctx.stroke(); }
+    ctx.fillStyle = '#a0522d'; ctx.fillRect(x+4, y+h*.55, w-8, 4);
+  } else if(o.k==='coc'){ // bamboo stakes
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x+w/2, y+h+2, w/2+4, 5);
+    const cols = ['#7cae3e','#6b9a33','#88b94a'];
+    for(let k=0;k<3;k++){
+      const bx = x + k*13, bh = h - (k===1?0:10);
+      ctx.fillStyle = cols[k]; ctx.fillRect(bx, y+h-bh, 11, bh);
+      ctx.fillStyle = '#527a26'; for(let s=1;s<4;s++) ctx.fillRect(bx, y+h-bh + s*bh/4, 11, 2);
+      ctx.fillStyle = '#a7d36a'; ctx.beginPath(); ctx.moveTo(bx,y+h-bh); ctx.lineTo(bx+5.5,y+h-bh-8); ctx.lineTo(bx+11,y+h-bh); ctx.fill();
+    }
+  } else if(o.k==='chum'){ // clay jar
+    ctx.fillStyle = 'rgba(0,0,0,.12)'; ellipse(x+w/2, y+h+2, w/2+2, 5);
+    ctx.fillStyle = '#9c5a32'; ellipse(x+w/2, y+h*.58, w/2, h*.45);
+    ctx.fillStyle = '#7d4524'; ctx.fillRect(x+w*.25, y, w*.5, 9);
+    ctx.fillStyle = '#b8744a'; ellipse(x+w*.36, y+h*.48, 5, 10, .3);
+    ctx.fillStyle = '#e0c08a'; ctx.fillRect(x+6, y+h*.62, w-12, 3);
+  } else if(o.k==='co'){ // flock of storks stacked into a column (bottom one flies just above the hero's head)
+    const bot = y + h, n = Math.ceil(h/44);
+    for(let i=0;i<n;i++) stork(x + (i%2 ? 10 : 0), bot - 32 - i*44, o.ph + i*1.3);
+  } else if(o.k==='dieu'){ // a chain of kites on one string, hanging down to just above the hero's head
+    const bot = y + h, cx = x + w/2, n = Math.ceil(h/56), sw = Math.sin(o.ph*.6)*3;
+    ctx.strokeStyle = 'rgba(80,50,30,.6)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx - 30, -10); ctx.lineTo(cx + sw, bot - 22); ctx.stroke();
+    for(let i=0;i<n;i++) kite(cx + sw*(1 - i/n), bot - 22 - i*56, w, 40, o.ph + i, i);
+  }
+  ctx.restore();
+}
+function stork(x,y,ph){ // box 58x30 at (x,y)
+  const w = 58, h = 30, flap = Math.sin(ph)*12;
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#6d6d6d'; ctx.lineWidth = 1.5;
+  ellipse(x+w*.45, y+h*.55, 20, 9);
+  ctx.beginPath(); ctx.moveTo(x+w*.35,y+h*.5); ctx.lineTo(x+w*.55,y+h*.5-18-flap); ctx.lineTo(x+w*.65,y+h*.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; circle(x+6, y+h*.4, 6);
+  ctx.fillStyle = '#e8a33a'; ctx.beginPath(); ctx.moveTo(x+1,y+h*.38); ctx.lineTo(x-14,y+h*.44); ctx.lineTo(x+1,y+h*.47); ctx.fill();
+  ctx.fillStyle = '#222'; circle(x+5, y+h*.36, 1.6);
+  ctx.strokeStyle = '#e8a33a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x+w*.7,y+h*.6); ctx.lineTo(x+w+4,y+h*.7); ctx.stroke();
+}
+function kite(cx,cy,w,h,ph,i){ // diamond kite centered at (cx,cy), tail streams backwards (right)
+  const cols = [['#e8473a','#ffd34d'],['#2f8fd8','#ffd34d'],['#3fb36a','#fff3b0']][i%3];
+  ctx.save(); ctx.translate(cx, cy);
+  ctx.fillStyle = cols[0];
+  ctx.beginPath(); ctx.moveTo(0,-h/2); ctx.lineTo(w/2,0); ctx.lineTo(0,h/2); ctx.lineTo(-w/2,0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = cols[1]; ctx.beginPath(); ctx.moveTo(0,-h/2); ctx.lineTo(w/2,0); ctx.lineTo(0,0); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#7a3b1d'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0,-h/2); ctx.lineTo(0,h/2); ctx.moveTo(-w/2,0); ctx.lineTo(w/2,0); ctx.stroke();
+  ctx.strokeStyle = cols[0]; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0,h/2);
+  for(let k=1;k<6;k++) ctx.lineTo(k*8, h/2 - 2 + Math.sin(ph*1.5+k)*4);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawHero(p, ghost){ // nhân vật "Bong Bóng Thoại" (ghost = đối thủ vẽ mờ)
+  const dead = ghost ? !p.alive : state==='over';
+  const ducking = p.duckT>0 && p.onGround;
+  const run = p.onGround && !dead ? Math.sin(p.runT*14) : 0;
+  const sq = p.squash>0 ? p.squash*1.2 : 0;
+  const INK = '#3b2a1a';
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,.15)';
+  const sh = Math.max(.4, 1 - (GROUND-p.y)/220);
+  ctx.save(); ctx.translate(0, GROUND-p.y); ellipse(0,2,26*sh,5*sh); ctx.restore();
+  if(dead){ ctx.rotate(-.3); }
+  // legs + shoes
+  ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.lineCap='round';
+  if(!ducking){
+    if(p.onGround){
+      ctx.beginPath(); ctx.moveTo(-7,-13); ctx.lineTo(-7+run*7,-2); ctx.moveTo(7,-13); ctx.lineTo(7-run*7,-2); ctx.stroke();
+      ctx.fillStyle = '#e8473a'; ellipse(-5+run*7,-2,6,3); ellipse(9-run*7,-2,6,3);
+    } else {
+      ctx.beginPath(); ctx.moveTo(-7,-13); ctx.lineTo(-11,-6); ctx.moveTo(7,-13); ctx.lineTo(3,-6); ctx.stroke();
+      ctx.fillStyle = '#e8473a'; ellipse(-11,-6,5,3); ellipse(3,-6,5,3);
+    }
+  }
+  const sx = ducking ? 1.35 : 1 + sq*.3 - (!p.onGround ? .06 : 0);
+  const sy = ducking ? .62 : 1 - sq*.3 + (!p.onGround ? .08 : 0);
+  ctx.scale(sx, sy);
+  const bob = p.onGround ? Math.abs(run)*2 : 0;
+  const by = -58 - bob, bh = 44;
+  // bubble tail
+  ctx.fillStyle = '#fffdf6'; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-14, by+bh-2); ctx.lineTo(-28, by+bh+10); ctx.lineTo(-2, by+bh-2); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // bubble body
+  rrect(-26, by, 52, bh, 16); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fffdf6'; ctx.fillRect(-15, by+bh-5, 12, 6); // hide seam
+  // shine
+  ctx.fillStyle = 'rgba(255,255,255,.9)'; ellipse(-15, by+9, 6, 3, -.4);
+  // eyes
+  const ey = by + 17;
+  if(dead){
+    ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+    for(const ex of [-4, 12]){ ctx.beginPath(); ctx.moveTo(ex-4,ey-4); ctx.lineTo(ex+4,ey+4); ctx.moveTo(ex+4,ey-4); ctx.lineTo(ex-4,ey+4); ctx.stroke(); }
+  } else {
+    const blink = (Math.sin(t*1.7) > .985);
+    ctx.fillStyle = INK;
+    for(const ex of [-4, 12]){ if(blink) ctx.fillRect(ex-4, ey, 8, 2.5); else { ellipse(ex, ey, 3.6, 4.6); ctx.fillStyle='#fff'; circle(ex+1.2, ey-1.6, 1.3); ctx.fillStyle=INK; } }
+  }
+  // cheeks
+  ctx.fillStyle = 'rgba(255,120,120,.5)'; ellipse(-12, ey+8, 4.5, 2.6); ellipse(20, ey+8, 4.5, 2.6);
+  // mouth
+  const talking = !ghost && bubble && bubble.life > .15;
+  const my = ey + 11;
+  ctx.strokeStyle = INK; ctx.lineWidth = 2.5;
+  if(dead){
+    ctx.beginPath(); ctx.moveTo(-1,my+2); ctx.quadraticCurveTo(2,my-2,4,my+2); ctx.quadraticCurveTo(7,my+5,9,my+1); ctx.stroke();
+  } else if(talking){
+    const o = 4 + Math.abs(Math.sin(t*28))*3;
+    ctx.fillStyle = '#7a2b22'; ellipse(4, my+1, 6, o); ctx.fillStyle = '#ff8a8a'; ellipse(4, my+o*.5, 3.5, o*.35);
+  } else {
+    ctx.beginPath(); ctx.arc(4, my-2, 5, .2*Math.PI, .8*Math.PI); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// lời thoại (bóng chat) trên đầu nhân vật
+function drawBubble(){
+  const b = bubble, p = player;
+  const ducking = p.duckT>0 && p.onGround;
+  let text = b.text;
+  ctx.font = '900 19px "Baloo 2",Nunito,system-ui,sans-serif';
+  const maxW = Math.min(300, W - 40);
+  if(ctx.measureText(text).width > maxW){ // chữ dài (đang nghe) → giữ phần cuối
+    while(text.length > 3 && ctx.measureText('…' + text).width > maxW) text = text.slice(1);
+    text = '…' + text;
+  }
+  const tw = ctx.measureText(text).width, bw = tw + 26, bh = 36;
+  const pop = Math.min(1, (b.max - b.life) * 10 + .6), fade = Math.min(1, b.life * 4);
+  const cx = Math.min(W - bw/2 - 8, Math.max(bw/2 + 8, p.x + 40));
+  const by = p.y - (ducking ? 56 : 104) - bh;
+  ctx.save(); ctx.globalAlpha = fade;
+  ctx.translate(cx, by + bh); ctx.scale(pop, pop); ctx.translate(-cx, -(by + bh));
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = b.color; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+  rrect(cx - bw/2, by, bw, bh, 16); ctx.fill(); ctx.stroke();
+  const tx = Math.max(cx - bw/2 + 14, Math.min(cx + bw/2 - 30, p.x + 6));
+  ctx.beginPath(); ctx.moveTo(tx, by + bh - 1.5); ctx.lineTo(tx - 6, by + bh + 14); ctx.lineTo(tx + 14, by + bh - 1.5); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(tx, by + bh); ctx.lineTo(tx - 6, by + bh + 14); ctx.lineTo(tx + 14, by + bh); ctx.stroke();
+  ctx.fillStyle = b.color; ctx.textAlign = 'center';
+  ctx.fillText(text, cx, by + 25);
+  ctx.restore();
+}
+// đối thủ: nhân vật mờ chạy cùng đường đua, vị trí theo quãng đường của họ
+function updateGhost(dt){
+  const os = match.os; if(!os) return;
+  const age = (performance.now() - match.at) / 1000;
+  const target = os.a ? os.d + spdAt(os.d) * Math.min(age, .5) : os.d; // ngoại suy giữa 2 gói tin
+  match.gd = match.gd == null ? target : match.gd + (target - match.gd) * Math.min(1, dt*12);
+  match.gy = match.gy == null ? os.y : match.gy + (os.y - match.gy) * Math.min(1, dt*18);
+}
+function drawGhost(){
+  const os = match.os, gx = player.x + ((match.gd||0) - dist);
+  if(gx < -60 || gx > W + 60) { // ngoài màn hình → mũi tên chỉ hướng
+    ctx.font = '900 15px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.textAlign = gx < 0 ? 'left' : 'right';
+    ctx.fillStyle = 'rgba(59,42,26,.75)';
+    const lbl = gx < 0 ? '◀ ' + match.opp.name : match.opp.name + ' ▶';
+    ctx.fillText(lbl, gx < 0 ? 8 : W - 8, GROUND - 70);
+    return;
+  }
+  const g = {x:gx, y:match.gy||GROUND, onGround:(match.gy||GROUND) >= GROUND - 1, duckT: os.k ? 1 : 0, runT: t*1.6, squash:0, alive: !!os.a};
+  ctx.save(); ctx.globalAlpha = .45; drawHero(g, true); ctx.restore();
+  ctx.font = '900 14px "Baloo 2",Nunito,system-ui,sans-serif'; ctx.textAlign = 'center';
+  ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.fillStyle = '#5b4bd1';
+  const ny = g.y - (g.duckT ? 44 : 74);
+  ctx.strokeText(match.opp.name, gx, ny); ctx.fillText(match.opp.name, gx, ny);
+}
+
+/* ================= INPUT ================= */
+window.addEventListener('keydown', e => {
+  const tg = e.target && e.target.tagName;
+  if(tg==='INPUT' || tg==='TEXTAREA') return; // đang gõ tên / chat
+  if(['ArrowUp','ArrowDown',' ','w','s','W','S'].includes(e.key)) e.preventDefault();
+  if(state==='over'){ if((e.key===' '||e.key==='Enter') && !$('overOv').classList.contains('hide')){ e.preventDefault(); startGame(mode); } return; }
+  if(e.key==='ArrowUp'||e.key===' '||e.key==='w'||e.key==='W') doJump('key');
+  if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') doDuck('key');
+});
+$('pUp').addEventListener('pointerdown', e => { e.preventDefault(); doJump('tap'); });
+$('pDown').addEventListener('pointerdown', e => { e.preventDefault(); doDuck('tap'); });
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect();
+  // khi game bị xoay 90° (điện thoại cầm dọc), mép TRÊN của game nằm ở mép PHẢI màn hình
+  const fromTop = LAY.rot ? (r.right - e.clientX) / r.width : (e.clientY - r.top) / r.height;
+  if(fromTop < .6) doJump('tap'); else doDuck('tap');
+});
+
+/* ================= FIT OVERLAY CARDS (khung nhúng thấp → thu nhỏ thẻ cho vừa, không bị cắt) ================= */
+function fitCards(){
+  for(const ov of document.querySelectorAll('.overlay:not(.hide)')){
+    const card = ov.querySelector('.card'); if(!card) continue;
+    card.style.zoom = ''; card.style.maxWidth = '';
+    const cs = getComputedStyle(ov);
+    const avail = ov.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 4;
+    let z = 1;
+    for(let i=0;i<4;i++){ // co lại vài lần vì chữ xuống dòng khác đi khi thu nhỏ
+      // scrollHeight của overlay = chiều cao thật (đã zoom) của thẻ + padding; không bị ảnh hưởng bởi transform xoay
+      const need = ov.scrollHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      if(need <= avail + 1 || avail <= 0) break;
+      z = Math.max(.45, z * avail / need);
+      card.style.zoom = z; card.style.maxWidth = Math.round(560 / z) + 'px';
+    }
+  }
+}
+window.addEventListener('resize', fitCards);
+
+/* ================= NHẬN GIỌNG NÓI =================
+   Hai bộ nhận giọng, dùng chung một cách khớp lời:
+   ⚡ “Nạp giọng nói”: mô hình tiếng Việt chạy NGAY TRÊN MÁY (sherpa-onnx + Zipformer – xem asr/giay-phep.html).
+      Tự cắt từng câu theo độ to của tiếng và cứ ~0,1 giây lại đoán chữ một lần → vừa nói xong chữ đầu là nhảy liền.
+   🌐 Nhận giọng của trình duyệt (Web Speech API): dùng tạm trong lúc chưa nạp xong, nạp xong tự chuyển sang ⚡. */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const AC = window.AudioContext || window.webkitAudioContext;
+let rec = null, listening = false, processed = {}, cool = 0;
+let engine = '';                       // 'local' (⚡ trên máy) | 'web' (trình duyệt) | ''
+function setMic(txt, ok){ const c=$('micChip'); c.textContent = txt; c.classList.toggle('off', !ok); }
+function heard(html){ $('heard').innerHTML = html; }
+
+// ---- khớp lời: mỗi đoạn nói nhớ đã xét tới chữ nào; chữ nào khớp là nhảy/cúi NGAY ----
+function newSeg(){ return {from:0, rest:null}; }
+function scanHeard(seg, text, isFinal){
+  const toks = ftokens(text);
+  let done = seg.from, hit = false;
+  for(let j = seg.from; j < toks.length; j++){
+    const tk = toks[j];
+    // các chữ còn lại của câu vừa khớp (vd “non” trong “Lên non”) → bỏ qua, không nhảy thêm lần nữa
+    if(seg.rest && seg.rest.length){
+      if(strip(tk) === seg.rest[0]){ seg.rest.shift(); done = j+1; continue; }
+      seg.rest = null;
+    }
+    const r = matchToken(tk);
+    if(r === -2) break;                              // đang hồi lệnh → để lần sau xét tiếp
+    if(r){ hit = true; seg.rest = r; done = j+1; continue; }
+    if(j < toks.length-1 || isFinal) done = j+1;     // chữ cuối của bản nháp có thể còn đang nói dở → xét lại
+  }
+  seg.from = done;
+  return hit;
+}
+// trả về: null = không khớp · -2 = đang hồi lệnh · mảng = các chữ còn lại của câu vừa khớp
+function matchToken(tk){
+  if(state!=='play' || !pair) return null;
+  const now = performance.now();
+  if(now < cool) return -2;
+  const st = strip(tk);
+  const up = pair.upF.has(tk) || (!pair.downF.has(tk) && pair.upS.has(st));
+  const down = !up && (pair.downF.has(tk) || pair.downS.has(st));
+  if(!up && !down) return null;
+  const words = tokens(up ? pair.correct : pair.ngong), k = words.indexOf(st);
+  cool = now + 200;
+  if(up) doJump('voice'); else doDuck('voice');
+  return k >= 0 ? words.slice(k+1) : [];
+}
+function escapeHtml(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function showHeard(text, hit, icon){
+  heard(icon + ' Máy nghe: <em>' + escapeHtml(text) + '</em>');
+  // hiện ngay điều máy đang nghe thành lời thoại trên đầu nhân vật (không đè lên câu vừa nói đúng)
+  if(!hit && state==='play' && text && (!bubble || bubble.live || bubble.life < .35)) talk(text, '#9a7b5a', 1.3, true);
+}
+// vừa có tiếng là nhân vật “há miệng” nghe, trước cả khi máy đoán ra chữ
+function voiceOnset(){ if(state==='play' && !bubble) talk('🎙️ …', '#9a7b5a', 1.2, true); }
+
+/* ---------- 🌐 nhận giọng của trình duyệt ---------- */
+function useWeb(){
+  if(!SR) return false;
+  lvIdle();
+  engine = 'web';
+  if(!rec){
+    rec = new SR();
+    rec.lang = 'vi-VN'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 3;
+    rec.onresult = e => {
+      if(engine!=='web' || !listening) return;
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const res = e.results[i], text = res[0].transcript.trim();
+        let hit = scanHeard(processed[i] || (processed[i] = newSeg()), text, res.isFinal);
+        if(!hit && res.isFinal){
+          for(let a=1;a<res.length && !hit;a++) for(const tk of ftokens(res[a].transcript)){ const r = matchToken(tk); if(r && r!==-2){ hit = true; break; } }
+        }
+        showHeard(text, hit, '🎙️');
+      }
+    };
+    rec.onsoundstart = rec.onspeechstart = () => { if(engine==='web') voiceOnset(); };
+    rec.onerror = e => {
+      if(engine!=='web') return;
+      if((e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='network') && ASR_OK && ASR.st!=='error'){
+        // trình duyệt không cho dùng nhận giọng của nó → chờ ⚡ nạp xong rồi tự chuyển sang nhận giọng trên máy
+        engine = '';
+        setMic('⏳ Đang nạp giọng', false);
+        heard('⏳ Nhận giọng của trình duyệt không dùng được – đang ⚡ nạp giọng nói, xong là nói được ngay (trong lúc chờ có thể bấm nút màu).');
+        if(ASR.st==='ready') useLocal();
+      } else if(e.error==='not-allowed' || e.error==='service-not-allowed'){
+        listening = false; micGranted = false;
+        heard('<span class="err">Chưa được cấp quyền micrô. ' + (IN_FRAME ? 'Bấm ⛶ Phóng to để mở trò chơi ở thẻ riêng rồi cho phép micrô' : 'Bấm 🔒 cạnh thanh địa chỉ → Micro → Cho phép') + ', hoặc chơi bằng ⌨️ Phím.</span>');
+        setMic('⚠️ Micrô bị chặn', false);
+        micFail(e.error==='service-not-allowed' ? 'service' : 'NotAllowedError');
+      } else if(e.error==='network'){
+        heard('<span class="err">Nhận giọng của trình duyệt cần mạng Internet. Bấm ⚡ Nạp giọng nói để chơi không cần mạng.</span>');
+      }
+    };
+    rec.onend = () => { processed = {}; if(listening && engine==='web'){ try{ rec.start(); }catch(e){} } };
+  }
+  processed = {};
+  try{ rec.start(); }catch(e){}
+  setMic('🎙️ Đang nghe', true);
+  return true;
+}
+function webStop(){ if(rec){ try{ rec.stop(); }catch(e){} } }
+
+/* ---------- ⚡ nạp giọng nói: mô hình chạy trên máy ---------- */
+const ASR_BASE = new URL('asr/', location.href);
+const ASR_OK = !!(window.Worker && window.WebAssembly && AC && window.AudioWorkletNode && window.DecompressionStream &&
+                  window.isSecureContext && window.crypto && crypto.subtle && navigator.mediaDevices);
+const ASR = {st:'idle', loaded:0, total:0, err:'', worker:null, promise:null, cache:''};   // st: idle|download|init|ready|error
+const mb = n => (n/1048576).toFixed(n < 10485760 ? 1 : 0).replace('.', ',');
+async function sha256(buf){ const h = await crypto.subtle.digest('SHA-256', buf); return [...new Uint8Array(h)].map(v=>v.toString(16).padStart(2,'0')).join(''); }
+async function readBody(resp, onBytes){
+  if(!resp.body || !resp.body.getReader){ const b = await resp.arrayBuffer(); onBytes(b.byteLength); return b; }
+  const rd = resp.body.getReader(), parts = []; let size = 0;
+  for(;;){ const {done, value} = await rd.read(); if(done) break; parts.push(value); size += value.byteLength; onBytes(value.byteLength); }
+  const out = new Uint8Array(size); let o = 0; for(const p of parts){ out.set(p, o); o += p.byteLength; }
+  return out.buffer;
+}
+function asrLoad(){
+  if(!ASR_OK) return Promise.reject(new Error('Trình duyệt này chưa chạy được nhận giọng trên máy.'));
+  if(ASR.promise) return ASR.promise;
+  ASR.st = 'download'; ASR.loaded = 0; ASR.err = ''; asrUI(true);
+  ASR.promise = (async () => {
+    const mr = await fetch(new URL('models/vietnamese.json', ASR_BASE), {cache:'no-cache'});
+    if(!mr.ok) throw new Error('Không tải được thông tin mô hình giọng nói.');
+    const man = await mr.json();
+    ASR.total = man.bytes;
+    let cache = null; ASR.cache = 'nn-asr-' + man.sha256.slice(0, 12);
+    try{
+      cache = await caches.open(ASR.cache);
+      for(const k of await caches.keys()) if(k.startsWith('nn-asr-') && k !== ASR.cache) caches.delete(k);
+    }catch(e){}
+    const bump = n => { ASR.loaded += n; asrUI(); };
+    const dir = new URL('models/', ASR_BASE);
+    const parts = await Promise.all(man.parts.map(async p => {
+      const url = new URL(p.file, dir).href;
+      let buf = null;
+      try{ const c = cache && await cache.match(url); if(c) buf = await c.arrayBuffer(); }catch(e){}
+      if(buf && buf.byteLength === p.bytes){ bump(buf.byteLength); return buf; }
+      const r = await fetch(url);
+      if(!r.ok) throw new Error('Không tải được mô hình giọng nói (lỗi ' + r.status + ').');
+      buf = await readBody(r, bump);
+      if(buf.byteLength !== p.bytes || await sha256(buf) !== p.sha256) throw new Error('Tệp giọng nói tải chưa đủ – mạng chập chờn.');
+      try{ cache && await cache.put(url, new Response(buf)); }catch(e){}
+      return buf;
+    }));
+    ASR.st = 'init'; asrUI(true);
+    const archive = await new Blob(parts).arrayBuffer();
+    const w = new Worker(new URL('recognizer-worker.js', ASR_BASE));
+    try{
+      await new Promise((res, rej) => {
+        const to = setTimeout(() => rej(new Error('Khởi động bộ nhận giọng quá lâu.')), 90000);
+        w.onerror = e => { clearTimeout(to); rej(new Error((e && e.message) || 'Không mở được bộ nhận giọng.')); };
+        w.onmessage = ({data}) => {
+          if(data.type==='ready'){ clearTimeout(to); res(); }
+          else if(data.type==='error'){ clearTimeout(to); rej(Object.assign(new Error(data.error), {init:true})); }
+        };
+        w.postMessage({type:'load', archive}, [archive]);
+      });
+    }catch(e){ w.terminate(); if(e.init){ try{ caches.delete(ASR.cache); }catch(_){} } throw e; }
+    w.onmessage = ({data}) => lvOnText(data);
+    w.onerror = e => asrCrash((e && e.message) || 'Bộ nhận giọng bị lỗi.');
+    ASR.worker = w; ASR.st = 'ready'; asrUI(true);
+    try{ localStorage.setItem('nn_asr', '1'); }catch(e){}
+    return w;
+  })().catch(e => { ASR.st = 'error'; ASR.err = (e && e.message) || String(e); ASR.promise = null; asrUI(true); throw e; });
+  return ASR.promise;
+}
+function asrCrash(msg){
+  try{ ASR.worker && ASR.worker.terminate(); }catch(e){}
+  ASR.worker = null; ASR.promise = null; ASR.st = 'error'; ASR.err = msg; asrUI(true);
+  if(LV.run){ LV.run.busy = false; LV.run.q.length = 0; }
+  if(engine==='local' && listening){
+    if(SR){ useWeb(); heard('<span class="err">⚡ ' + escapeHtml(msg) + ' Tạm dùng nhận giọng của trình duyệt.</span>'); }
+    else { engine = ''; setMic('⚠️ Lỗi nhận giọng', false); heard('<span class="err">⚡ ' + escapeHtml(msg) + ' Bấm ↻ Nạp lại giọng nói, hoặc chơi bằng ⌨️ Phím.</span>'); }
+  }
+}
+let asrLastSt = '';
+function asrUI(force){
+  const box = $('asrBox');
+  if(!ASR_OK){ box.hidden = true; return; }
+  const pct = ASR.total ? Math.min(100, Math.round(ASR.loaded / ASR.total * 100)) : 0;
+  const bar = $('asrBar'), btn = $('asrBtn'), msg = $('asrMsg'), st = ASR.st;
+  bar.hidden = !(st==='download' || st==='init');
+  bar.classList.toggle('busy', st==='init' || (st==='download' && !ASR.total));
+  bar.firstElementChild.style.width = pct + '%';
+  if(st==='download') msg.innerHTML = '⏳ Đang tải giọng nói… <b>' + pct + '%</b>' + (ASR.total ? ' (' + mb(ASR.loaded) + '/' + mb(ASR.total) + ' MB)' : '') + ' – vẫn chơi được trong lúc chờ.';
+  if(state==='play' && mode==='speech' && engine!=='local' && (st==='download' || st==='init'))
+    setMic(st==='init' ? '⚙️ Đang nạp giọng' : '⏳ Nạp giọng ' + pct + '%', engine==='web');
+  if(!force && st===asrLastSt) return;            // các bước tiến độ chỉ cập nhật số, không vẽ lại cả thẻ
+  asrLastSt = st;
+  box.className = 'asrbox' + (st==='ready' ? ' ok' : st==='error' ? ' bad' : '');
+  btn.hidden = !(st==='idle' || st==='error');
+  btn.textContent = st==='error' ? '↻ Nạp lại giọng nói' : '⚡ Nạp giọng nói';
+  if(st==='idle') msg.innerHTML = '⚡ <b>Nạp giọng nói</b>: máy nhận lời ngay khi bạn vừa nói – nói là nhảy liền, không phải chờ. Chạy ngay trên máy, chỉ tải lần đầu (~30 MB).';
+  else if(st==='init') msg.innerHTML = '⚙️ Đã tải xong, đang khởi động bộ nhận giọng…';
+  else if(st==='ready') msg.innerHTML = '✅ <b>Đã nạp giọng nói</b> – chế độ 🎙️ NÓI nhận lời tức thì, xử lý ngay trên máy (âm thanh không gửi đi đâu). <a href="asr/giay-phep.html" target="_blank" rel="noopener">Nguồn &amp; giấy phép</a>';
+  else if(st==='error') msg.innerHTML = '⚠️ ' + escapeHtml(ASR.err) + ' Bấm nạp lại nhé' + (SR ? ' – trong lúc đó chế độ NÓI dùng nhận giọng của trình duyệt (chậm hơn).' : '.');
+  $('speechSub').textContent = st==='ready' ? '⚡ Đã nạp giọng nói – nói là nhảy liền' : 'Nhận giọng tiếng Việt – nói chuẩn = nhảy, nói ngọng = cúi';
+  try{ fitCards(); }catch(e){}
+}
+
+// thu âm micrô (16 kHz) → cắt thành từng đoạn nói theo độ to → gửi bộ nhận giọng giải mã liên tục
+const LV = {run:null, gen:0, idle:0};
+const SEG_PRE = 8, SEG_GAP = 16000*.3, SEG_MAX = 16000*6, SEG_STEP = 16000*.1, SEG_MIN = 16000*.1;
+async function lvStart(){
+  clearTimeout(LV.idle);
+  if(LV.run && !LV.run.dead) return true;          // micrô vẫn mở từ lượt trước → nghe được ngay
+  const run = {id: ++LV.gen, seg:null, pre:[], noise:.003, q:[], busy:false, cur:null, sentAt:0, seq:0, dead:false};
+  LV.run = run;
+  try{
+    let ctx; try{ ctx = new AC({sampleRate:16000}); }catch(e){ ctx = new AC(); }
+    run.ctx = ctx; ctx.resume().catch(()=>{});
+    run.stream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1, echoCancellation:true, noiseSuppression:true, autoGainControl:true}});
+    if(run.dead){ lvStop(run); return false; }
+    const mod = new URL('pcm-worklet.js', ASR_BASE).href;
+    await ctx.audioWorklet.addModule(mod);
+    let src;
+    try{ src = ctx.createMediaStreamSource(run.stream); }
+    catch(e){ // vài trình duyệt (Firefox) không nối được micrô vào khung 16 kHz → mở khung thường, tự hạ tần số trong worklet
+      ctx.close().catch(()=>{}); ctx = run.ctx = new AC(); ctx.resume().catch(()=>{});
+      await ctx.audioWorklet.addModule(mod); src = ctx.createMediaStreamSource(run.stream);
+    }
+    if(run.dead){ lvStop(run); return false; }
+    const node = new AudioWorkletNode(ctx, 'nn-capture', {numberOfInputs:1, numberOfOutputs:1, outputChannelCount:[1]});
+    node.port.onmessage = ({data}) => lvFeed(run, data);
+    const mute = ctx.createGain(); mute.gain.value = 0;
+    src.connect(node); node.connect(mute); mute.connect(ctx.destination);
+    run.src = src; run.node = node;
+    run.dog = setInterval(() => lvWatch(run), 1000);
+    micGranted = true;
+    return true;
+  }catch(e){ lvStop(run); throw e; }
+}
+function lvStop(run){
+  run = run || LV.run; if(!run) return;
+  run.dead = true; clearInterval(run.dog);
+  try{ if(run.node) run.node.port.onmessage = null; run.src && run.src.disconnect(); run.node && run.node.disconnect(); }catch(e){}
+  try{ run.stream && run.stream.getTracks().forEach(t => t.stop()); }catch(e){}
+  try{ run.ctx && run.ctx.close().catch(()=>{}); }catch(e){}
+  if(LV.run === run) LV.run = null;
+}
+// hết lượt: ngừng giải mã, giữ micrô mở thêm 20 giây để lượt sau nghe được ngay; quá thì tắt micrô
+function lvIdle(){
+  const run = LV.run;
+  if(run){ run.seg = null; run.pre.length = 0; run.q.length = 0; }
+  clearTimeout(LV.idle);
+  LV.idle = setTimeout(() => { if(!(listening && engine==='local')) lvStop(); }, 20000);
+}
+function lvWatch(run){
+  if(run.dead) return;
+  const tr = run.stream && run.stream.getAudioTracks()[0];
+  if(!tr || tr.readyState==='ended'){
+    lvStop(run);
+    if(engine==='local' && listening){ heard('<span class="err">Micrô bị ngắt – đang mở lại…</span>'); lvStart().catch(()=>{}); }
+    return;
+  }
+  if(run.ctx.state==='suspended') run.ctx.resume().catch(()=>{});
+  if(run.busy && performance.now() - run.sentAt > 8000) asrCrash('Bộ nhận giọng bị treo.');
+}
+function lvFeed(run, x){
+  if(run.dead) return;
+  let e = 0; for(let i=0;i<x.length;i++) e += x[i]*x[i];
+  const rms = Math.sqrt(e / x.length);
+  // ước lượng tiếng ồn nền: hạ nhanh khi yên, tăng rất chậm khi có tiếng
+  run.noise = rms < run.noise ? run.noise*.9 + rms*.1 : run.noise*.998 + rms*.002;
+  if(!listening || engine!=='local' || !ASR.worker){ run.seg = null; run.pre.length = 0; return; }
+  const voiced = rms > Math.max(.004, run.noise * 2.5);
+  if(!run.seg){
+    run.pre.push(x); if(run.pre.length > SEG_PRE) run.pre.shift();   // giữ ~0,16 giây trước tiếng đầu
+    if(!voiced) return;
+    const len = run.pre.reduce((s, c) => s + c.length, 0);
+    run.seg = {id: ++run.seq, chunks: run.pre, len, lastVoice: len, lastReq: 0, voiced: 0, scan: newSeg()};
+    run.pre = [];
+    voiceOnset();
+  } else { run.seg.chunks.push(x); run.seg.len += x.length; }
+  const s = run.seg;
+  if(voiced){ s.lastVoice = s.len; s.voiced += x.length; }
+  const fin = s.len - s.lastVoice >= SEG_GAP || s.len >= SEG_MAX;
+  if(fin){ run.seg = null; if(s.voiced >= SEG_MIN) lvRequest(run, s, true); }
+  else if(s.voiced >= SEG_MIN && s.len - s.lastReq >= SEG_STEP) lvRequest(run, s, false);
+}
+function lvRequest(run, s, fin){
+  s.lastReq = s.len;
+  const r = {s, fin, len: s.len};
+  const k = run.q.findIndex(q => q.s === s);        // mỗi đoạn chỉ giữ yêu cầu mới nhất
+  if(k >= 0) run.q[k] = r; else run.q.push(r);
+  lvPump(run);
+}
+function lvPump(run){
+  if(run.busy || !run.q.length || !ASR.worker || run.dead) return;
+  const r = run.q.shift();
+  const pcm = new Float32Array(r.len + 1600);       // thêm 0,1 giây lặng cuối để mô hình nhả chữ cuối
+  let o = 0; for(const c of r.s.chunks){ if(o + c.length > r.len) break; pcm.set(c, o); o += c.length; }
+  run.busy = true; run.cur = r; run.sentAt = performance.now();
+  ASR.worker.postMessage({type:'decode', id: run.id, seq: r.s.id, final: r.fin, samples: pcm}, [pcm.buffer]);
+}
+function lvOnText(d){
+  if(d.type==='error'){ asrCrash(d.error || 'Lỗi nhận giọng.'); return; }
+  const run = LV.run;
+  if(!run || d.id !== run.id) return;
+  run.busy = false;
+  const r = run.cur; run.cur = null;
+  let text = (d.text || '').trim().toLocaleLowerCase('vi-VN');   // mô hình trả chữ IN HOA → viết thường cho dễ đọc
+  text = text.charAt(0).toLocaleUpperCase('vi-VN') + text.slice(1);
+  if(r && text && listening && engine==='local') showHeard(text, scanHeard(r.s.scan, text, r.fin), '⚡');
+  lvPump(run);
+}
+async function useLocal(){
+  if(!listening) return;
+  webStop(); engine = 'local';
+  setMic('⚡ Đang nghe', true);
+  try{
+    await lvStart();
+    if(listening && engine==='local') heard('⚡ Đã nạp giọng nói – nói câu màu xanh là nhảy liền!');
+  }catch(e){
+    const n = e && e.name;
+    engine = '';
+    if(n==='NotAllowedError' || n==='SecurityError' || n==='NotFoundError'){
+      micGranted = false; setMic('⚠️ Micrô bị chặn', false); micFail(n);
+      heard('<span class="err">Không mở được micrô. Hãy cho phép quyền micrô, hoặc chơi bằng ⌨️ Phím.</span>');
+    } else if(SR && listening){ useWeb(); heard('<span class="err">⚡ Không mở được thu âm trên máy – tạm dùng nhận giọng của trình duyệt.</span>'); }
+    else heard('<span class="err">⚡ Không mở được thu âm: ' + escapeHtml((e && e.message) || '') + '</span>');
+  }
+}
+function startSpeech(){
+  listening = true;
+  if(ASR.st==='ready'){ useLocal(); return true; }
+  if(ASR_OK) asrLoad().then(() => { if(listening && mode==='speech' && engine!=='local') useLocal(); }).catch(() => {});
+  if(SR){
+    useWeb();
+    heard('🎙️ Nói thử câu màu xanh để nhảy nhé!' + (ASR_OK ? ' <small>(⚡ đang nạp giọng nói – nạp xong máy nghe nhanh hơn)</small>' : ''));
+    return true;
+  }
+  if(ASR_OK){ engine = ''; setMic('⏳ Đang nạp giọng', false); heard('⏳ Đang nạp giọng nói… nạp xong là nói được ngay (trong lúc chờ có thể bấm nút màu).'); return true; }
+  heard('<span class="err">Trình duyệt này không hỗ trợ nhận giọng. Hãy dùng Chrome, hoặc chọn 📣 Hét / ⌨️ Phím.</span>'); setMic('⚠️ Không có micrô', false);
+  return false;
+}
+// trình duyệt hay “ngủ” khung âm thanh khi chưa có cú chạm → đánh thức ở cú chạm/phím kế tiếp
+['pointerdown','keydown'].forEach(t => document.addEventListener(t, () => { const r = LV.run; if(r && r.ctx && r.ctx.state==='suspended') r.ctx.resume().catch(()=>{}); }, true));
+$('asrBtn').addEventListener('click', () => { asrLoad().catch(() => {}); });
+/* ================= SHOUT (volume) ================= */
+let micStream = null, analyser = null, buf = null, ambient = .02, calibUntil = 0, loud = false;
+async function startShout(){
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:false}});
+  }catch(e){
+    heard('<span class="err">Không mở được micrô. Hãy cho phép quyền micrô, hoặc chơi bằng ⌨️ Phím.</span>');
+    setMic('⚠️ Micrô bị chặn', false); micGranted = false; micFail(e && e.name); return false;
+  }
+  const a = ac(); if(a.state==='suspended') await a.resume();
+  const src = a.createMediaStreamSource(micStream);
+  analyser = a.createAnalyser(); analyser.fftSize = 1024; buf = new Float32Array(analyser.fftSize);
+  src.connect(analyser);
+  ambient = .02; calibUntil = performance.now() + 900;
+  $('meter').classList.add('show');
+  setMic('📣 Hét để nhảy', true);
+  heard('📣 Giữ im 1 giây để đo tiếng ồn… rồi HÉT để nhảy!');
+  return true;
+}
+function updateMeter(){
+  if(mode!=='shout' || !analyser) return;
+  analyser.getFloatTimeDomainData(buf);
+  let s=0; for(let i=0;i<buf.length;i++) s+=buf[i]*buf[i];
+  const rms = Math.sqrt(s/buf.length);
+  const now = performance.now();
+  if(now < calibUntil){ ambient = Math.max(ambient*.9 + rms*.1, .01); }
+  const thr = Math.max(.07, ambient*4);
+  $('meter').firstElementChild.style.width = Math.min(100, rms/thr*60) + '%';
+  if(now >= calibUntil){
+    if(rms > thr && !loud){ loud = true; doJump('shout'); }
+    else if(rms < thr*.6) loud = false;
+  }
+}
+
+function stopListening(){
+  listening = false;
+  webStop();
+  lvIdle();
+}
+
+/* ================= MIC PERMISSION ================= */
+let IN_FRAME = false;
+try { IN_FRAME = window.self !== window.top; } catch(e){ IN_FRAME = true; }
+const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+let micGranted = false;
+function frameBlocksMic(){
+  try{
+    const pp = document.permissionsPolicy || document.featurePolicy;
+    if(pp && pp.allowsFeature) return !pp.allowsFeature('microphone');
+  }catch(e){}
+  return false;
+}
+function micUI(cls, html, showAsk, showOpen){
+  const box = $('micBox'); box.className = 'micbox' + (cls ? ' '+cls : '');
+  $('micMsg').innerHTML = html;
+  $('micAsk').hidden = !showAsk; $('micOpen').hidden = !showOpen;
+  fitCards();
+}
+function micOK(){
+  // máy tính đã cho micrô → nạp sẵn giọng nói trong nền để vào chơi là nghe nhanh ngay
+  if(!micGranted && ASR_OK && !IS_PHONE && ASR.st==='idle') asrLoad().catch(() => {});
+  micGranted = true;micUI('ok', '✅ Micro đã bật – chọn 🎙️ NÓI hoặc 📣 HÉT để chơi bằng giọng!', false, false); }
+function micFail(reason){
+  if(reason==='frame'){
+    micUI('bad', '🎙️ Trang đang nhúng trò chơi không cho hỏi micrô trực tiếp. Bấm <b>Cấp quyền micrô</b> → trò chơi mở ở thẻ riêng và trình duyệt sẽ hỏi ngay, chọn <b>“Cho phép”</b>.', true, false);
+  } else if(reason==='opened'){
+    micUI('', '↗️ Đã mở trò chơi ở thẻ mới – trình duyệt đang hỏi quyền micrô ở thẻ đó, hãy bấm <b>“Cho phép”</b>.', true, false);
+  } else if(reason==='NotAllowedError' || reason==='SecurityError' || reason==='PermissionDeniedError'){
+    const how = IOS ? 'Trên iPhone: bấm <b>“aA”</b> trên thanh địa chỉ → <b>Cài đặt trang web</b> → <b>Micrô → Cho phép</b> (hoặc Cài đặt → Safari → Micrô), rồi tải lại trang.'
+                    : 'Bấm biểu tượng <b>🔒 / ⓘ</b> cạnh thanh địa chỉ → <b>Micro → Cho phép</b>, rồi bấm lại nút dưới.';
+    micUI('bad', '⚠️ Micro đang bị chặn. ' + how, true, IN_FRAME);
+  } else if(reason==='service'){
+    micUI('bad', '⚠️ Trình duyệt không cho nhận giọng nói' + (IOS ? ' (iPhone: bật <b>Siri & Đọc chính tả</b> trong Cài đặt)' : '') + '. Thử 📣 HÉT hoặc ⌨️ Phím.', true, IN_FRAME);
+  } else if(reason==='NotFoundError' || reason==='DevicesNotFoundError'){
+    micUI('bad', '⚠️ Không tìm thấy micrô trên thiết bị này. Hãy chơi bằng ⌨️ Phím / 👆 Chạm.', true, false);
+  } else if(reason==='nosupport'){
+    micUI('bad', '⚠️ Trình duyệt này không hỗ trợ micrô' + (location.protocol!=='https:' && location.hostname!=='localhost' ? ' (cần mở bằng https://)' : '') + '.', false, IN_FRAME);
+  } else {
+    micUI('bad', '⚠️ Không mở được micrô. Bấm thử lại, hoặc chơi bằng ⌨️ Phím.', true, IN_FRAME);
+  }
+}
+// fromClick = gọi ngay trong cú bấm của người chơi → được phép mở tab mới nếu khung nhúng chặn micrô
+async function ensureMic(fromClick){
+  if(micGranted) return true;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ micFail('nosupport'); return false; }
+  if(frameBlocksMic()){
+    if(fromClick && openStandalone(true)) micFail('opened'); else micFail('frame');
+    return false;
+  }
+  micUI('', '⏳ Trình duyệt đang hỏi quyền micrô – hãy bấm <b>“Cho phép”</b>.', false, false);
+  const t0 = performance.now();
+  try{
+    const s = await navigator.mediaDevices.getUserMedia({audio:true});
+    s.getTracks().forEach(tr => tr.stop());
+    micOK(); return true;
+  }catch(e){
+    const name = e && e.name;
+    // trong khung nhúng mà bị từ chối tức thì (trình duyệt không hề hiện hộp hỏi) → mở tab riêng để được hỏi
+    if(fromClick && IN_FRAME && name==='NotAllowedError' && performance.now()-t0 < 500 && openStandalone(true)){ micFail('opened'); return false; }
+    micFail(name); return false;
+  }
+}
+function openStandalone(ask){
+  let url = location.href;
+  try{ const u = new URL(location.href); if(ask) u.searchParams.set('ask','1'); url = u.toString(); }catch(e){}
+  let w = null;
+  try{ w = window.open(url, '_blank'); }catch(e){}
+  if(!w){ try{ window.top.location.href = url; return true; }catch(e){ return false; } }
+  return true;
+}
+$('micAsk').addEventListener('click', () => { ac() && actx.state==='suspended' && actx.resume(); ensureMic(true); });
+$('micOpen').addEventListener('click', () => openStandalone(true));
+(async () => { // trạng thái quyền ban đầu
+  let ask = false;
+  try{ const u = new URL(location.href); ask = u.searchParams.get('ask')==='1'; if(ask){ u.searchParams.delete('ask'); history.replaceState(null,'',u.toString()); } }catch(e){}
+  if(frameBlocksMic()){ micFail('frame'); return; }
+  try{
+    const st = await navigator.permissions.query({name:'microphone'});
+    const apply = () => { if(st.state==='granted') micOK(); else if(st.state==='denied'){ micGranted = false; micFail('NotAllowedError'); } };
+    apply(); st.onchange = apply;
+  }catch(e){}
+  if(ask && !micGranted) ensureMic(false); // mở từ khung nhúng → hỏi quyền ngay khi vào trang
+})();
+
+/* ================= FULLSCREEN ================= */
+const DE = document.documentElement;
+const fsReq = DE.requestFullscreen || DE.webkitRequestFullscreen;
+const FS_OK = !!fsReq && !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+const isFS = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function enterFS(){
+  if(!FS_OK || isFS()) return;
+  try{
+    const r = fsReq.call(DE, {navigationUI:'hide'});
+    if(r && r.then) r.then(() => {
+      try{ setTimeout(resize, 60); }catch(e){}
+      // Android: khi đã toàn màn hình thì khoá màn hình nằm ngang luôn (iPhone không hỗ trợ → CSS tự xoay)
+      try{ tryLockLandscape(); }catch(e){}
+    }, () => {});
+  }catch(e){}
+}
+/* ---- điện thoại: tự phủ toàn màn hình + xoay ngang ----
+   Trình duyệt chỉ cho phóng to / khoá xoay sau một cú chạm, nên cú chạm ĐẦU TIÊN vào trò chơi sẽ:
+     • xin toàn màn hình thật rồi khoá nằm ngang (Android Chrome)
+     • nếu được nhúng bằng embed.js: báo trang chủ phủ iframe kín màn hình (chạy cả trên iPhone, nơi
+       iframe không được toàn màn hình) → máy cầm dọc thì sân khấu tự xoay ngang bằng CSS. */
+let HOST_EMBED = false, pseudoFS = false, autoLand = false;
+function postHost(msg){ try{ if(IN_FRAME) window.parent.postMessage(Object.assign({type:'noi-ngong'}, msg), '*'); }catch(e){} }
+window.addEventListener('message', e => {
+  if(e.source !== window.parent || !e.data || e.data.type !== 'noi-ngong-host') return;
+  HOST_EMBED = true; $('fsBtn').hidden = false;
+  if(typeof e.data.fs === 'boolean'){ pseudoFS = e.data.fs; fsLabel(); }
+});
+postHost({hello:1});
+function setPseudoFS(on){ if(!HOST_EMBED) return false; pseudoFS = on; postHost({fs:on}); fsLabel(); return true; }
+function goLandscape(){
+  if(!IS_PHONE) return;
+  setPseudoFS(true);
+  if(!frameBlocksMic()) enterFS();   // khung nhúng chặn micrô → để dành cú chạm cho việc mở thẻ mới xin quyền
+  tryLockLandscape();
+}
+document.addEventListener('click', e => {
+  if(!IS_PHONE || autoLand) return;
+  if(e.target && e.target.closest && e.target.closest('#fsBtn, #micBox, #panel, a')) return;
+  autoLand = true; goLandscape();
+}, true);
+function toggleFS(){
+  if(isFS() || pseudoFS){
+    if(isFS()){ try{ (document.exitFullscreen || document.webkitExitFullscreen).call(document); }catch(e){} }
+    setPseudoFS(false); fsLabel(); return;
+  }
+  if(IS_PHONE && (HOST_EMBED || FS_OK)){ autoLand = true; goLandscape(); return; }
+  if(FS_OK) enterFS();
+  else if(IN_FRAME) openStandalone(); // iPhone / khung nhúng không cho fullscreen → mở tab riêng chiếm cả màn hình
+}
+function fsLabel(){
+  const on = isFS() || pseudoFS;
+  $('fsBtn').textContent = on ? '✕ Thu nhỏ' : '⛶ Phóng to';
+  $('fsX').hidden = !(on && IS_PHONE && state !== 'play' && state !== 'countdown');
+}
+$('fsX').addEventListener('click', toggleFS);
+if(FS_OK || IN_FRAME){
+  $('fsBtn').hidden = false;
+  $('fsBtn').addEventListener('click', toggleFS);
+  document.addEventListener('fullscreenchange', () => { fsLabel(); setTimeout(resize, 60); });
+  document.addEventListener('webkitfullscreenchange', () => { fsLabel(); setTimeout(resize, 60); });
+}
+
+/* ================= FLOW ================= */
+// bật cách điều khiển cho lượt chơi (nói / hét / phím)
+async function beginControls(){
+  $('meter').classList.toggle('show', mode==='shout');
+  if(mode==='speech'){ startSpeech(); }
+  else if(mode==='shout'){ if(!analyser) await startShout(); else { calibUntil = performance.now()+600; setMic('📣 Hét để nhảy', true); } }
+  else {
+    setMic(TOUCH ? '👆 Chạm' : '⌨️ Phím', false);
+    heard(TOUCH ? '👆 Chạm nút XANH để nhảy · nút CAM để cúi' : '⌨️ ↑ hoặc phím cách để nhảy · ↓ để cúi · hoặc bấm 2 nút màu');
+  }
+}
+async function startGame(m){
+  if(match && !match.ended) return;           // đang trong trận thách đấu
+  match = null;
+  const needMic = (m==='speech' || m==='shout') && !micGranted;
+  // điện thoại: tự phóng to toàn màn hình khi bắt đầu (phải gọi ngay trong cú chạm).
+  // Không phóng to khi khung nhúng chặn micrô, để cú chạm còn dùng được cho việc mở tab mới xin quyền.
+  if(IS_PHONE && state==='menu' && !(needMic && frameBlocksMic())){ setPseudoFS(true); enterFS(); tryLockLandscape(); }
+  if(needMic){
+    ac() && actx.state==='suspended' && actx.resume();
+    if(!(await ensureMic(true))){
+      state = 'menu'; $('overOv').classList.add('hide'); $('startOv').classList.remove('hide'); fitCards();
+      try{ $('micBox').scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){}
+      heard('<span class="err">Chưa bật được micrô – xem hướng dẫn trong khung, hoặc chơi bằng ⌨️ Phím.</span>');
+      return;
+    }
+  }
+  mode = m;
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  ac() && actx.state==='suspended' && actx.resume();
+  $('startOv').classList.add('hide'); $('overOv').classList.add('hide'); closePanel();
+  rng = Math.random;
+  resetGame();
+  await beginControls();
+  sfx.quack();
+  state = 'play';
+  netSend({t:'status', st:'solo'});
+}
+function beginRun(){ // hết đếm ngược trận thách đấu → chạy
+  state = 'play'; runStart = performance.now(); last = performance.now(); sfx.quack();
+}
+let overKind = 'solo';
+function setOverButtons(kind){
+  overKind = kind;
+  const a = $('againBtn'), m = $('modeBtn'), l = $('overLobby');
+  a.hidden = m.hidden = (kind==='wait');
+  a.textContent = kind==='result' ? '⚔️ Đấu lại' : '🔁 Chơi lại';
+  m.textContent = kind==='result' ? '🎮 Chơi đơn' : '🎛️ Đổi chế độ';
+  l.textContent = kind==='wait' ? '🏳️ Bỏ cuộc' : '🏆 Xếp hạng';
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => startGame(b.dataset.mode)));
+$('againBtn').addEventListener('click', () => {
+  startGame(mode);
+});
+$('modeBtn').addEventListener('click', () => {
+  if(match && !match.ended) return;
+  match = null; $('overOv').classList.add('hide'); $('startOv').classList.remove('hide'); state='menu'; fitCards();
+  netSend({t:'status', st:'idle'});
+});
+$('overLobby').addEventListener('click', () => {
+  if(overKind==='wait'){ netSend({t:'mquit'}); return; }
+  openPanel('lb');
+});
+function pauseGame(){
+  if(state!=='play' || paused || match) return; // trận thách đấu không tạm dừng được
+  paused = true; resumeSpeech = (mode==='speech'); stopListening();
+}
+function resumeGame(){
+  if(!paused) return false;
+  paused = false; last = performance.now();
+  if(resumeSpeech) startSpeech();
+  return true;
+}
+document.addEventListener('visibilitychange', () => { if(document.hidden) pauseGame(); last = performance.now(); });
+window.addEventListener('pagehide', pauseGame);
+
+/* ================= THÁCH ĐẤU (client) ================= */
+let matchMode = 'keys';
+try{ const mm = localStorage.getItem('nn_mm'); if(['speech','shout','keys'].includes(mm)) matchMode = mm; }catch(e){}
+async function startMatch(m){
+  hideToast(); closePanel();
+  stopListening(); paused = false;
+  match = {id:m.id, opp:m.opp, os:{d:0, y:GROUND, k:0, s:0, a:1}, at:performance.now(), gd:0, gy:GROUND, ended:false, dead:false, lastSend:0};
+  $('startOv').classList.add('hide'); $('overOv').classList.add('hide');
+  rng = mulberry32(m.seed >>> 0);
+  resetGame();
+  state = 'countdown'; countT = 3.5;
+  sfx.good();
+  mode = matchMode;
+  if(mode==='speech' && !SR && !ASR_OK) mode = 'keys';
+  if((mode==='speech' || mode==='shout') && !micGranted && !(await ensureMic(false))){
+    mode = 'keys'; heard('<span class="err">Không bật được micrô → trận này chơi bằng 👆 Phím/Chạm.</span>');
+  }
+  if(!match || match.id !== m.id) return;
+  await beginControls();
+}
+function netMatchTick(){
+  const n = performance.now();
+  if(n - match.lastSend < 90) return;
+  match.lastSend = n;
+  netSend({t:'mstate', d:Math.round(dist), y:Math.round(player.y), k:(player.duckT>0 && player.onGround) ? 1 : 0, s:score, a:1});
+}
+function showMatchWaiting(){
+  setOverButtons('wait');
+  $('overTitle').textContent = '💥 Bạn ngã rồi!';
+  $('finalScore').textContent = score;
+  $('overInfo').innerHTML = `Đang chờ <b>${esc(match.opp.name)}</b> chạy nốt…<br>Điểm đối thủ: <b id="oppLive" style="color:#5b4bd1">${Math.floor(match.os.s||0)}</b>`;
+  setTimeout(() => { if(match && !match.ended && state==='over'){ $('overOv').classList.remove('hide'); fitCards(); } }, 600);
+}
+function onMatchEnd(m){
+  if(!match || match.ended) return;
+  match.ended = true;
+  const wasAlive = state==='play' || state==='countdown';
+  stopListening();
+  if(wasAlive){ state = 'over'; netSend({t:'score', score, dur:(performance.now()-runStart)/1000}); }
+  const mine = wasAlive || m.scores[myPid] == null ? score : m.scores[myPid];
+  const opp = m.scores[match.opp.pid] != null ? m.scores[match.opp.pid] : Math.floor(match.os.s||0);
+  const win = m.winner === myPid, lose = !!m.winner && m.winner !== myPid;
+  $('overTitle').textContent = win ? '🏆 Bạn THẮNG!' : lose ? '😢 Thua mất rồi!' : (m.reason==='left' ? '📡 Mất kết nối' : '🤝 Hòa nhau!');
+  $('finalScore').textContent = mine + ' – ' + opp;
+  let info = `Bạn <b>${mine}</b> điểm · ${esc(match.opp.name)} <b>${opp}</b> điểm`;
+  if(m.reason==='left') info += `<br>${win ? 'Đối thủ đã rời trận.' : 'Kết nối bị gián đoạn, trận đấu kết thúc.'}`;
+  if(m.reason==='quit') info += `<br>${win ? 'Đối thủ đã bỏ cuộc.' : 'Bạn đã bỏ cuộc.'}`;
+  if(funniest) info += `<br>Câu ngọng “đỉnh” nhất: <b style="color:#e8622a">“${esc(funniest)}”</b>`;
+  $('overInfo').innerHTML = info;
+  setOverButtons('result');
+  if(win){ sfx.good(); buzz([30,40,30]); }
+  $('overOv').classList.remove('hide'); fitCards();
+  netSend({t:'status', st:'idle'});
+}
+
+/* ================= MẠNG: GỬI ĐIỂM · BXH (đã bỏ sảnh, trò chuyện, thách đấu) ================= */
+const NET_HOST = (/^https?:$/.test(location.protocol) && /(workers\.dev|localhost|127\.0\.0\.1)$/.test(location.hostname)) ? location.host : 'noi-ngong.game-onl.workers.dev';
+const NET_WS = ((location.protocol==='http:' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) ? 'ws://' : 'wss://') + NET_HOST + '/ws';
+let myPid = '', myName = '';
+try{ myPid = localStorage.getItem('nn_pid') || ''; myName = localStorage.getItem('nn_name') || ''; }catch(e){}
+if(!/^[a-z0-9]{8,32}$/.test(myPid)){ myPid = Array.from({length:16}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random()*36)]).join(''); try{ localStorage.setItem('nn_pid', myPid); }catch(e){} }
+if(!myName){ myName = 'Bé Bong ' + Math.floor(1000 + Math.random()*9000); try{ localStorage.setItem('nn_name', myName); }catch(e){} }
+const net = {ws:null, ok:false, retry:0, lb:null, lbTab:'all', incoming:null, dead:false, pingT:0};
+function esc(s){ return escapeHtml(String(s==null ? '' : s)).replace(/'/g, '&#39;'); }
+
+function netConnect(){
+  if(net.dead) return;
+  let ws;
+  try{ ws = new WebSocket(NET_WS + '?pid=' + myPid + '&name=' + encodeURIComponent(myName)); }catch(e){ return netRetry(); }
+  net.ws = ws;
+  ws.onopen = () => { net.ok = true; net.retry = 0; netStatus(); clearInterval(net.pingT); net.pingT = setInterval(() => netSend({t:'ping'}), 25000); };
+  ws.onmessage = ev => { let m; try{ m = JSON.parse(ev.data); }catch(e){ return; } netOn(m); };
+  ws.onclose = ev => {
+    if(net.ws !== ws) return;
+    net.ok = false; clearInterval(net.pingT);
+    if(match && !match.ended) onMatchEnd({winner:null, scores:{}, reason:'left'});
+    if(ev.code === 4000){ net.dead = true; netStatus('Trò chơi đang mở ở thẻ khác – điểm sẽ được lưu ở thẻ đó.'); return; }
+    netStatus(); netRetry();
+  };
+}
+function netRetry(){ net.retry++; setTimeout(netConnect, Math.min(15000, 800 * 2 ** Math.min(net.retry, 5))); }
+function netSend(o){ if(net.ok && net.ws){ try{ net.ws.send(JSON.stringify(o)); }catch(e){} } }
+function netStatus(msg){
+  const el = $('netSt');
+  el.classList.toggle('bad', !net.ok);
+  el.textContent = msg || (net.ok ? '🟢 Điểm của bạn được lưu với tên: ' + myName : '🔴 Mất kết nối máy chủ – đang thử lại…');
+}
+function netOn(m){
+  switch(m.t){
+    case 'welcome':
+      net.lb = m.lb || null;
+      if(m.you && m.you.name) myName = m.you.name;
+      netStatus(); renderLb(); break;
+    case 'lb': { const me = net.lb && net.lb.me; net.lb = m.lb; if(!net.lb.me) net.lb.me = me; renderLb(); break; }
+    case 'scored': {
+      const el = document.getElementById('rankInfo');
+      if(el) el.innerHTML = m.rank ? `🏆 Điểm này xếp <b>hạng #${m.rank}</b> toàn server` : '🏆 Đã lưu điểm – cố lên để vào <b>top 100</b> toàn server!';
+      netSend({t:'lb'}); break;
+    }
+    case 'notice': toastMsg(m.text); break;
+  }
+}
+
+let toastTimer = 0;
+function hideToast(){ $('toast').classList.add('hide'); clearTimeout(toastTimer); }
+function toastMsg(text, ms){
+  if(net.incoming) return; // đang hiện lời mời thách đấu – không đè lên
+  const el = $('toast'); el.innerHTML = esc(text); el.classList.remove('hide');
+  clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, ms || 3500);
+}
+/* ---------- bảng xếp hạng ---------- */
+function panelOn(){ return !$('panel').classList.contains('hide'); }
+function openPanel(){
+  if(state==='play' && !match) pauseGame();
+  $('panel').classList.remove('hide');
+  if(net.ok) netSend({t:'lb'});
+}
+function closePanel(){ $('panel').classList.add('hide'); }
+function renderLb(){
+  const lb = net.lb, ol = $('lbList');
+  document.querySelectorAll('#lbSeg [data-lb]').forEach(b => b.classList.toggle('on', b.dataset.lb === net.lbTab));
+  if(!lb){ ol.innerHTML = '<div class="empty">Đang tải…</div>'; return; }
+  const rows = lb[net.lbTab] || [];
+  const medal = i => ['🥇','🥈','🥉'][i] || (i+1);
+  ol.innerHTML = rows.length ? rows.map((r,i) => `<li class="${r.pid===myPid ? 'me' : ''}"><span class="rk">${medal(i)}</span><span class="n">${esc(r.name)}</span><span class="s">${r.score}</span></li>`).join('')
+    : '<div class="empty">Chưa có điểm nào – chơi một ván để lên bảng!</div>';
+  $('lbMe').innerHTML = lb.me ? `⭐ Kỷ lục của bạn: <b>${lb.me.best}</b> điểm · ${lb.me.rank ? 'hạng <b>#' + lb.me.rank + '</b>' : 'ngoài top 100'}` : '';
+}
+document.querySelectorAll('#lbSeg [data-lb]').forEach(b => b.addEventListener('click', () => { net.lbTab = b.dataset.lb; renderLb(); }));
+$('panelClose').addEventListener('click', closePanel);
+$('lobbyBtn').addEventListener('click', () => panelOn() ? closePanel() : openPanel());
+$('lobbyBtn2').addEventListener('click', () => openPanel());
+$('nameIn').value = myName;
+function saveName(){
+  const n = $('nameIn').value.replace(/[\u0000-\u001f<>]/g,'').replace(/\s+/g,' ').trim().slice(0,18);
+  if(!n) return;
+  myName = n; $('nameIn').value = n;
+  try{ localStorage.setItem('nn_name', n); }catch(e){}
+  netSend({t:'name', name:n}); netStatus(); toastMsg('✅ Đã đổi tên: ' + n, 1800);
+}
+$('nameSave').addEventListener('click', saveName);
+$('nameIn').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); saveName(); $('nameIn').blur(); } });
+renderLb(); netStatus();
+
+renderCats();
+const TOUCH = window.matchMedia && matchMedia('(pointer:coarse)').matches;
+if(TOUCH){
+  $('keysTitle').textContent = '👆 Chạm';
+  $('keysSub').textContent = 'Nút XANH = nhảy · nút CAM = cúi';
+  $('shoutSub').textContent = 'Hét to = nhảy · chạm nút CAM = cúi';
+}
+if(!SR && !ASR_OK) $('startNote').textContent = 'Trình duyệt này không hỗ trợ nhận giọng nói — chế độ 🎙️ NÓI cần Google Chrome.';
+asrUI(true);
+// đã nạp giọng nói lần trước (tệp nằm sẵn trong trình duyệt) → tự nạp lại ngay khi mở trang, không tốn mạng
+if(ASR_OK && window.caches) caches.keys().then(ks => { if(ks.some(k => k.startsWith('nn-asr-'))) asrLoad().catch(() => {}); }, () => {});
+
+measureLayout();
+resize();
+player = {x:120, y:GROUND, vy:0, onGround:true, duckT:0, runT:0, squash:0, jumpBuf:0, jumpSrc:''};
+obstacles = []; particles = []; floats = [];
+pickPhrase();
+requestAnimationFrame(loop);
+netConnect();
+})();
+</script>
+</body>
+</html>

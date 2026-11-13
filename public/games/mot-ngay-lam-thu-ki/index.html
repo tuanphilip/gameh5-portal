@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Một Ngày Làm Thư Ký</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="TemplateData/style.css">
+  <!-- GameHiHi API Bridge v1.0.2 SDK, unchanged (used only when the game runs in a WordPress iframe on another origin). -->
+  <script src="js/gamehihi-api-client.js"></script>
+  <!-- GameHiHi Game Manager scores SDK 1.0.0 (gamehihi-game-manager docs/SCORES_API.md), unchanged; Tools/ghm/sync-sdk.mjs. -->
+  <script src="js/gamehihi-scores.js"></script>
+</head>
+<body>
+  <!-- #game is the iframe's own viewport. All sizing below is measured on it, never on the parent page. -->
+  <div id="game">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="loader">
+      <div id="loader-card">
+        <img id="loader-linh" src="assets/linh.png" alt="">
+        <div id="loader-main">
+          <img id="loader-logo" src="assets/logo.png" alt="GameHiHi">
+          <div id="loader-title">Một Ngày Làm Thư Ký</div>
+          <div id="loader-sub">JOYDIGI OFFICE · Chuẩn bị cho ngày làm việc mới</div>
+          <div id="loader-bar"><div id="loader-fill"></div></div>
+          <div id="loader-text">Đang tải văn phòng… 0%</div>
+          <div id="loader-tip">Mẹo: kéo email vào đúng nhóm để nhận thêm điểm.</div>
+        </div>
+      </div>
+    </div>
+    <div id="rotate-hint" hidden>
+      <img src="assets/rotate-device.png" alt="">
+      <div>Xoay ngang điện thoại để chơi thoải mái hơn</div>
+      <button id="rotate-ok" type="button">Chơi ngay</button>
+    </div>
+    <div id="error-box" hidden></div>
+  </div>
+  <script>
+  (function () {
+    var BREAKPOINT = 1400;          // container width at which the game fills the whole iframe
+    var game = document.getElementById('game');
+    var canvas = document.getElementById('unity-canvas');
+    var instance = null, unityReady = false, lastLayout = '';
+    var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    var ua = navigator.userAgent || '';
+    function mq(q) { return !!(window.matchMedia && window.matchMedia(q).matches); }
+    // Phones and tablets: a touch-only pointer, a mobile user agent, or iPadOS (which reports itself as a Mac).
+    // A desktop with a touch screen still has a hovering pointer, so it keeps the desktop rules.
+    var isMobile = (mq('(pointer: coarse)') && !mq('(hover: hover)')) || /iPhone|iPad|iPod|Android|Mobile/i.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var hintDismissed = false;
+    var parentSafe = { l: 0, t: 0, r: 0, b: 0 };   // insets sent by the host page (see Documentation/gamehihi-iframe)
+
+    // ---- language -----------------------------------------------------------------------------
+    // Hints for Unity (LanguageSelect.cs decides: url > saved > page > browser > Vietnamese). GameHiHi's site paths are
+    // /vi/ /en/ /id/ /br/ – "br" means Brazilian Portuguese (pt-BR), it is not a locale code.
+    function normLang(c) {
+      c = String(c || '').trim().replace('_', '-').toLowerCase();
+      if (c === 'vi' || c.indexOf('vi-') === 0) return 'vi';
+      if (c === 'en' || c.indexOf('en-') === 0) return 'en';
+      if (c === 'id' || c === 'in' || c.indexOf('id-') === 0 || c.indexOf('in-') === 0) return 'id';
+      if (c === 'br' || c === 'pt' || c.indexOf('pt-') === 0) return 'pt-BR';
+      return null;
+    }
+    function langFromPath(p) { var m = /(?:^|\/)(vi|en|id|br)(?:\/|$)/i.exec(p || ''); return m ? normLang(m[1]) : null; }
+    var langHints = { url: null, saved: null, page: null, browser: null };
+    try { langHints.url = normLang(new URLSearchParams(location.search).get('lang')) || langFromPath(location.pathname); } catch (e) {}
+    try { langHints.saved = normLang(localStorage.getItem('mnltk_lang')); } catch (e) {}
+    try { if (document.referrer) langHints.page = langFromPath(new URL(document.referrer).pathname); } catch (e) {}
+    try { langHints.browser = (navigator.languages || [navigator.language]).map(normLang).filter(Boolean)[0] || null; } catch (e) {}
+    // Only GameHiHi (and a local test host) may tell the game its language; nothing reads the parent page's DOM.
+    var LANG_ORIGIN = /^https?:\/\/([a-z0-9-]+\.)*gamehihi\.com(:\d+)?$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
+    var uiLang = langHints.url || langHints.saved || langHints.page || langHints.browser || 'vi';
+    var TEXT = {
+      vi: { title: 'Một Ngày Làm Thư Ký', sub: 'JOYDIGI OFFICE · Chuẩn bị cho ngày làm việc mới', loading: 'Đang tải văn phòng… ', error: 'Không thể khởi động trò chơi: ', retry: 'Tải lại',
+        rotate: 'Xoay ngang điện thoại để chơi thoải mái hơn', play: 'Chơi ngay',
+        tips: ['Mẹo: kéo email vào đúng nhóm để nhận thêm điểm.', 'Mẹo: hoàn thành nhiệm vụ trước hạn để được thưởng.', 'Mẹo: trò chuyện với đồng nghiệp để tăng thân thiết.', 'Mẹo: mở rộng văn phòng để có thêm phòng làm việc mới.', 'Mẹo: nghỉ ở pantry giúp hồi thể lực.'] },
+      en: { title: "A Secretary's Day", sub: 'JOYDIGI OFFICE · Getting ready for a new workday', loading: 'Loading the office… ', error: 'The game could not start: ', retry: 'Reload',
+        rotate: 'Turn your phone sideways to play comfortably', play: 'Play now',
+        tips: ['Tip: drag each e-mail into the right group for bonus points.', 'Tip: finish tasks before the deadline to earn rewards.', 'Tip: chat with colleagues to grow closer.', 'Tip: expand the office to unlock new rooms.', 'Tip: a break in the pantry restores your energy.'] },
+      id: { title: 'Sehari Jadi Sekretaris', sub: 'JOYDIGI OFFICE · Bersiap untuk hari kerja baru', loading: 'Memuat kantor… ', error: 'Game tidak dapat dimulai: ', retry: 'Muat ulang',
+        rotate: 'Putar ponsel ke posisi mendatar agar lebih nyaman bermain', play: 'Main sekarang',
+        tips: ['Tips: seret email ke kelompok yang tepat untuk poin tambahan.', 'Tips: selesaikan tugas sebelum tenggat untuk mendapat hadiah.', 'Tips: mengobrol dengan rekan kerja agar makin akrab.', 'Tips: perluas kantor untuk membuka ruangan baru.', 'Tips: istirahat di pantry memulihkan energi.'] },
+      'pt-BR': { title: 'Um Dia de Secretária', sub: 'JOYDIGI OFFICE · Preparando um novo dia de trabalho', loading: 'Carregando o escritório… ', error: 'Não foi possível iniciar o jogo: ', retry: 'Recarregar',
+        rotate: 'Gire o celular na horizontal para jogar com mais conforto', play: 'Jogar agora',
+        tips: ['Dica: arraste cada e-mail para o grupo certo e ganhe pontos extras.', 'Dica: conclua as tarefas antes do prazo para ganhar recompensas.', 'Dica: converse com os colegas para ficar mais próxima deles.', 'Dica: amplie o escritório para abrir novas salas.', 'Dica: uma pausa na copa recupera sua energia.'] }
+    };
+    function L() { return TEXT[uiLang] || TEXT.vi; }
+    function applyPageText() {
+      var t = L();
+      document.documentElement.lang = uiLang;
+      document.title = t.title;
+      document.getElementById('loader-title').textContent = t.title;
+      document.getElementById('loader-sub').textContent = t.sub;
+      document.querySelector('#rotate-hint div').textContent = t.rotate;
+      document.getElementById('rotate-ok').textContent = t.play;
+    }
+    applyPageText();
+    window.addEventListener('message', function (e) {
+      var d = e.data;
+      if (e.source !== window.parent || !LANG_ORIGIN.test(e.origin || '') || !d || d.type !== 'gamehihi:lang') return;
+      var l = normLang(d.lang);
+      if (!l) return;
+      langHints.page = l;
+      if (instance && unityReady) instance.SendMessage('WebBridge', 'OnPageLanguage', l);
+    });
+
+    // ---- layout -----------------------------------------------------------------------------
+    // Desktop, < 1400 px wide: 16:9 play area (letterboxed if the iframe is too short).
+    // Desktop, >= 1400 px wide: fill the container completely.
+    // Phone / tablet: always fill the container (no pillarbox in landscape); Unity widens the camera view instead of
+    // stretching, and the HUD keeps clear of the safe-area insets.
+    // Phone held in portrait: the canvas fills the portrait area and Unity renders the game rotated 90°,
+    // so input coordinates stay native (no CSS rotation, no coordinate remapping needed).
+    function containerSize() {
+      var r = game.getBoundingClientRect();
+      var w = Math.round(r.width) || window.innerWidth, h = Math.round(r.height) || window.innerHeight;
+      return { w: w, h: h };
+    }
+
+    // env(safe-area-inset-*) of this document (non-zero when the game page itself is the top-level page on a notched
+    // phone), combined with what the host page reports for the area the iframe covers.
+    var safeProbe = document.createElement('div');
+    safeProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;' +
+      'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+    document.body.appendChild(safeProbe);
+    function safeArea() {
+      var cs = getComputedStyle(safeProbe);
+      function v(own, host) { return Math.min(64, Math.max(parseFloat(own) || 0, host || 0)); }
+      return { l: v(cs.paddingLeft, parentSafe.l), t: v(cs.paddingTop, parentSafe.t), r: v(cs.paddingRight, parentSafe.r), b: v(cs.paddingBottom, parentSafe.b) };
+    }
+    window.addEventListener('message', function (e) {
+      var d = e.data;
+      if (e.source !== window.parent || !d || d.type !== 'gamehihi:viewport' || !d.safe) return;
+      function n(x) { x = +x; return isFinite(x) && x > 0 ? x : 0; }
+      parentSafe = { l: n(d.safe.left), t: n(d.safe.top), r: n(d.safe.right), b: n(d.safe.bottom) };
+      layout();
+    });
+
+    function layout() {
+      var c = containerSize();
+      var W = c.w, H = c.h;
+      var rotated = isMobile && H > W * 1.05;
+      var lw = rotated ? H : W, lh = rotated ? W : H;   // logical (landscape) container
+      var gw, gh, mode;
+      if (isMobile) {
+        mode = 'mobile';
+        gw = lw; gh = lh;
+      } else if (lw < BREAKPOINT) {
+        mode = 'fit16x9';
+        gw = lw; gh = Math.round(lw * 9 / 16);
+        if (gh > lh) { gh = lh; gw = Math.round(lh * 16 / 9); }
+      } else {
+        mode = 'fill';
+        gw = lw; gh = lh;
+      }
+      var cw = rotated ? gh : gw, ch = rotated ? gw : gh;  // physical canvas size
+      canvas.style.width = cw + 'px';
+      canvas.style.height = ch + 'px';
+      canvas.style.left = Math.round((W - cw) / 2) + 'px';
+      canvas.style.top = Math.round((H - ch) / 2) + 'px';
+      document.documentElement.classList.toggle('rotated', rotated);
+      var s = isMobile ? safeArea() : { l: 0, t: 0, r: 0, b: 0 };
+      var info = { w: cw, h: ch, cw: W, ch: H, dpr: window.devicePixelRatio || 1, rotated: rotated, mode: mode, touch: isTouch,
+        mobile: isMobile, sl: s.l, st: s.t, sr: s.r, sb: s.b };
+      var json = JSON.stringify(info);
+      window.MNLT.layout = info;
+      if (json !== lastLayout && instance && unityReady) {
+        lastLayout = json;
+        instance.SendMessage('WebBridge', 'OnLayout', json);
+      }
+      updateRotateHint(rotated);
+    }
+
+    function updateRotateHint(rotated) {
+      var hint = document.getElementById('rotate-hint');
+      hint.hidden = !(rotated && !hintDismissed && unityReady);
+    }
+
+    // ---- fullscreen + orientation lock (only allowed after a user gesture; may be refused in iframes) ----
+    function toggleFullscreen() {
+      var d = document;
+      var fsEl = d.fullscreenElement || d.webkitFullscreenElement;
+      if (fsEl) { (d.exitFullscreen || d.webkitExitFullscreen).call(d); return; }
+      var req = game.requestFullscreen || game.webkitRequestFullscreen;
+      if (!req) return;
+      try {
+        var p = req.call(game, { navigationUI: 'hide' });
+        if (p && p.then) p.then(lockLandscape).catch(function () {});
+      } catch (e) {}
+    }
+    function lockLandscape() {
+      try {
+        if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(function () {});
+      } catch (e) {}
+    }
+
+    document.getElementById('rotate-ok').addEventListener('click', function () {
+      hintDismissed = true;
+      updateRotateHint(false);
+      if (isTouch) toggleFullscreen();   // best effort: fullscreen + landscape lock where the browser allows it
+    });
+
+    // ---- bridge used by WebBridge.jslib and by the automated browser tests ----
+    window.MNLT = {
+      layout: null,
+      reports: [],
+      onUnityReady: function () { unityReady = true; lastLayout = ''; layout(); },
+      toggleFullscreen: toggleFullscreen,
+      report: function (s) { try { window.MNLT.reports.push(JSON.parse(s)); } catch (e) { window.MNLT.reports.push(s); } },
+      send: function (cmd) { if (instance) instance.SendMessage('WebBridge', 'TestCommand', typeof cmd === 'string' ? cmd : JSON.stringify(cmd)); },
+      relayout: function () { lastLayout = ''; layout(); },
+      langHints: langHints,
+      setLang: function (l) { l = normLang(l); if (l) { uiLang = l; applyPageText(); } }
+    };
+
+    if (window.ResizeObserver) new ResizeObserver(layout).observe(game);
+    window.addEventListener('resize', layout);
+    window.addEventListener('orientationchange', function () { setTimeout(layout, 150); });
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', layout);
+    document.addEventListener('fullscreenchange', layout);
+    document.addEventListener('visibilitychange', function () {
+      if (instance) instance.SendMessage('WebBridge', 'OnVisibility', document.visibilityState);
+    });
+    window.addEventListener('pagehide', function () {
+      if (instance) instance.SendMessage('WebBridge', 'OnVisibility', 'hidden');
+    });
+    layout();
+
+    // ---- GameHiHi score (GameHiHiApi.cs ↔ GameHiHiBridge.jslib) ----------------------------------
+    // Every day result goes to POST /wp-json/gamehihi-api/v1/end-game (API Bridge v1.0.10, then Event Score):
+    // direct : the page served by Event Score on gamehihi.com (same origin) for a guest: the request of the CMD test,
+    //          form-urlencoded, credentials same-origin – WordPress keeps the guest session (HttpOnly ghes_guest_v205).
+    // core   : the same page for a logged-in WordPress account: its injected GameHiHiEndGame (the Bridge accepts a
+    //          logged-in user only with the nonce of its shortcode page, which this page does not have).
+    // bridge : the game on another origin (Cloudflare R2) in a WordPress page with the [gamehihi_api_game] shortcode:
+    //          gamehihi-api-client.js handshake, then the same postMessage protocol (error codes kept for the game).
+    // offline: no WordPress around the game; nothing is saved online and the game says so.
+    // ghm-*  : GameHiHi Game Manager (js/gamehihi-scores.js), a second store independent of the four above.
+    // No nonce, secret, cookie or credential is read or stored here: WordPress and the parent page hold them.
+    window.MNLT.ghh = (function () {
+      var SLUG = 'mot-ngay-lam-thu-ky';
+      var status = { transport: 'connecting', scoringEnabled: true, loggedIn: false, player: '', season: '', best: -1, total: -1, ghm: 'off', ghmChannel: '', ghmGame: '' };
+      var ready = false, started = false, parentOrigin = '', pend = {}, seq = 0;
+      var core = window.GameHiHiDirectEventScoreConfig;
+      function toUnity(method, obj) { if (instance && unityReady) instance.SendMessage('GameHiHi', method, JSON.stringify(obj)); }
+      function push() { if (ready) toUnity('OnStatus', status); }
+      function num(v) { v = Number(v); return isFinite(v) ? Math.floor(v) : -1; }
+      function err(e) {
+        e = e || {}; var d = e.data && typeof e.data === 'object' ? e.data : {};
+        return { code: String(e.code || d.code || 'api_error').slice(0, 60), message: String(e.message || d.message || '').slice(0, 300) };
+      }
+      function withTimeout(p, ms) {
+        return new Promise(function (res, rej) {
+          var t = setTimeout(function () { rej({ code: 'timeout', message: 'No answer in ' + Math.round(ms / 1000) + ' s' }); }, ms);
+          p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); });
+        });
+      }
+      function readJson(r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok) throw { code: (j && j.code) || 'http_' + r.status, message: j && j.message };
+          return j;
+        });
+      }
+      function coreScores() {
+        var dbg = window.GameHiHiEventScoreDebug;
+        if (dbg && dbg.getBest) { status.best = num(dbg.getBest()); status.total = num(dbg.getTotal()); }
+      }
+      // API Bridge parent: gamehihi.com (or a subdomain, from the referrer); https://localhost only for the local test host.
+      // Any other embedding page gets no handshake at all (nothing is posted to an origin that is not the parent).
+      function pickParent() {
+        var q = ''; try { q = new URLSearchParams(location.search).get('ghapi_parent') || ''; } catch (e) {}
+        if (/^https:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(q)) return q;
+        var ref = ''; try { ref = document.referrer ? new URL(document.referrer).origin : ''; } catch (e) {}
+        return /^https:\/\/([a-z0-9-]+\.)*gamehihi\.com$/i.test(ref) ? ref : '';
+      }
+      window.addEventListener('message', function (e) {
+        if (!parentOrigin || e.source !== window.parent || e.origin !== parentOrigin) return;
+        var d = e.data;
+        if (!d || d.type !== 'gamehihi:api:response' || !pend[d.requestId]) return;
+        var p = pend[d.requestId]; delete pend[d.requestId];
+        if (d.payload && d.payload.ok) p.res(d.payload.data); else p.rej((d.payload && d.payload.error) || {});
+      });
+      // Same messages as GameHiHiAPI.prototype.send, but the error code reaches the game (the SDK keeps only the text).
+      function bridgeSend(action, payload) {
+        var rid = 'mnltk_' + Date.now().toString(36) + '_' + (++seq);
+        return withTimeout(new Promise(function (res, rej) {
+          pend[rid] = { res: res, rej: rej };
+          window.parent.postMessage({ type: 'gamehihi:api:' + action, requestId: rid, payload: payload || {} }, parentOrigin);
+        }), 20000).catch(function (e) { delete pend[rid]; throw e; });
+      }
+      // GET /me (Event Score): period=season gives this season's score per game, the one the Top 25 ranks.
+      function meScores(d) {
+        d = d || {};
+        if (d.games && d.games[SLUG] != null) status.best = num(d.games[SLUG]);
+        else if (d.best_score != null) status.best = num(d.best_score);
+        if (d.total_score != null) status.total = num(d.total_score);
+        if (d.player_label) status.player = String(d.player_label).slice(0, 60);
+        push(); return d;
+      }
+      function refreshMe() { return bridgeSend('me', { period: 'season' }).then(meScores); }
+      var API = location.origin + '/wp-json/gamehihi-api/v1/';
+      function directMe() {
+        return withTimeout(fetch(API + 'me?game_slug=' + SLUG + '&period=season', { credentials: 'same-origin', cache: 'no-store' }).then(readJson), 15000).then(meScores);
+      }
+      // The CMD request: game_slug, score, run_id, result, mode, meta[day|points|tasks_done|tasks_total|on_time].
+      function directEndGame(p) {
+        var body = new URLSearchParams();
+        body.set('game_slug', SLUG);
+        body.set('score', String(p.score));
+        body.set('run_id', String(p.run_id || p.runId || ''));
+        body.set('result', String(p.result));
+        body.set('mode', String(p.mode));
+        var m = p.meta || {};
+        ['day', 'points', 'tasks_done', 'tasks_total', 'on_time'].forEach(function (k) { if (m[k] != null) body.set('meta[' + k + ']', String(m[k])); });
+        return withTimeout(fetch(API + 'end-game', { method: 'POST', credentials: 'same-origin', cache: 'no-store', body: body }).then(readJson), 25000);
+      }
+      // GA4 of a saved day, as the Event Score page sends it after its own GameHiHiEndGame (game_score, score_submit,
+      // game_end to the game's and the Master property, its common parameters already set with gtag('set')).
+      // Only for a new save: a duplicate answer sends nothing.
+      var playFrom = 0;
+      ['pointerdown', 'touchstart', 'keydown'].forEach(function (ev) { window.addEventListener(ev, function () { if (!playFrom) playFrom = Date.now(); }, { passive: true, once: true }); });
+      function mid(v) { v = String(v || '').trim().toUpperCase(); return /^G-[A-Z0-9]{4,20}$/.test(v) ? v : ''; }
+      function directGa4(p, j) {
+        if (!j || !j.saved || typeof window.gtag !== 'function') return;
+        var targets = [];
+        [mid(core.ga4MeasurementId), Number(core.ga4MasterEnabled) ? mid(core.ga4MasterMeasurementId) : ''].forEach(function (id) { if (id && targets.indexOf(id) < 0) targets.push(id); });
+        var m = p.meta || {};
+        var data = { score: Math.max(0, Math.floor(Number(j.score != null ? j.score : p.score) || 0)), mode: String(p.mode), result: String(p.result),
+          play_time_seconds: playFrom ? Math.floor((Date.now() - playFrom) / 1000) : 0, submit_source: 'day_saved',
+          game_day: m.day, game_points: m.points, game_tasks_done: m.tasks_done, game_tasks_total: m.tasks_total, game_on_time: m.on_time };
+        ['game_score', 'score_submit', 'game_end'].forEach(function (name) {
+          targets.forEach(function (id) { try { window.gtag('event', name, Object.assign({}, data, { send_to: id })); } catch (e) {} });
+        });
+      }
+      // GameHiHi Game Manager: every finished day also goes to POST /api/public/v1/scores of the Manager Worker (D1),
+      // whatever Event Score answers. The SDK finds the game from the Player URL (/games/<slug>/ → live, /preview/<id>/ →
+      // preview); on any other page the game names itself. The Manager takes a POST only from its Player origin, its
+      // SCORE_ALLOWED_ORIGINS and localhost (elsewhere: origin_not_allowed, shown by the game). Player: the SDK's anonymous
+      // id (localStorage), or the one the parent page sends with gamehihi:player – then its name is kept too.
+      var ghm = window.GameHiHiScores, ghmNamed = false;
+      (function ghmSetup() {
+        if (!ghm || typeof ghm.submit !== 'function') return;
+        try {
+          var q = ''; try { q = new URLSearchParams(location.search).get('ghm_api') || ''; } catch (e) {}
+          if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(q)) ghm.init({ apiBase: q });   // a local test Manager only
+          else if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return;     // local pages never write to the real Manager
+          var c = ghm.config();
+          if (!c.game && !c.deployment) c = ghm.init({ game: SLUG });
+          if (!c.apiBase) return;
+          status.ghm = 'ready'; status.ghmChannel = c.channel; status.ghmGame = c.game || '';
+        } catch (e) { return; }
+        window.addEventListener('message', function (e) {
+          if (e.source === window.parent && e.data && e.data.type === 'gamehihi:player') ghmNamed = true;
+        });
+      })();
+      function ghmCall(action, p) {
+        if (status.ghm !== 'ready') return Promise.reject({ code: 'ghm_off', message: 'GameHiHi Manager SDK not loaded' });
+        var run;
+        if (action === 'ghm-submit') {
+          if (!ghmNamed && p.name) try { ghm.setPlayer({ name: String(p.name) }, { persist: false }); } catch (e) {}
+          run = ghm.submit(Number(p.score), { durationMs: p.durationMs >= 0 ? p.durationMs : undefined, meta: p.meta || {} });
+        } else if (action === 'ghm-leaderboard') run = ghm.getLeaderboard({ limit: p.limit || 25, period: p.period || 'all' });
+        else if (action === 'ghm-player') run = ghm.getPlayerStats({});
+        else return Promise.reject({ code: 'bad_action' });
+        // SDK errors carry code + status; a fetch that never reached the server (CSP, DNS, offline) has no code.
+        return withTimeout(run, 25000).catch(function (e) {
+          var x = { code: (e && e.code) || 'network', message: e && e.message };
+          try { console.warn('[GameHiHi Manager] ' + action + ': ' + x.code + (x.message ? ' – ' + x.message : '')); } catch (w) {}
+          throw x;
+        });
+      }
+      (function setup() {
+        if (core && core.enabled && (!core.gameSlug || core.gameSlug === SLUG)) {
+          status.loggedIn = !!core.loggedIn; status.player = String(core.currentUserName || '');
+          status.season = String(core.seasonKey || ''); status.best = num(core.initialScore); status.total = num(core.initialTotalScore);
+          // API Bridge has no all-season total: shown as unknown rather than the page's load-time number.
+          if (!core.loggedIn) { status.transport = 'direct'; status.total = -1; directMe().catch(function () {}); return; }
+          if (typeof window.GameHiHiEndGame === 'function') { status.transport = 'core'; return; }
+        }
+        if (window.parent !== window && typeof window.GameHiHiAPI === 'function') {
+          parentOrigin = pickParent();
+          if (parentOrigin) try {
+            new window.GameHiHiAPI({ parentOrigin: parentOrigin });   // official handshake: ready → init
+            window.addEventListener('gamehihi:api-ready', function (e) {
+              var d = e.detail || {};
+              status.transport = 'bridge'; status.scoringEnabled = d.scoringEnabled !== false;
+              push(); refreshMe().catch(function () {});
+            });
+            setTimeout(function () { if (status.transport === 'connecting') { status.transport = 'offline'; push(); } }, 8000);
+            return;
+          } catch (e) { parentOrigin = ''; }
+        }
+        status.transport = 'offline';
+      })();
+      function call(action, id, payloadJson) {
+        var p = {}; try { p = JSON.parse(payloadJson || '{}'); } catch (e) {}
+        var promise = null;
+        if (action.indexOf('ghm-') === 0) promise = ghmCall(action, p);
+        else if (status.transport === 'direct') {
+          if (action === 'end-game') promise = directEndGame(p).then(function (d) { directGa4(p, d); directMe().catch(function () {}); return d; });
+          else if (action === 'leaderboard') promise = withTimeout(fetch(API + 'leaderboard?game_slug=' + SLUG, { credentials: 'same-origin', cache: 'no-store' }).then(readJson), 15000);
+          else if (action === 'me') promise = directMe();
+          else if (action === 'track') promise = Promise.resolve({ skipped: 'the Event Score page sends its own GA4 events' });
+        } else if (status.transport === 'core') {
+          if (action === 'end-game') {
+            promise = withTimeout(Promise.resolve(window.GameHiHiEndGame({ score: p.score, mode: p.mode, result: p.result, run_id: p.run_id, meta: p.meta })), 25000)
+              .then(function (j) { coreScores(); push(); return j; });
+          } else if (action === 'leaderboard') {
+            promise = withTimeout(fetch(location.origin + '/wp-json/gamehihi-api/v1/leaderboard?game_slug=' + SLUG, { credentials: 'same-origin' }).then(readJson), 15000);
+          } else if (action === 'me') {
+            coreScores();
+            promise = Promise.resolve({ best_score: status.best, total_score: status.total, player: status.player, season_key: status.season });
+          } else if (action === 'track') {
+            promise = Promise.resolve({ skipped: 'the Event Score page sends its own GA4 events' });
+          }
+        } else if (status.transport === 'bridge') {
+          if (action === 'end-game') promise = bridgeSend('end-game', p).then(function (d) { refreshMe().catch(function () {}); return d; });
+          else if (action === 'leaderboard') promise = bridgeSend('leaderboard', {});
+          else if (action === 'me') promise = refreshMe();
+          else if (action === 'track') {
+            if (p.eventName === 'game_start' && started) promise = Promise.resolve({ skipped: 'already sent' });
+            else { if (p.eventName === 'game_start') started = true; promise = bridgeSend('event', { eventName: p.eventName, meta: p.meta || {}, score: p.score || 0 }); }
+          }
+        }
+        if (!promise) promise = Promise.reject({ code: status.transport === 'offline' ? 'offline' : 'not_ready', message: 'GameHiHi is not connected' });
+        promise.then(function (data) { toUnity('OnResult', { id: id, ok: true, data: JSON.stringify(data == null ? {} : data) }); },
+          function (e) { var x = err(e); toUnity('OnResult', { id: id, ok: false, code: x.code, message: x.message }); });
+      }
+      return { init: function () { ready = true; push(); }, call: call, status: function () { return status; } };
+    })();
+
+    // ---- Unity loader -------------------------------------------------------------------------
+    var buildUrl = 'Build';
+    var config = {
+      dataUrl: buildUrl + '/mot-ngay-lam-thu-ky-0225b4c291.data.unityweb',
+      frameworkUrl: buildUrl + '/mot-ngay-lam-thu-ky-0225b4c291.framework.js.unityweb',
+      codeUrl: buildUrl + '/mot-ngay-lam-thu-ky-0225b4c291.wasm.unityweb',
+      streamingAssetsUrl: 'StreamingAssets',
+      companyName: "JOYDIGI",
+      productName: "Một Ngày Làm Thư Ký",
+      productVersion: "1.0.0",
+      // Crisp on retina screens without paying for 3x rendering on phones.
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, isTouch ? 2 : 2.5),
+      matchWebGLToCanvasSize: true
+    };
+
+    var fill = document.getElementById('loader-fill'), text = document.getElementById('loader-text');
+    // Rotating tips while the build downloads.
+    var tips = L().tips;
+    var tipEl = document.getElementById('loader-tip'), tipIdx = 0;
+    tipEl.textContent = tips[0];
+    text.textContent = L().loading + '0%';
+    var tipTimer = setInterval(function () { tipIdx = (tipIdx + 1) % tips.length; tipEl.textContent = tips[tipIdx]; }, 3000);
+    var script = document.createElement('script');
+    script.src = buildUrl + '/mot-ngay-lam-thu-ky-0225b4c291.loader.js';
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (p) {
+        var pct = Math.round(p * 100);
+        fill.style.width = pct + '%';
+        text.textContent = L().loading + pct + '%';
+      }).then(function (inst) {
+        instance = inst;
+        window.MNLT.instance = inst;
+        clearInterval(tipTimer);
+        document.getElementById('loader').classList.add('done');
+        setTimeout(function () { document.getElementById('loader').hidden = true; }, 400);
+        layout();
+      }).catch(function (msg) {
+        // A crash inside the engine arrives as a WebAssembly.Exception, which prints as "[object …]": log the
+        // object for the console and show its type, plus a reload button.
+        console.error('[MNLT] startup failed', msg);
+        var box = document.getElementById('error-box');
+        box.hidden = false;
+        box.textContent = L().error + String((msg && msg.message) || (typeof msg === 'string' ? msg : (msg && msg.constructor && msg.constructor.name) || msg)).split(/\r?\n/)[0].slice(0, 160) + ' ';
+        var again = document.createElement('button');
+        again.type = 'button';
+        again.textContent = L().retry;
+        again.style.cssText = 'margin-left:8px;padding:4px 12px;border:0;border-radius:8px;background:#e8456b;color:#fff;font:inherit;cursor:pointer';
+        again.onclick = function () { location.reload(); };
+        box.appendChild(again);
+      });
+    };
+    document.body.appendChild(script);
+  })();
+  </script>
+</body>
+</html>

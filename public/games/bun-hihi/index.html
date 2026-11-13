@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Bún HiHi – Quán Đêm</title>
+  <!-- Game được nhúng bằng iframe: bố cục theo KHUNG iframe, không theo màn hình thiết bị. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1A0F08">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="assets/icon.png">
+  <!-- Bảng xếp hạng GameHiHi (SCORES_API.md): tự nhận game từ /games/<slug>/; async để không chặn tải game, lỗi tải thì game vẫn chạy -->
+  <script async src="js/gamehihi-scores.js"></script>
+  <style>
+    :root { --ink: #1A0F08; --cream: #FFF2D6; --gold: #FFD25A; --green: #3FBF4F; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      background: var(--ink); color: var(--cream);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%;
+    }
+    /* Khung chứa canvas — ResizeObserver đo phần tử này (CSS px của iframe). */
+    #bhh-frame { position: fixed; inset: 0; background: var(--ink); }
+    #unity-canvas { display: block; width: 100%; height: 100%; background: var(--ink); touch-action: none; outline: none; }
+    #bhh-loading {
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      background: #1A0F08 url('assets/loading_bg.jpg') center / cover no-repeat;
+      transition: opacity .45s ease; padding: 20px; text-align: center;
+    }
+    #bhh-loading.hide { opacity: 0; pointer-events: none; }
+    .bhh-logo { font-size: clamp(34px, 8vw, 76px); font-weight: 900; letter-spacing: 1px; margin: 0; line-height: 1; }
+    .bhh-logo .a { color: #FFC66A; text-shadow: 0 0 18px rgba(255,90,40,.8), 0 3px 0 #5A1E08; }
+    .bhh-logo .b { color: #C8F6FF; text-shadow: 0 0 18px rgba(40,150,255,.9), 0 3px 0 #0A2A5A; }
+    .bhh-sub { margin: 0; font-size: clamp(12px, 2.4vw, 17px); color: #F3DDB4; max-width: 40ch; line-height: 1.45; }
+    .bhh-hero { height: clamp(90px, 22vh, 200px); filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
+    .bhh-track { width: min(70%, 380px); height: 14px; background: #3A2412; border: 2px solid #C88A3C; border-radius: 99px; overflow: hidden; }
+    .bhh-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2E9E3C, #6BDB52); transition: width .2s ease; }
+    .bhh-pct { font-size: 13px; color: #E7CFA6; font-variant-numeric: tabular-nums; }
+    #bhh-error { position: absolute; inset: 0; display: none; z-index: 20; align-items: center; justify-content: center; flex-direction: column; gap: 14px; padding: 28px; background: var(--ink); text-align: center; }
+    #bhh-error.show { display: flex; }
+    .bhh-btn { appearance: none; border: 0; cursor: pointer; background: var(--green); color: #fff; font-weight: 800; font-size: 17px; padding: 12px 24px; border-radius: 12px; min-height: 44px; }
+  </style>
+</head>
+<body>
+  <div id="bhh-frame">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="bhh-loading">
+      <img class="bhh-hero" src="assets/server.png" alt="">
+      <h1 class="bhh-logo"><span class="a">BÚN</span> <span class="b">HiHi</span></h1>
+      <p class="bhh-sub">Quán bún đêm ven sông đang lên đèn, ninh nồi nước dùng…</p>
+      <div class="bhh-track"><div class="bhh-fill" id="bhh-fill"></div></div>
+      <div class="bhh-pct" id="bhh-pct">0%</div>
+    </div>
+    <div id="bhh-error">
+      <h1 class="bhh-logo"><span class="a">BÚN</span> <span class="b">HiHi</span></h1>
+      <p class="bhh-sub" id="bhh-error-msg">Trình duyệt không tải được game.</p>
+      <button class="bhh-btn" onclick="location.reload()">Thử lại</button>
+      <p class="bhh-sub">Game cần WebGL 2. Hãy dùng Chrome, Edge, Safari hoặc Firefox bản mới.</p>
+    </div>
+  </div>
+  <script>
+  (function () {
+    'use strict';
+    var canvas = document.querySelector('#unity-canvas');
+    var loading = document.querySelector('#bhh-loading');
+    var fill = document.querySelector('#bhh-fill');
+    var pct = document.querySelector('#bhh-pct');
+    window.__bhh = window.__bhh || {};
+
+    window.BHHLoadingDone = function () {
+      loading.classList.add('hide');
+      setTimeout(function () { loading.style.display = 'none'; }, 500);
+    };
+    function showError(msg) {
+      document.querySelector('#bhh-error-msg').textContent = msg || 'Trình duyệt không tải được game.';
+      document.querySelector('#bhh-error').classList.add('show');
+      loading.style.display = 'none';
+      window.__bhh.loadError = msg;
+    }
+    try {
+      var probe = document.createElement('canvas');
+      if (!probe.getContext('webgl2')) { showError('Trình duyệt này không hỗ trợ WebGL 2.'); return; }
+    } catch (e) { showError('Trình duyệt này không hỗ trợ WebGL.'); return; }
+
+    var buildUrl = 'Build';
+    var config = {
+      dataUrl: buildUrl + '/WebGLBuild_TenNguoiChoi.data.unityweb',
+      frameworkUrl: buildUrl + '/WebGLBuild_TenNguoiChoi.framework.js.unityweb',
+      codeUrl: buildUrl + '/WebGLBuild_TenNguoiChoi.wasm.unityweb',
+      streamingAssetsUrl: 'StreamingAssets',
+      companyName: 'JoyDigi',
+      productName: 'Bún HiHi',
+      productVersion: '1.0.0',
+      matchWebGLToCanvasSize: true,
+      // Giới hạn mật độ điểm ảnh: sắc nét trên màn hình Retina nhưng không quá tải máy yếu.
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, (navigator.hardwareConcurrency || 4) <= 4 ? 1.5 : 2),
+      showBanner: function (msg, type) { if (type === 'error') showError(msg); else console.log('[Bún HiHi]', msg); }
+    };
+
+    var script = document.createElement('script');
+    script.src = buildUrl + '/WebGLBuild_TenNguoiChoi.loader.js';
+    script.onerror = function () { showError('Không tải được tệp game. Kiểm tra đường dẫn hoặc thử lại.'); };
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (p) {
+        var v = Math.round(p * 100); fill.style.width = v + '%'; pct.textContent = v + '%';
+      }).then(function (instance) {
+        window.unityInstance = instance;
+        window.__bhh.loaded = '1';
+        setTimeout(function () { if (!loading.classList.contains('hide')) window.BHHLoadingDone(); }, 4000);
+      }).catch(function (err) { showError('Lỗi khởi động: ' + (err && err.message ? err.message : err)); });
+    };
+    document.body.appendChild(script);
+
+    // chặn trang tự cuộn / phóng to khi chạm
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); }, { passive: false }); });
+    document.addEventListener('touchmove', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    document.addEventListener('dblclick', function (e) { e.preventDefault(); }, { passive: false });
+    canvas.addEventListener('pointerdown', function () { canvas.focus(); });
+  })();
+  </script>
+</body>
+</html>

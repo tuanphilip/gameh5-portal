@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#5d9e3e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fart Raft HiHi</title>
+<meta name="description" content="Fart Raft HiHi: co-op party game for 1-4 players. Fart together to push a bamboo raft down the river! Free, mobile & PC, 18 languages.">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#6fb84f;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;color:#3a2410;-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none;-webkit-touch-callout:none}
+canvas{display:block}
+#safe{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.ov{position:fixed;inset:0;display:flex;align-items:flex-start;justify-content:center;background:rgba(20,50,30,.35);z-index:10;padding:calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.hide{display:none!important}
+.panel{margin:auto;background:#fff8e6;border:5px solid #7a4a1d;border-radius:24px;box-shadow:0 10px 0 #5a3412,0 18px 40px rgba(0,0,0,.35);padding:16px 20px;max-width:760px;width:100%;text-align:center;position:relative}
+.mtop{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+.mtop select{font:inherit;font-weight:bold;font-size:14px;border:3px solid #7a4a1d;border-radius:12px;background:#ffe39a;color:#5a3412;padding:5px 6px;max-width:250px}
+.logo{font-size:44px;line-height:1.05;color:#ff7b29;text-shadow:3px 3px 0 #7a4a1d,-2px -2px 0 #fff;letter-spacing:1px;margin:4px 0 2px}
+.logo span{color:#38b000}
+.tag{font-weight:bold;color:#7a4a1d;margin-bottom:8px;font-size:15px}
+.sec{margin:9px 0}
+.lbl{font-weight:900;font-size:14px;color:#a0521a;text-transform:uppercase;margin-bottom:6px;letter-spacing:.5px}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.btn{font:inherit;font-weight:900;font-size:16px;border:3px solid #7a4a1d;border-radius:14px;background:#ffe39a;color:#5a3412;padding:8px 14px;cursor:pointer;box-shadow:0 4px 0 #7a4a1d;transition:transform .08s;touch-action:manipulation}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7a4a1d}
+.btn.on{background:#ff9f43;color:#fff;text-shadow:1px 1px 0 #7a4a1d}
+.big{font-size:22px;padding:12px 26px;background:#38b000;color:#fff;text-shadow:2px 2px 0 #1f6b00;border-color:#1f6b00;box-shadow:0 5px 0 #1f6b00;margin-top:8px}
+.slot{background:#fff;border:3px solid #7a4a1d;border-radius:16px;padding:6px 6px 8px;width:150px}
+.slot .pt{font-weight:900;font-size:13px;color:#fff;border-radius:8px;padding:2px 6px;display:inline-block}
+.slot .nm{font-weight:900;font-size:16px;margin-top:2px}
+.slot .ds{font-size:12px;color:#7a5a3a;min-height:30px}
+.slot .ky{font-size:12px;font-weight:bold;background:#f1e3c4;border-radius:6px;padding:2px 4px;margin-top:4px}
+.slot .ar{display:flex;align-items:center;justify-content:space-between}
+.slot .ar button{font:inherit;font-weight:900;font-size:18px;width:34px;height:34px;border-radius:50%;border:2px solid #7a4a1d;background:#ffe39a;cursor:pointer;color:#5a3412;touch-action:manipulation;flex:none}
+.slot canvas{width:90px;height:100px}
+.lv{min-width:0}
+#levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.lv.locked{opacity:.55;filter:grayscale(.7)}
+.lv.locked small{color:#7a5a3a}
+.lv small{display:block;font-size:12px;font-weight:bold;color:#8a5a2a}
+.stars{color:#ffb703;font-size:16px;text-shadow:1px 1px 0 #7a4a1d}
+details{margin-top:12px;text-align:start;background:#fdebc4;border-radius:12px;padding:8px 12px;font-size:14px}
+summary{font-weight:900;cursor:pointer;color:#a0521a}
+details li{margin:4px 0 4px 18px}
+#topbtns{position:fixed;top:calc(8px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));z-index:12;display:flex;gap:6px}
+#topbtns .btn{font-size:18px;padding:4px 10px}
+#touch{position:fixed;inset:0;z-index:4;touch-action:none}
+.res h2{font-size:38px;color:#38b000;text-shadow:2px 2px 0 #1f6b00}
+.res .bigstars{font-size:54px;color:#ffb703;text-shadow:3px 3px 0 #7a4a1d;letter-spacing:6px}
+.res table{margin:8px auto;border-collapse:collapse;font-weight:bold}
+.res td{padding:3px 10px;text-align:start}
+.res .award{background:#fdebc4;border-radius:12px;padding:8px;margin:8px 0;font-weight:900;color:#a0521a}
+@media (max-width:640px),(max-height:500px){
+ .panel{padding:10px 10px 12px;border-width:4px;border-radius:18px}
+ .logo{font-size:30px}.tag{font-size:13px}.sec{margin:6px 0}.lbl{font-size:12px;margin-bottom:4px}
+ .btn{font-size:14px;padding:7px 10px}
+ .slot{width:calc(50% - 6px);padding:4px}.slot .ds{font-size:11px;min-height:0}.slot .nm{font-size:14px}
+ .slot canvas{width:72px;height:80px}
+ #levels{grid-template-columns:repeat(2,1fr);gap:6px}.lv small{font-size:11px}.big{font-size:19px;padding:10px 18px}
+ details{font-size:13px}
+ #topbtns .btn{font-size:15px;padding:3px 8px;border-radius:11px}
+ .res h2{font-size:28px}.res .bigstars{font-size:40px}.res td{font-size:13px;padding:2px 6px}
+}
+@media (max-height:500px) and (orientation:landscape){#levels{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.slot{width:130px}.slot .ds{display:none}}
+</style>
+</head>
+<body>
+<div id="safe"></div>
+<canvas id="c"></canvas>
+<div id="touch" class="hide"></div>
+
+<div id="topbtns" class="hide">
+  <button class="btn" id="bPause">⏸</button>
+  <button class="btn" id="bMusic">🎵</button>
+  <button class="btn" id="bSfx">🔊</button>
+  <button class="btn" id="bFull">⛶</button>
+</div>
+
+<div id="menu" class="ov">
+  <div class="panel">
+    <div class="mtop"><span>🌐</span><select id="langSel"></select><button class="btn" id="mFull" style="padding:4px 10px">⛶</button></div>
+    <h1 class="logo" id="logo"></h1>
+    <p class="tag" id="tag"></p>
+    <div class="sec"><div class="lbl" id="lblPlayers"></div><div id="pcount" class="row"></div></div>
+    <div class="sec"><div class="lbl" id="lblChars"></div><div id="slots" class="row"></div></div>
+    <div class="sec"><div class="lbl" id="lblLevels"></div><div id="levels" class="row"></div></div>
+    <button id="play" class="btn big"></button>
+    <details><summary id="howSum"></summary><ul id="howList"></ul></details>
+  </div>
+</div>
+
+<div id="pause" class="ov hide">
+  <div class="panel" style="max-width:380px">
+    <h2 id="pTitle" style="font-size:32px;color:#ff7b29;text-shadow:2px 2px 0 #7a4a1d"></h2>
+    <div class="row" style="flex-direction:column;margin-top:12px">
+      <button class="btn big" id="pResume"></button>
+      <button class="btn" id="pRestart"></button>
+      <button class="btn" id="pMenu"></button>
+    </div>
+  </div>
+</div>
+
+<div id="result" class="ov hide">
+  <div class="panel res" style="max-width:460px">
+    <h2 id="rTitle"></h2>
+    <div class="bigstars" id="rStars">★★★</div>
+    <table id="rTable"></table>
+    <div class="award" id="rAward"></div>
+    <div class="row">
+      <button class="btn" id="rRetry"></button>
+      <button class="btn big" id="rNext"></button>
+      <button class="btn" id="rMenu"></button>
+    </div>
+  </div>
+</div>
+<script>
+const I18N={
+vi:{name:'Tiếng Việt',title:'FART RAFT',tag:'Xì cùng lúc – bè mới chạy! 💨 Chơi chung 1–4 người',players:'Số người chơi',pn:'{n} người',chars:'Chọn nhân vật',levels:'Chọn màn',play:'XÌ THÔI! ▶',howto:'📖 Cách chơi',
+how:['Mỗi người đứng một góc bè. <b>Xoay người</b> rồi <b>giữ nút xì hơi</b>: hơi phụt ra sau mông nên bè bị đẩy về hướng nhân vật đang nhìn.','Đứng lệch tâm mà xì lệch nhau thì bè <b>quay mòng mòng</b>. Phải hô nhau xì cho đều!','Hết hơi phải chờ hơi hồi lại. Ăn <b>🍠 khoai lang</b> để cả bè nạp đầy hơi và được <b>SIÊU XÌ</b> vài giây.','Né đá, khúc gỗ trôi, vịt. Đụng <b>chông tre</b> hoặc bị <b>xoáy nước</b> cuốn là té sông, phải về lại cờ gần nhất.','Phím: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> về cờ · <b>Esc</b> tạm dừng. Điện thoại: <b>kéo cần điều khiển</b> (1–2 người).'],
+paused:'TẠM DỪNG',resume:'Chơi tiếp ▶',restart:'🔄 Chơi lại màn',menu:'🏠 Về menu',finish:'VỀ ĐÍCH! 🎉',retry:'🔄 Chơi lại',next:'Màn tiếp ▶',time:'⏱ Thời gian',falls:'💦 Số lần té sông',goal:'🎯 Mốc 3 sao / 2 sao',record:'🏆 Kỷ lục',fartFor:'xì {s} giây',king:'👑 Vua Xì Hơi',lazy:'😴 Lười xì nhất',soloKing:'👑 {n} đã xì tổng cộng {s} giây!',
+lv:[['Kênh Làng Quê','Dễ – làm quen xì hơi'],['Ghềnh Đá Tre','Vừa – đá, gỗ trôi, chông tre'],['Xoáy Nước Ma','Khó – xoáy nước cuốn bè']],
+desc:['Cậu nhóc tóc chổm, xì nhanh như chớp','Bà bán xôi đội nón lá, xì kêu “pẹt pẹt”','Bụng bự, xì trầm như trống trận','Cô bé hai bím tóc, xì the thé'],
+tips:['Giữ nút XÌ HƠI 💨 – bè chạy theo hướng nhân vật nhìn!','Xoay người cho đúng hướng. Xì lệch nhau là bè quay mòng mòng!','Ăn 🍠 KHOAI LANG để nạp đầy hơi + SIÊU XÌ!','Tránh bèo lục bình – dính vào là chậm rì rì 🐌','Cẩn thận CHÔNG TRE – đụng vào là té sông!','Khúc gỗ trôi qua lại – canh thời điểm rồi xì!','XOÁY NƯỚC: bị hút vào giữa là bè chìm! Xì mạnh để thoát!'],
+cp:'🚩 Đã lưu cờ! Té sông sẽ quay về đây',backCp:'Về cờ gần nhất 🚩',backSuffix:'→ Về lại cờ 🚩',whirl:'Bị XOÁY NƯỚC cuốn mất rồi! 🌀',chong:'Đâm vào CHÔNG TRE! 🎋',level:'Màn',gas:'HƠI 💨',sup:'SIÊU XÌ!',empty:'HẾT HƠI',noGas:'Hết hơi!',fallBig:'TÉ SÔNG RỒI! 💦',go:'XÌ NÀO!!! 💨',potato:'KHOAI LANG',start:'BẾN XUẤT PHÁT',arch:'VỀ ĐÍCH 🏁',cpWord:'CỜ!',splash:'ÙM!!',quack:'QUẠC!',touch:'Kéo cần điều khiển',need34:'Chế độ 3–4 người cần bàn phím.',joy:'Chạm & kéo để quay + xì',landscape:'📱 Xoay ngang điện thoại để chơi 2 người thoải mái hơn',lang:'Ngôn ngữ',full:'Toàn màn hình',words:['BỦM!','PỪ!','XÌÌ~','BÚP!','PHỤT!','PẸT!','BRỪ!']},
+
+en:{name:'English',title:'FART RAFT',tag:'Fart together – or the raft won\'t move! 💨 Co-op for 1–4 players',players:'Players',pn:'{n}P',chars:'Choose characters',levels:'Choose level',play:'LET\'S FART! ▶',howto:'📖 How to play',
+how:['Each player stands on a corner of the raft. <b>Turn</b>, then <b>hold the fart button</b>: the gas blasts out behind, pushing the raft the way your character faces.','Off-center farts that don\'t match make the raft <b>spin like crazy</b>. Shout and fart in sync!','Out of gas? Wait for it to refill. Eat a <b>🍠 sweet potato</b> to refill everyone and get a few seconds of <b>SUPER FART</b>.','Dodge rocks, drifting logs and ducks. Hit the <b>bamboo spikes</b> or get sucked into a <b>whirlpool</b> and you fall in – back to the last flag.','Keys: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> last flag · <b>Esc</b> pause. Phone: <b>drag the joystick</b> (1–2 players).'],
+paused:'PAUSED',resume:'Resume ▶',restart:'🔄 Restart level',menu:'🏠 Menu',finish:'FINISH! 🎉',retry:'🔄 Retry',next:'Next level ▶',time:'⏱ Time',falls:'💦 Falls',goal:'🎯 3★ / 2★ target',record:'🏆 Best',fartFor:'farted {s}s',king:'👑 Fart King',lazy:'😴 Laziest farter',soloKing:'👑 {n} farted for {s} seconds total!',
+lv:[['Village Canal','Easy – learn to fart'],['Bamboo Rapids','Medium – rocks, logs, spikes'],['Ghost Whirlpools','Hard – whirlpools swallow rafts']],
+desc:['Spiky-haired kid, farts lightning fast','Rice seller in a conical hat, goes "pet pet"','Big belly, farts deep like a war drum','Girl with pigtails, high-pitched toots'],
+tips:['Hold the FART button 💨 – the raft goes where your character faces!','Turn to the right direction. Mismatched farts make the raft spin!','Eat a 🍠 SWEET POTATO to refill gas + SUPER FART!','Avoid the water hyacinth – it slows you to a crawl 🐌','Watch out for BAMBOO SPIKES – touch them and you fall in!','Logs drift back and forth – time it, then fart!','WHIRLPOOL: get pulled to the center and you sink! Fart hard to escape!'],
+cp:'🚩 Flag saved! You\'ll respawn here',backCp:'Back to last flag 🚩',backSuffix:'→ Back to the flag 🚩',whirl:'Swallowed by a WHIRLPOOL! 🌀',chong:'Crashed into BAMBOO SPIKES! 🎋',level:'Level',gas:'GAS 💨',sup:'SUPER FART!',empty:'NO GAS',noGas:'Out of gas!',fallBig:'SPLASH! YOU FELL IN! 💦',go:'FART!!! 💨',potato:'SWEET POTATO',start:'START DOCK',arch:'FINISH 🏁',cpWord:'FLAG!',splash:'SPLOOSH!',quack:'QUACK!',touch:'Drag the joystick',need34:'3–4 player mode needs a keyboard.',joy:'Touch & drag to turn + fart',landscape:'📱 Turn your phone sideways for easier 2-player play',lang:'Language',full:'Fullscreen',words:['PFFT!','BRRT!','TOOT!','PRRP!','FWOMP!']},
+
+pt:{name:'Português (BR)',title:'FART RAFT',tag:'Peidem juntos – senão a balsa não anda! 💨 Cooperativo de 1 a 4 jogadores',players:'Jogadores',pn:'{n}J',chars:'Escolha os personagens',levels:'Escolha a fase',play:'BORA PEIDAR! ▶',howto:'📖 Como jogar',
+how:['Cada jogador fica num canto da balsa. <b>Gire</b> e <b>segure o botão do pum</b>: o gás sai por trás e empurra a balsa para onde o personagem está olhando.','Puns fora do centro e desencontrados fazem a balsa <b>girar sem parar</b>. Combinem e soltem juntos!','Acabou o gás? Espere recarregar. Coma uma <b>🍠 batata-doce</b> para encher o gás de todos e ganhar alguns segundos de <b>SUPER PUM</b>.','Desvie de pedras, troncos e patos. Bateu nas <b>estacas de bambu</b> ou caiu no <b>redemoinho</b>? Cai na água e volta para a última bandeira.','Teclas: J1 <b>A D + W</b> · J2 <b>← → + ↑</b> · J3 <b>J L + I</b> · J4 <b>Num 4 6 + 8</b> · <b>R</b> última bandeira · <b>Esc</b> pausa. Celular: <b>arraste o joystick</b> (1–2 jogadores).'],
+paused:'PAUSADO',resume:'Continuar ▶',restart:'🔄 Reiniciar fase',menu:'🏠 Menu',finish:'CHEGADA! 🎉',retry:'🔄 Jogar de novo',next:'Próxima fase ▶',time:'⏱ Tempo',falls:'💦 Quedas na água',goal:'🎯 Meta 3★ / 2★',record:'🏆 Recorde',fartFor:'peidou {s}s',king:'👑 Rei do Pum',lazy:'😴 Mais preguiçoso',soloKing:'👑 {n} peidou {s} segundos no total!',
+lv:[['Canal da Vila','Fácil – aprenda a peidar'],['Corredeira de Bambu','Médio – pedras, troncos, estacas'],['Redemoinho Assombrado','Difícil – redemoinhos engolem a balsa']],
+desc:['Moleque de cabelo espetado, pum rapidinho','Vendedora com chapéu de palha, faz "pet pet"','Barrigudo, pum grave como tambor','Menina de maria-chiquinha, pum fininho'],
+tips:['Segure o botão do PUM 💨 – a balsa vai para onde o personagem olha!','Gire para a direção certa. Puns desencontrados fazem a balsa girar!','Coma 🍠 BATATA-DOCE para encher o gás + SUPER PUM!','Fuja do aguapé – ele deixa tudo lentinho 🐌','Cuidado com as ESTACAS DE BAMBU – encostou, caiu na água!','Os troncos vão e voltam – espere a hora certa e solte o pum!','REDEMOINHO: se for puxado pro meio, afunda! Peide forte para escapar!'],
+cp:'🚩 Bandeira salva! Você volta aqui se cair',backCp:'Voltar à última bandeira 🚩',backSuffix:'→ De volta à bandeira 🚩',whirl:'Engolido pelo REDEMOINHO! 🌀',chong:'Bateu nas ESTACAS DE BAMBU! 🎋',level:'Fase',gas:'GÁS 💨',sup:'SUPER PUM!',empty:'SEM GÁS',noGas:'Sem gás!',fallBig:'TCHIBUM! CAIU NA ÁGUA! 💦',go:'PEIDA!!! 💨',potato:'BATATA-DOCE',start:'CAIS DE PARTIDA',arch:'CHEGADA 🏁',cpWord:'BANDEIRA!',splash:'TCHIBUM!',quack:'QUÉN!',touch:'Arraste o joystick',need34:'Modo 3–4 jogadores precisa de teclado.',joy:'Toque e arraste para girar + peidar',landscape:'📱 Vire o celular na horizontal para jogar a dois',lang:'Idioma',full:'Tela cheia',words:['PUM!','PRRR!','FUUU!','PROOT!','PÔ!']},
+
+es:{name:'Español',title:'FART RAFT',tag:'¡Pedos a la vez o la balsa no avanza! 💨 Cooperativo de 1 a 4 jugadores',players:'Jugadores',pn:'{n}J',chars:'Elige personajes',levels:'Elige nivel',play:'¡A PEDORREAR! ▶',howto:'📖 Cómo jugar',
+how:['Cada jugador está en una esquina de la balsa. <b>Gira</b> y <b>mantén el botón del pedo</b>: el gas sale por detrás y empuja la balsa hacia donde mira tu personaje.','Pedos descentrados y descoordinados hacen que la balsa <b>gire como loca</b>. ¡Pónganse de acuerdo!','¿Sin gas? Espera a que se recargue. Come un <b>🍠 camote</b> para recargar a todos y tener unos segundos de <b>SÚPER PEDO</b>.','Esquiva rocas, troncos y patos. Si tocas las <b>estacas de bambú</b> o te traga un <b>remolino</b>, caes al agua y vuelves a la última bandera.','Teclas: J1 <b>A D + W</b> · J2 <b>← → + ↑</b> · J3 <b>J L + I</b> · J4 <b>Num 4 6 + 8</b> · <b>R</b> última bandera · <b>Esc</b> pausa. Móvil: <b>arrastra el joystick</b> (1–2 jugadores).'],
+paused:'PAUSA',resume:'Continuar ▶',restart:'🔄 Reiniciar nivel',menu:'🏠 Menú',finish:'¡META! 🎉',retry:'🔄 Reintentar',next:'Siguiente nivel ▶',time:'⏱ Tiempo',falls:'💦 Caídas al agua',goal:'🎯 Meta 3★ / 2★',record:'🏆 Récord',fartFor:'se tiró {s}s',king:'👑 Rey del Pedo',lazy:'😴 El más flojo',soloKing:'👑 ¡{n} se tiró pedos durante {s} segundos!',
+lv:[['Canal del Pueblo','Fácil – aprende a pedorrear'],['Rápidos de Bambú','Medio – rocas, troncos, estacas'],['Remolino Fantasma','Difícil – los remolinos tragan balsas']],
+desc:['Chico de pelo de punta, pedos rapidísimos','Vendedora con sombrero cónico, hace "pet pet"','Barrigón, pedos graves como tambor','Niña de coletas, pedos agudos'],
+tips:['Mantén el botón del PEDO 💨 – ¡la balsa va hacia donde mira tu personaje!','Gira hacia la dirección correcta. ¡Pedos descoordinados hacen girar la balsa!','¡Come 🍠 CAMOTE para recargar gas + SÚPER PEDO!','Evita el jacinto de agua – te deja lentísimo 🐌','¡Cuidado con las ESTACAS DE BAMBÚ – si las tocas, caes al agua!','Los troncos van y vienen – ¡calcula el momento y suelta el pedo!','REMOLINO: si te arrastra al centro, ¡te hundes! ¡Pedo fuerte para escapar!'],
+cp:'🚩 ¡Bandera guardada! Volverás aquí si caes',backCp:'Volver a la última bandera 🚩',backSuffix:'→ De vuelta a la bandera 🚩',whirl:'¡Te tragó el REMOLINO! 🌀',chong:'¡Chocaste con ESTACAS DE BAMBÚ! 🎋',level:'Nivel',gas:'GAS 💨',sup:'¡SÚPER PEDO!',empty:'SIN GAS',noGas:'¡Sin gas!',fallBig:'¡PLAF! ¡AL AGUA! 💦',go:'¡¡¡PEDO!!! 💨',potato:'CAMOTE',start:'MUELLE DE SALIDA',arch:'META 🏁',cpWord:'¡BANDERA!',splash:'¡PLAF!',quack:'¡CUAC!',touch:'Arrastra el joystick',need34:'El modo de 3–4 jugadores requiere teclado.',joy:'Toca y arrastra para girar + pedo',landscape:'📱 Gira el móvil en horizontal para jugar a dos',lang:'Idioma',full:'Pantalla completa',words:['¡PRRT!','¡PUM!','¡FSSS!','¡PROOT!']},
+
+id:{name:'Bahasa Indonesia',title:'FART RAFT',tag:'Kentut bareng – kalau tidak, rakit tak jalan! 💨 Co-op 1–4 pemain',players:'Jumlah pemain',pn:'{n}P',chars:'Pilih karakter',levels:'Pilih level',play:'AYO KENTUT! ▶',howto:'📖 Cara main',
+how:['Tiap pemain berdiri di sudut rakit. <b>Putar badan</b> lalu <b>tahan tombol kentut</b>: gas menyembur ke belakang dan mendorong rakit ke arah karakter menghadap.','Kentut di pinggir yang tidak kompak bikin rakit <b>berputar-putar</b>. Kompak dong!','Gas habis? Tunggu terisi lagi. Makan <b>🍠 ubi jalar</b> untuk mengisi gas semua pemain dan dapat <b>SUPER KENTUT</b> beberapa detik.','Hindari batu, kayu hanyut, dan bebek. Kena <b>ranjau bambu</b> atau tersedot <b>pusaran air</b> = jatuh ke sungai, kembali ke bendera terakhir.','Tombol: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> bendera terakhir · <b>Esc</b> jeda. HP: <b>geser joystick</b> (1–2 pemain).'],
+paused:'JEDA',resume:'Lanjut ▶',restart:'🔄 Ulang level',menu:'🏠 Menu',finish:'FINIS! 🎉',retry:'🔄 Ulangi',next:'Level berikut ▶',time:'⏱ Waktu',falls:'💦 Jatuh ke sungai',goal:'🎯 Target 3★ / 2★',record:'🏆 Rekor',fartFor:'kentut {s} dtk',king:'👑 Raja Kentut',lazy:'😴 Paling malas kentut',soloKing:'👑 {n} kentut total {s} detik!',
+lv:[['Kanal Desa','Mudah – belajar kentut'],['Jeram Bambu','Sedang – batu, kayu, ranjau bambu'],['Pusaran Hantu','Sulit – pusaran menelan rakit']],
+desc:['Bocah rambut jabrik, kentut secepat kilat','Penjual nasi bercaping, bunyinya "pet pet"','Perut buncit, kentut berat seperti genderang','Gadis kuncir dua, kentutnya nyaring'],
+tips:['Tahan tombol KENTUT 💨 – rakit melaju ke arah karakter menghadap!','Putar ke arah yang benar. Kentut tak kompak bikin rakit berputar!','Makan 🍠 UBI JALAR untuk isi gas + SUPER KENTUT!','Hindari eceng gondok – bikin rakit lambat banget 🐌','Awas RANJAU BAMBU – kena sedikit langsung jatuh!','Kayu hanyut bolak-balik – tunggu waktu yang pas, lalu kentut!','PUSARAN AIR: tersedot ke tengah = tenggelam! Kentut kuat-kuat untuk kabur!'],
+cp:'🚩 Bendera tersimpan! Kalau jatuh, mulai dari sini',backCp:'Kembali ke bendera terakhir 🚩',backSuffix:'→ Kembali ke bendera 🚩',whirl:'Tersedot PUSARAN AIR! 🌀',chong:'Menabrak RANJAU BAMBU! 🎋',level:'Level',gas:'GAS 💨',sup:'SUPER KENTUT!',empty:'GAS HABIS',noGas:'Gas habis!',fallBig:'BYUR! JATUH KE SUNGAI! 💦',go:'KENTUT!!! 💨',potato:'UBI JALAR',start:'DERMAGA START',arch:'FINIS 🏁',cpWord:'BENDERA!',splash:'BYUR!',quack:'KWEK!',touch:'Geser joystick',need34:'Mode 3–4 pemain butuh keyboard.',joy:'Sentuh & geser untuk putar + kentut',landscape:'📱 Miringkan HP agar main berdua lebih nyaman',lang:'Bahasa',full:'Layar penuh',words:['PRUT!','BROT!','DUT!','PREET!']},
+
+th:{name:'ไทย',title:'FART RAFT',tag:'ตดพร้อมกัน แพถึงจะวิ่ง! 💨 เล่นร่วมกัน 1–4 คน',players:'จำนวนผู้เล่น',pn:'{n} คน',chars:'เลือกตัวละคร',levels:'เลือกด่าน',play:'ตดเลย! ▶',howto:'📖 วิธีเล่น',
+how:['ผู้เล่นแต่ละคนยืนคนละมุมของแพ <b>หมุนตัว</b> แล้ว <b>กดค้างปุ่มตด</b> ลมจะพุ่งออกด้านหลัง ดันแพไปทางที่ตัวละครหันหน้า','ตดไม่พร้อมกันจากมุมแพ แพจะ <b>หมุนติ้ว</b> ต้องนับพร้อมกันนะ!','ลมหมดต้องรอให้ฟื้น กิน <b>🍠 มันเทศ</b> เพื่อเติมลมให้ทุกคนและได้ <b>ซูเปอร์ตด</b> สองสามวินาที','หลบหิน ขอนไม้ และเป็ด ถ้าชน <b>หลาวไม้ไผ่</b> หรือโดน <b>น้ำวน</b> ดูด จะตกน้ำและกลับไปที่ธงล่าสุด','ปุ่ม: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> ธงล่าสุด · <b>Esc</b> หยุดชั่วคราว มือถือ: <b>ลากจอยสติ๊ก</b> (1–2 คน)'],
+paused:'หยุดชั่วคราว',resume:'เล่นต่อ ▶',restart:'🔄 เริ่มด่านใหม่',menu:'🏠 เมนู',finish:'เข้าเส้นชัย! 🎉',retry:'🔄 เล่นอีกครั้ง',next:'ด่านต่อไป ▶',time:'⏱ เวลา',falls:'💦 ตกน้ำ',goal:'🎯 เป้า 3★ / 2★',record:'🏆 สถิติ',fartFor:'ตด {s} วิ',king:'👑 ราชาแห่งตด',lazy:'😴 ขี้เกียจตดที่สุด',soloKing:'👑 {n} ตดรวม {s} วินาที!',
+lv:[['คลองหมู่บ้าน','ง่าย – ฝึกตด'],['แก่งไผ่','กลาง – หิน ขอนไม้ หลาวไผ่'],['น้ำวนผีสิง','ยาก – น้ำวนกลืนแพ']],
+desc:['เด็กผมตั้ง ตดไวปานสายฟ้า','ป้าขายข้าวเหนียวสวมงอบ ตดดัง "ปั๊ด ปั๊ด"','พุงพลุ้ย ตดทุ้มเหมือนกลองศึก','สาวน้อยผมแกละ ตดเสียงแหลม'],
+tips:['กดค้างปุ่มตด 💨 – แพจะไปทางที่ตัวละครหัน!','หันให้ถูกทาง ตดไม่พร้อมกันแพจะหมุน!','กิน 🍠 มันเทศ เติมลมเต็ม + ซูเปอร์ตด!','หลบผักตบชวา – ติดแล้วช้ามาก 🐌','ระวังหลาวไม้ไผ่ – แตะนิดเดียวตกน้ำ!','ขอนไม้ลอยไปมา – รอจังหวะแล้วค่อยตด!','น้ำวน: ถูกดูดเข้ากลางแพจม! ตดแรงๆ เพื่อหนี!'],
+cp:'🚩 บันทึกธงแล้ว! ตกน้ำจะกลับมาที่นี่',backCp:'กลับไปธงล่าสุด 🚩',backSuffix:'→ กลับไปที่ธง 🚩',whirl:'โดนน้ำวนดูดหายไป! 🌀',chong:'ชนหลาวไม้ไผ่! 🎋',level:'ด่าน',gas:'ลม 💨',sup:'ซูเปอร์ตด!',empty:'ลมหมด',noGas:'ลมหมด!',fallBig:'ตูม! ตกน้ำแล้ว! 💦',go:'ตด!!! 💨',potato:'มันเทศ',start:'ท่าเรือเริ่มต้น',arch:'เส้นชัย 🏁',cpWord:'ธง!',splash:'ตูม!',quack:'ก๊าบ!',touch:'ลากจอยสติ๊ก',need34:'โหมด 3–4 คนต้องใช้คีย์บอร์ด',joy:'แตะแล้วลากเพื่อหมุน + ตด',landscape:'📱 หมุนมือถือแนวนอนเพื่อเล่น 2 คนสะดวกขึ้น',lang:'ภาษา',full:'เต็มจอ',words:['ปู้ด!','ปร๊ด!','ตู้ด!','บรึ้ม!']},
+
+zh:{name:'简体中文',title:'FART RAFT',tag:'一起放屁，木筏才会前进！💨 1–4人合作',players:'玩家人数',pn:'{n}人',chars:'选择角色',levels:'选择关卡',play:'开放！▶',howto:'📖 玩法',
+how:['每位玩家站在木筏的一角。<b>转身</b>后<b>按住放屁键</b>：气体从后面喷出，把木筏推向角色面对的方向。','偏离中心又不同步地放屁，木筏会<b>疯狂打转</b>。大家要喊口号一起放！','没气了就等它恢复。吃<b>🍠 红薯</b>可让所有人回满气，并获得几秒<b>超级屁</b>。','躲开石头、漂木和鸭子。撞上<b>竹尖桩</b>或被<b>漩涡</b>吸进去就会落水，回到最近的旗子。','按键：P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> 回旗子 · <b>Esc</b> 暂停。手机：<b>拖动摇杆</b>（1–2人）。'],
+paused:'暂停',resume:'继续 ▶',restart:'🔄 重新开始本关',menu:'🏠 菜单',finish:'到达终点！🎉',retry:'🔄 再玩一次',next:'下一关 ▶',time:'⏱ 时间',falls:'💦 落水次数',goal:'🎯 3★ / 2★ 目标',record:'🏆 最佳纪录',fartFor:'放屁 {s} 秒',king:'👑 屁王',lazy:'😴 最懒放屁者',soloKing:'👑 {n} 一共放了 {s} 秒屁！',
+lv:[['乡村水渠','简单 – 学会放屁'],['竹林急流','中等 – 石头、漂木、竹桩'],['幽灵漩涡','困难 – 漩涡吞木筏']],
+desc:['刺猬头小男孩，放屁快如闪电','戴斗笠的卖糯米饭奶奶，“噗噗”响','大肚子大叔，屁声低沉如战鼓','双马尾小女孩，屁声尖细'],
+tips:['按住放屁键 💨 – 木筏会往角色面对的方向走！','转向正确方向。放屁不同步木筏会打转！','吃 🍠 红薯 回满气 + 超级屁！','避开水葫芦 – 碰到就慢吞吞 🐌','小心竹尖桩 – 一碰就落水！','漂木来回移动 – 看准时机再放屁！','漩涡：被吸到中心就会沉没！用力放屁逃出去！'],
+cp:'🚩 已保存旗子！落水会回到这里',backCp:'回到最近的旗子 🚩',backSuffix:'→ 回到旗子 🚩',whirl:'被漩涡吞掉了！🌀',chong:'撞上竹尖桩！🎋',level:'关卡',gas:'屁气 💨',sup:'超级屁！',empty:'没气了',noGas:'没气了！',fallBig:'扑通！落水了！💦',go:'放屁！！！💨',potato:'红薯',start:'起点码头',arch:'终点 🏁',cpWord:'旗子！',splash:'扑通！',quack:'嘎！',touch:'拖动摇杆',need34:'3–4人模式需要键盘。',joy:'触摸并拖动来转身 + 放屁',landscape:'📱 横屏握持，两人玩更方便',lang:'语言',full:'全屏',words:['噗！','噗噗~','嘟！','噗哧！']},
+
+ja:{name:'日本語',title:'FART RAFT',tag:'みんなで同時におなら！じゃないと進まない！💨 1〜4人協力',players:'プレイ人数',pn:'{n}人',chars:'キャラクター選択',levels:'ステージ選択',play:'おならだ！▶',howto:'📖 遊び方',
+how:['各プレイヤーはイカダの角に立ちます。<b>向きを変えて</b>、<b>おならボタンを長押し</b>！お尻からガスが噴き出し、キャラの向いている方向へイカダが進みます。','中心からずれた位置でバラバラにおならすると、イカダが<b>ぐるぐる回転</b>。声をかけ合ってタイミングを合わせよう！','ガス切れになったら回復を待とう。<b>🍠 さつまいも</b>を食べると全員のガスが満タンになり、数秒間<b>スーパーおなら</b>！','岩、流木、アヒルをよけよう。<b>竹やり</b>に当たったり<b>渦潮</b>に吸い込まれると落水し、最後の旗に戻ります。','キー：P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> 旗に戻る · <b>Esc</b> 一時停止。スマホ：<b>スティックをドラッグ</b>（1〜2人）。'],
+paused:'一時停止',resume:'つづける ▶',restart:'🔄 ステージをやり直す',menu:'🏠 メニュー',finish:'ゴール！🎉',retry:'🔄 もう一度',next:'次のステージ ▶',time:'⏱ タイム',falls:'💦 落水回数',goal:'🎯 3★ / 2★ 目標',record:'🏆 ベスト',fartFor:'おなら {s}秒',king:'👑 おなら王',lazy:'😴 一番サボった人',soloKing:'👑 {n}は合計{s}秒おならした！',
+lv:[['田舎の水路','かんたん – おならに慣れよう'],['竹の急流','ふつう – 岩・流木・竹やり'],['お化け渦潮','むずかしい – 渦がイカダを飲み込む']],
+desc:['ツンツン頭の少年、おならは電光石火','すげ笠のおこわ売りおばあちゃん、「ペッペッ」','太鼓腹のおじさん、陣太鼓のような重低音','ツインテールの女の子、かん高いおなら'],
+tips:['おならボタンを長押し 💨 – キャラの向いている方向に進むよ！','正しい方向を向こう。バラバラだとイカダが回転！','🍠 さつまいもを食べてガス満タン＋スーパーおなら！','ホテイアオイに注意 – 引っかかるとノロノロ 🐌','竹やりに注意 – 触れたら落水！','流木が行ったり来たり – タイミングを見ておなら！','渦潮：中心に吸い込まれたら沈没！全力おならで脱出！'],
+cp:'🚩 旗をセーブ！落水したらここから',backCp:'最後の旗に戻る 🚩',backSuffix:'→ 旗に戻ります 🚩',whirl:'渦潮に飲み込まれた！🌀',chong:'竹やりに激突！🎋',level:'ステージ',gas:'ガス 💨',sup:'スーパーおなら！',empty:'ガス切れ',noGas:'ガス切れ！',fallBig:'ドボン！落水！💦',go:'おなら！！！💨',potato:'さつまいも',start:'スタート桟橋',arch:'ゴール 🏁',cpWord:'旗！',splash:'ドボン！',quack:'ガー！',touch:'スティックをドラッグ',need34:'3〜4人モードはキーボードが必要です。',joy:'タッチ＆ドラッグで回転＋おなら',landscape:'📱 横向きにすると2人で遊びやすいよ',lang:'言語',full:'全画面',words:['ブッ!','プゥ~','ブリッ!','プスー!']},
+
+ko:{name:'한국어',title:'FART RAFT',tag:'다 같이 뀌어야 뗏목이 간다! 💨 1–4인 협동',players:'플레이어 수',pn:'{n}인',chars:'캐릭터 선택',levels:'스테이지 선택',play:'뿡 출발! ▶',howto:'📖 게임 방법',
+how:['각 플레이어는 뗏목의 한 모서리에 섭니다. <b>몸을 돌리고</b> <b>방귀 버튼을 길게 누르세요</b>. 가스가 뒤로 뿜어져 캐릭터가 바라보는 방향으로 뗏목을 밀어요.','중심에서 벗어난 채로 따로따로 뀌면 뗏목이 <b>빙글빙글</b> 돌아요. 구령 맞춰 같이 뀌세요!','가스가 떨어지면 충전을 기다리세요. <b>🍠 고구마</b>를 먹으면 모두 가스가 가득 차고 몇 초간 <b>슈퍼 방귀</b>!','바위, 떠다니는 통나무, 오리를 피하세요. <b>대나무 꼬챙이</b>에 닿거나 <b>소용돌이</b>에 빨려 들어가면 물에 빠져 마지막 깃발로 돌아갑니다.','키: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> 마지막 깃발 · <b>Esc</b> 일시정지. 휴대폰: <b>조이스틱 드래그</b> (1–2인).'],
+paused:'일시정지',resume:'계속하기 ▶',restart:'🔄 스테이지 다시',menu:'🏠 메뉴',finish:'골인! 🎉',retry:'🔄 다시하기',next:'다음 스테이지 ▶',time:'⏱ 시간',falls:'💦 물에 빠진 횟수',goal:'🎯 3★ / 2★ 목표',record:'🏆 최고 기록',fartFor:'방귀 {s}초',king:'👑 방귀왕',lazy:'😴 제일 게으른 사람',soloKing:'👑 {n}이(가) 총 {s}초 동안 방귀를 뀌었어요!',
+lv:[['시골 수로','쉬움 – 방귀 연습'],['대나무 급류','보통 – 바위, 통나무, 꼬챙이'],['유령 소용돌이','어려움 – 소용돌이가 뗏목을 삼켜요']],
+desc:['삐죽머리 소년, 번개처럼 빠른 방귀','삿갓 쓴 찹쌀밥 장수 할머니, "뽁뽁"','배불뚝이 아저씨, 북소리 같은 저음 방귀','양갈래 머리 소녀, 높은 소리 방귀'],
+tips:['방귀 버튼을 길게 💨 – 캐릭터가 보는 방향으로 가요!','올바른 방향으로 돌아요. 따로 뀌면 뗏목이 돌아요!','🍠 고구마를 먹고 가스 충전 + 슈퍼 방귀!','부레옥잠을 피하세요 – 걸리면 엄청 느려져요 🐌','대나무 꼬챙이 조심 – 닿으면 바로 풍덩!','통나무가 왔다 갔다 – 타이밍 맞춰 뀌세요!','소용돌이: 가운데로 빨려 들면 침몰! 세게 뀌어서 탈출!'],
+cp:'🚩 깃발 저장! 빠지면 여기서 다시',backCp:'마지막 깃발로 🚩',backSuffix:'→ 깃발로 돌아가요 🚩',whirl:'소용돌이에 삼켜졌어요! 🌀',chong:'대나무 꼬챙이에 부딪혔어요! 🎋',level:'스테이지',gas:'가스 💨',sup:'슈퍼 방귀!',empty:'가스 없음',noGas:'가스 없음!',fallBig:'풍덩! 물에 빠졌어요! 💦',go:'뀌어!!! 💨',potato:'고구마',start:'출발 선착장',arch:'골인 🏁',cpWord:'깃발!',splash:'풍덩!',quack:'꽥!',touch:'조이스틱 드래그',need34:'3–4인 모드는 키보드가 필요해요.',joy:'터치 후 드래그해서 회전 + 방귀',landscape:'📱 휴대폰을 가로로 돌리면 2인 플레이가 편해요',lang:'언어',full:'전체 화면',words:['뿡!','뿌웅~','뽀옹!','부륵!']},
+
+fr:{name:'Français',title:'FART RAFT',tag:'Pétez ensemble, sinon le radeau n\'avance pas ! 💨 Coop de 1 à 4 joueurs',players:'Joueurs',pn:'{n}J',chars:'Choisir les personnages',levels:'Choisir le niveau',play:'ON PÈTE ! ▶',howto:'📖 Comment jouer',
+how:['Chaque joueur se tient à un coin du radeau. <b>Tourne-toi</b> puis <b>maintiens le bouton prout</b> : le gaz sort par derrière et pousse le radeau dans la direction où regarde ton perso.','Des prouts décentrés et désynchronisés font <b>tourner le radeau comme une toupie</b>. Comptez et pétez ensemble !','Plus de gaz ? Attends qu\'il se recharge. Mange une <b>🍠 patate douce</b> pour remplir le gaz de tous et obtenir quelques secondes de <b>SUPER PROUT</b>.','Évite les rochers, troncs et canards. Touche les <b>pieux en bambou</b> ou fais-toi aspirer par un <b>tourbillon</b> et tu tombes à l\'eau – retour au dernier drapeau.','Touches : J1 <b>A D + W</b> · J2 <b>← → + ↑</b> · J3 <b>J L + I</b> · J4 <b>Num 4 6 + 8</b> · <b>R</b> dernier drapeau · <b>Échap</b> pause. Mobile : <b>fais glisser le joystick</b> (1–2 joueurs).'],
+paused:'PAUSE',resume:'Reprendre ▶',restart:'🔄 Recommencer le niveau',menu:'🏠 Menu',finish:'ARRIVÉE ! 🎉',retry:'🔄 Rejouer',next:'Niveau suivant ▶',time:'⏱ Temps',falls:'💦 Chutes',goal:'🎯 Objectif 3★ / 2★',record:'🏆 Record',fartFor:'a pété {s}s',king:'👑 Roi du Prout',lazy:'😴 Le plus fainéant',soloKing:'👑 {n} a pété {s} secondes au total !',
+lv:[['Canal du Village','Facile – apprendre à péter'],['Rapides de Bambou','Moyen – rochers, troncs, pieux'],['Tourbillons Fantômes','Difficile – les tourbillons avalent les radeaux']],
+desc:['Gamin aux cheveux en pétard, prouts éclair','Vendeuse au chapeau conique, fait « pet pet »','Gros ventre, prouts graves comme un tambour','Fillette à couettes, prouts aigus'],
+tips:['Maintiens le bouton PROUT 💨 – le radeau va où regarde ton perso !','Tourne-toi dans la bonne direction. Des prouts désynchronisés font tourner le radeau !','Mange une 🍠 PATATE DOUCE pour recharger + SUPER PROUT !','Évite les jacinthes d\'eau – elles te ralentissent 🐌','Attention aux PIEUX EN BAMBOU – un contact et tu tombes à l\'eau !','Les troncs vont et viennent – attends le bon moment et pète !','TOURBILLON : aspiré au centre, tu coules ! Pète fort pour t\'échapper !'],
+cp:'🚩 Drapeau enregistré ! Tu reviendras ici',backCp:'Retour au dernier drapeau 🚩',backSuffix:'→ Retour au drapeau 🚩',whirl:'Avalé par un TOURBILLON ! 🌀',chong:'Contre les PIEUX EN BAMBOU ! 🎋',level:'Niveau',gas:'GAZ 💨',sup:'SUPER PROUT !',empty:'PLUS DE GAZ',noGas:'Plus de gaz !',fallBig:'PLOUF ! À L\'EAU ! 💦',go:'PROUT !!! 💨',potato:'PATATE DOUCE',start:'PONTON DE DÉPART',arch:'ARRIVÉE 🏁',cpWord:'DRAPEAU !',splash:'PLOUF !',quack:'COIN !',touch:'Fais glisser le joystick',need34:'Le mode 3–4 joueurs nécessite un clavier.',joy:'Touche et glisse pour tourner + péter',landscape:'📱 Tourne ton téléphone à l\'horizontale pour jouer à deux',lang:'Langue',full:'Plein écran',words:['PROUT!','POUET!','FRRT!','PFFF!']},
+
+de:{name:'Deutsch',title:'FART RAFT',tag:'Gemeinsam pupsen – sonst fährt das Floß nicht! 💨 Koop für 1–4 Spieler',players:'Spieler',pn:'{n}S',chars:'Figuren wählen',levels:'Level wählen',play:'LOS, PUPSEN! ▶',howto:'📖 Spielanleitung',
+how:['Jeder Spieler steht an einer Ecke des Floßes. <b>Dreh dich</b> und <b>halte die Pups-Taste</b>: Das Gas schießt nach hinten und schiebt das Floß in die Blickrichtung deiner Figur.','Wer außermittig und nicht gleichzeitig pupst, lässt das Floß <b>wild kreiseln</b>. Zählt an und pupst zusammen!','Kein Gas mehr? Warte, bis es sich auflädt. Iss eine <b>🍠 Süßkartoffel</b>, um alle aufzutanken und ein paar Sekunden <b>SUPER-PUPS</b> zu bekommen.','Weiche Felsen, Treibholz und Enten aus. Berührst du die <b>Bambusspieße</b> oder gerätst in einen <b>Strudel</b>, fällst du ins Wasser – zurück zur letzten Flagge.','Tasten: S1 <b>A D + W</b> · S2 <b>← → + ↑</b> · S3 <b>J L + I</b> · S4 <b>Num 4 6 + 8</b> · <b>R</b> letzte Flagge · <b>Esc</b> Pause. Handy: <b>Joystick ziehen</b> (1–2 Spieler).'],
+paused:'PAUSE',resume:'Weiter ▶',restart:'🔄 Level neu starten',menu:'🏠 Menü',finish:'ZIEL! 🎉',retry:'🔄 Nochmal',next:'Nächstes Level ▶',time:'⏱ Zeit',falls:'💦 Ins Wasser gefallen',goal:'🎯 Ziel 3★ / 2★',record:'🏆 Rekord',fartFor:'pupste {s}s',king:'👑 Pups-König',lazy:'😴 Faulster Pupser',soloKing:'👑 {n} hat insgesamt {s} Sekunden gepupst!',
+lv:[['Dorfkanal','Leicht – Pupsen lernen'],['Bambus-Stromschnellen','Mittel – Felsen, Holz, Spieße'],['Geisterstrudel','Schwer – Strudel verschlucken Flöße']],
+desc:['Junge mit Stachelhaar, pupst blitzschnell','Reisverkäuferin mit Kegelhut, macht „pet pet“','Dicker Bauch, pupst tief wie eine Kriegstrommel','Mädchen mit Zöpfen, pupst schrill'],
+tips:['Halte die PUPS-Taste 💨 – das Floß fährt in Blickrichtung deiner Figur!','Dreh dich in die richtige Richtung. Ungleiches Pupsen lässt das Floß kreiseln!','Iss eine 🍠 SÜSSKARTOFFEL zum Auftanken + SUPER-PUPS!','Meide die Wasserhyazinthen – sie machen dich schneckenlangsam 🐌','Vorsicht, BAMBUSSPIESSE – eine Berührung und du fällst ins Wasser!','Treibholz schwimmt hin und her – Timing abwarten, dann pupsen!','STRUDEL: In die Mitte gezogen = untergehen! Kräftig pupsen zum Entkommen!'],
+cp:'🚩 Flagge gespeichert! Hier geht es weiter',backCp:'Zurück zur letzten Flagge 🚩',backSuffix:'→ Zurück zur Flagge 🚩',whirl:'Vom STRUDEL verschluckt! 🌀',chong:'In die BAMBUSSPIESSE gekracht! 🎋',level:'Level',gas:'GAS 💨',sup:'SUPER-PUPS!',empty:'KEIN GAS',noGas:'Kein Gas!',fallBig:'PLATSCH! INS WASSER! 💦',go:'PUPS!!! 💨',potato:'SÜSSKARTOFFEL',start:'START-STEG',arch:'ZIEL 🏁',cpWord:'FLAGGE!',splash:'PLATSCH!',quack:'QUAK!',touch:'Joystick ziehen',need34:'3–4-Spieler-Modus braucht eine Tastatur.',joy:'Tippen & ziehen zum Drehen + Pupsen',landscape:'📱 Handy quer halten, dann klappt es zu zweit besser',lang:'Sprache',full:'Vollbild',words:['PUPS!','PFFT!','BRRT!','PRRRT!']},
+
+it:{name:'Italiano',title:'FART RAFT',tag:'Peti tutti insieme, o la zattera non si muove! 💨 Cooperativo da 1 a 4',players:'Giocatori',pn:'{n}G',chars:'Scegli i personaggi',levels:'Scegli il livello',play:'SI PETA! ▶',howto:'📖 Come si gioca',
+how:['Ogni giocatore sta in un angolo della zattera. <b>Girati</b> e <b>tieni premuto il tasto peto</b>: il gas esce da dietro e spinge la zattera dove guarda il personaggio.','Peti decentrati e non sincronizzati fanno <b>girare la zattera come una trottola</b>. Contate e petate insieme!','Gas finito? Aspetta che si ricarichi. Mangia una <b>🍠 patata dolce</b> per ricaricare tutti e ottenere qualche secondo di <b>SUPER PETO</b>.','Evita rocce, tronchi e anatre. Se tocchi i <b>pali di bambù</b> o vieni risucchiato da un <b>vortice</b> cadi in acqua e torni all\'ultima bandiera.','Tasti: G1 <b>A D + W</b> · G2 <b>← → + ↑</b> · G3 <b>J L + I</b> · G4 <b>Num 4 6 + 8</b> · <b>R</b> ultima bandiera · <b>Esc</b> pausa. Telefono: <b>trascina il joystick</b> (1–2 giocatori).'],
+paused:'PAUSA',resume:'Riprendi ▶',restart:'🔄 Ricomincia livello',menu:'🏠 Menu',finish:'TRAGUARDO! 🎉',retry:'🔄 Riprova',next:'Livello successivo ▶',time:'⏱ Tempo',falls:'💦 Cadute in acqua',goal:'🎯 Obiettivo 3★ / 2★',record:'🏆 Record',fartFor:'ha petato {s}s',king:'👑 Re del Peto',lazy:'😴 Il più pigro',soloKing:'👑 {n} ha petato per {s} secondi in tutto!',
+lv:[['Canale del Villaggio','Facile – impara a petare'],['Rapide di Bambù','Medio – rocce, tronchi, pali'],['Vortice Fantasma','Difficile – i vortici inghiottono zattere']],
+desc:['Ragazzino coi capelli a punta, peti fulminei','Venditrice di riso col cappello a cono, fa "pet pet"','Pancione, peti profondi come un tamburo','Bimba con i codini, peti acuti'],
+tips:['Tieni premuto il tasto PETO 💨 – la zattera va dove guarda il personaggio!','Girati nella direzione giusta. Peti non sincronizzati fanno girare la zattera!','Mangia una 🍠 PATATA DOLCE per ricaricare + SUPER PETO!','Evita i giacinti d\'acqua – ti rallentano tantissimo 🐌','Attenzione ai PALI DI BAMBÙ – un tocco e cadi in acqua!','I tronchi vanno avanti e indietro – aspetta il momento giusto e peta!','VORTICE: se finisci al centro affondi! Peta forte per scappare!'],
+cp:'🚩 Bandiera salvata! Ripartirai da qui',backCp:'Torna all\'ultima bandiera 🚩',backSuffix:'→ Ritorno alla bandiera 🚩',whirl:'Inghiottito dal VORTICE! 🌀',chong:'Contro i PALI DI BAMBÙ! 🎋',level:'Livello',gas:'GAS 💨',sup:'SUPER PETO!',empty:'NIENTE GAS',noGas:'Gas finito!',fallBig:'SPLASH! IN ACQUA! 💦',go:'PETA!!! 💨',potato:'PATATA DOLCE',start:'MOLO DI PARTENZA',arch:'TRAGUARDO 🏁',cpWord:'BANDIERA!',splash:'SPLASH!',quack:'QUA QUA!',touch:'Trascina il joystick',need34:'La modalità 3–4 giocatori richiede la tastiera.',joy:'Tocca e trascina per girare + petare',landscape:'📱 Ruota il telefono in orizzontale per giocare in due',lang:'Lingua',full:'Schermo intero',words:['PROT!','PEEE!','FRRT!','PRRR!']},
+
+ru:{name:'Русский',title:'FART RAFT',tag:'Пукайте вместе – иначе плот не поплывёт! 💨 Кооператив для 1–4 игроков',players:'Игроки',pn:'{n} игр.',chars:'Выбор персонажей',levels:'Выбор уровня',play:'ПУКАЕМ! ▶',howto:'📖 Как играть',
+how:['Каждый игрок стоит в углу плота. <b>Повернись</b> и <b>держи кнопку пука</b>: газ вылетает сзади и толкает плот туда, куда смотрит персонаж.','Пуки не из центра и не в такт заставят плот <b>крутиться волчком</b>. Считайте и пукайте вместе!','Газ закончился? Подожди, пока восстановится. Съешь <b>🍠 батат</b>, чтобы заправить всех и получить несколько секунд <b>СУПЕРПУКА</b>.','Уклоняйся от камней, брёвен и уток. Задел <b>бамбуковые колья</b> или затянуло в <b>водоворот</b> – падаешь в воду и возвращаешься к последнему флагу.','Клавиши: И1 <b>A D + W</b> · И2 <b>← → + ↑</b> · И3 <b>J L + I</b> · И4 <b>Num 4 6 + 8</b> · <b>R</b> к флагу · <b>Esc</b> пауза. Телефон: <b>тяни джойстик</b> (1–2 игрока).'],
+paused:'ПАУЗА',resume:'Продолжить ▶',restart:'🔄 Заново',menu:'🏠 Меню',finish:'ФИНИШ! 🎉',retry:'🔄 Ещё раз',next:'Следующий уровень ▶',time:'⏱ Время',falls:'💦 Падений в воду',goal:'🎯 Цель 3★ / 2★',record:'🏆 Рекорд',fartFor:'пукал {s} с',king:'👑 Король пуков',lazy:'😴 Самый ленивый',soloKing:'👑 {n}: в сумме {s} секунд пуков!',
+lv:[['Деревенский канал','Легко – учимся пукать'],['Бамбуковые пороги','Средне – камни, брёвна, колья'],['Призрачный водоворот','Сложно – водовороты глотают плоты']],
+desc:['Мальчишка с ёжиком, пукает молниеносно','Торговка рисом в конической шляпе, «пет-пет»','Большой живот, пукает басом, как барабан','Девочка с хвостиками, пукает тоненько'],
+tips:['Держи кнопку ПУКА 💨 – плот плывёт туда, куда смотрит персонаж!','Повернись в нужную сторону. Пуки не в такт крутят плот!','Съешь 🍠 БАТАТ – полный газ + СУПЕРПУК!','Обходи водяной гиацинт – с ним плот еле ползёт 🐌','Осторожно, БАМБУКОВЫЕ КОЛЬЯ – коснёшься и упадёшь в воду!','Брёвна плавают туда-сюда – улучи момент и пукай!','ВОДОВОРОТ: затянет в центр – утонешь! Пукай сильнее, чтобы вырваться!'],
+cp:'🚩 Флаг сохранён! Вернёшься сюда при падении',backCp:'К последнему флагу 🚩',backSuffix:'→ Обратно к флагу 🚩',whirl:'Затянуло в ВОДОВОРОТ! 🌀',chong:'Врезался в БАМБУКОВЫЕ КОЛЬЯ! 🎋',level:'Уровень',gas:'ГАЗ 💨',sup:'СУПЕРПУК!',empty:'НЕТ ГАЗА',noGas:'Нет газа!',fallBig:'БУЛЬ! УПАЛ В ВОДУ! 💦',go:'ПУКАЙ!!! 💨',potato:'БАТАТ',start:'СТАРТОВЫЙ ПРИЧАЛ',arch:'ФИНИШ 🏁',cpWord:'ФЛАГ!',splash:'БУЛЬ!',quack:'КРЯ!',touch:'Тяни джойстик',need34:'Для 3–4 игроков нужна клавиатура.',joy:'Коснись и тяни: поворот + пук',landscape:'📱 Поверни телефон горизонтально для игры вдвоём',lang:'Язык',full:'Полный экран',words:['ПУК!','ПРРР!','ФССС!','БРРТ!']},
+
+tr:{name:'Türkçe',title:'FART RAFT',tag:'Hep birlikte osurun – yoksa sal gitmez! 💨 1–4 oyunculu ortak oyun',players:'Oyuncu sayısı',pn:'{n}O',chars:'Karakter seç',levels:'Bölüm seç',play:'OSURALIM! ▶',howto:'📖 Nasıl oynanır',
+how:['Her oyuncu salın bir köşesinde durur. <b>Dön</b> ve <b>osuruk tuşunu basılı tut</b>: gaz arkadan fışkırır ve salı karakterin baktığı yöne iter.','Merkezden uzakta ve uyumsuz osurursanız sal <b>fırıl fırıl döner</b>. Sayın ve birlikte osurun!','Gaz bitti mi? Dolmasını bekle. <b>🍠 Tatlı patates</b> ye; herkesin gazı dolsun ve birkaç saniye <b>SÜPER OSURUK</b> kazan.','Kayalardan, kütüklerden ve ördeklerden kaç. <b>Bambu kazıklara</b> değersen ya da <b>girdaba</b> kapılırsan suya düşersin, son bayrağa dönersin.','Tuşlar: O1 <b>A D + W</b> · O2 <b>← → + ↑</b> · O3 <b>J L + I</b> · O4 <b>Num 4 6 + 8</b> · <b>R</b> son bayrak · <b>Esc</b> duraklat. Telefon: <b>joystick\'i sürükle</b> (1–2 oyuncu).'],
+paused:'DURAKLATILDI',resume:'Devam ▶',restart:'🔄 Bölümü yeniden başlat',menu:'🏠 Menü',finish:'BİTİŞ! 🎉',retry:'🔄 Tekrar',next:'Sonraki bölüm ▶',time:'⏱ Süre',falls:'💦 Suya düşme',goal:'🎯 Hedef 3★ / 2★',record:'🏆 Rekor',fartFor:'{s} sn osurdu',king:'👑 Osuruk Kralı',lazy:'😴 En tembel',soloKing:'👑 {n} toplam {s} saniye osurdu!',
+lv:[['Köy Kanalı','Kolay – osurmayı öğren'],['Bambu Akıntısı','Orta – kaya, kütük, kazık'],['Hayalet Girdap','Zor – girdaplar salı yutar']],
+desc:['Diken saçlı çocuk, şimşek gibi osurur','Konik şapkalı pilavcı nine, "pıt pıt" yapar','Koca göbekli amca, davul gibi kalın osurur','Çift örgülü kız, ince sesli osurur'],
+tips:['OSURUK tuşunu basılı tut 💨 – sal, karakterin baktığı yöne gider!','Doğru yöne dön. Uyumsuz osuruklar salı döndürür!','🍠 TATLI PATATES ye: gaz dolar + SÜPER OSURUK!','Su sümbülünden uzak dur – salı yavaşlatır 🐌','BAMBU KAZIKLARA dikkat – değersen suya düşersin!','Kütükler gidip gelir – zamanlamayı bekle, sonra osur!','GİRDAP: merkeze çekilirsen batarsın! Kurtulmak için güçlü osur!'],
+cp:'🚩 Bayrak kaydedildi! Düşersen buradan başlarsın',backCp:'Son bayrağa dön 🚩',backSuffix:'→ Bayrağa dönülüyor 🚩',whirl:'GİRDAP yuttu! 🌀',chong:'BAMBU KAZIKLARA çarptın! 🎋',level:'Bölüm',gas:'GAZ 💨',sup:'SÜPER OSURUK!',empty:'GAZ YOK',noGas:'Gaz bitti!',fallBig:'ŞAPUR! SUYA DÜŞTÜN! 💦',go:'OSUR!!! 💨',potato:'TATLI PATATES',start:'BAŞLANGIÇ İSKELESİ',arch:'BİTİŞ 🏁',cpWord:'BAYRAK!',splash:'ŞAPUR!',quack:'VAK!',touch:'Joystick\'i sürükle',need34:'3–4 oyunculu mod klavye gerektirir.',joy:'Dokun ve sürükle: dön + osur',landscape:'📱 İki kişilik oyun için telefonu yan çevir',lang:'Dil',full:'Tam ekran',words:['PIRT!','OSS!','FSSS!','PIRRT!']},
+
+ms:{name:'Bahasa Melayu',title:'FART RAFT',tag:'Kentut serentak – kalau tidak, rakit tak bergerak! 💨 Main bersama 1–4 pemain',players:'Bilangan pemain',pn:'{n}P',chars:'Pilih watak',levels:'Pilih peringkat',play:'JOM KENTUT! ▶',howto:'📖 Cara bermain',
+how:['Setiap pemain berdiri di satu sudut rakit. <b>Pusing badan</b> dan <b>tekan lama butang kentut</b>: gas menyembur ke belakang dan menolak rakit ke arah watak memandang.','Kentut dari tepi yang tidak serentak membuatkan rakit <b>berpusing-pusing</b>. Kira dan kentut bersama!','Gas habis? Tunggu sehingga penuh semula. Makan <b>🍠 ubi keledek</b> untuk mengisi gas semua orang dan dapat <b>SUPER KENTUT</b> beberapa saat.','Elakkan batu, kayu hanyut dan itik. Terkena <b>pancang buluh</b> atau disedut <b>pusaran air</b> – jatuh ke sungai dan kembali ke bendera terakhir.','Kekunci: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> bendera terakhir · <b>Esc</b> jeda. Telefon: <b>seret kayu bedik</b> (1–2 pemain).'],
+paused:'JEDA',resume:'Sambung ▶',restart:'🔄 Ulang peringkat',menu:'🏠 Menu',finish:'TAMAT! 🎉',retry:'🔄 Main lagi',next:'Peringkat seterusnya ▶',time:'⏱ Masa',falls:'💦 Jatuh ke sungai',goal:'🎯 Sasaran 3★ / 2★',record:'🏆 Rekod',fartFor:'kentut {s} saat',king:'👑 Raja Kentut',lazy:'😴 Paling malas',soloKing:'👑 {n} kentut selama {s} saat!',
+lv:[['Terusan Kampung','Mudah – belajar kentut'],['Jeram Buluh','Sederhana – batu, kayu, pancang'],['Pusaran Hantu','Sukar – pusaran menelan rakit']],
+desc:['Budak rambut cacak, kentut sepantas kilat','Mak cik jual pulut bertudung saji, bunyi "pet pet"','Perut boroi, kentut garau seperti gendang','Budak perempuan bertocang dua, kentut nyaring'],
+tips:['Tekan lama butang KENTUT 💨 – rakit bergerak ke arah watak memandang!','Pusing ke arah yang betul. Kentut tak serentak buat rakit berpusing!','Makan 🍠 UBI KELEDEK untuk isi gas + SUPER KENTUT!','Elak keladi bunting – rakit jadi sangat perlahan 🐌','Awas PANCANG BULUH – tersentuh terus jatuh!','Kayu hanyut ke sana ke mari – tunggu masa sesuai, baru kentut!','PUSARAN AIR: disedut ke tengah = tenggelam! Kentut kuat untuk lari!'],
+cp:'🚩 Bendera disimpan! Jatuh akan kembali ke sini',backCp:'Kembali ke bendera terakhir 🚩',backSuffix:'→ Kembali ke bendera 🚩',whirl:'Ditelan PUSARAN AIR! 🌀',chong:'Terlanggar PANCANG BULUH! 🎋',level:'Peringkat',gas:'GAS 💨',sup:'SUPER KENTUT!',empty:'GAS HABIS',noGas:'Gas habis!',fallBig:'DEBUSH! JATUH KE SUNGAI! 💦',go:'KENTUT!!! 💨',potato:'UBI KELEDEK',start:'JETI MULA',arch:'TAMAT 🏁',cpWord:'BENDERA!',splash:'DEBUSH!',quack:'KUEK!',touch:'Seret kayu bedik',need34:'Mod 3–4 pemain perlukan papan kekunci.',joy:'Sentuh & seret untuk pusing + kentut',landscape:'📱 Pusing telefon melintang untuk main berdua',lang:'Bahasa',full:'Skrin penuh',words:['PRUT!','PUT!','BROT!','PREET!']},
+
+fil:{name:'Filipino',title:'FART RAFT',tag:'Umutot nang sabay – kundi hindi aandar ang balsa! 💨 Co-op para sa 1–4 manlalaro',players:'Bilang ng manlalaro',pn:'{n}P',chars:'Pumili ng karakter',levels:'Pumili ng level',play:'UTOT NA! ▶',howto:'📖 Paano laruin',
+how:['Bawat manlalaro ay nakatayo sa isang sulok ng balsa. <b>Umikot</b> at <b>pindutin nang matagal ang utot button</b>: lalabas ang hangin sa likod at itutulak ang balsa sa direksyong tinitingnan ng karakter.','Kapag hindi sabay at nasa gilid ang utot, <b>iikot nang iikot</b> ang balsa. Magbilang at umutot nang sabay!','Ubos ang hangin? Hintaying mapuno. Kumain ng <b>🍠 kamote</b> para mapuno ang hangin ng lahat at makakuha ng ilang segundong <b>SUPER UTOT</b>.','Iwasan ang bato, troso at pato. Kapag tumama sa <b>matulis na kawayan</b> o nahigop ng <b>ipu-ipo</b>, mahuhulog ka sa tubig at babalik sa huling bandila.','Keys: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> huling bandila · <b>Esc</b> pause. Phone: <b>i-drag ang joystick</b> (1–2 manlalaro).'],
+paused:'NAKA-PAUSE',resume:'Ituloy ▶',restart:'🔄 Ulitin ang level',menu:'🏠 Menu',finish:'TAPOS! 🎉',retry:'🔄 Ulitin',next:'Susunod na level ▶',time:'⏱ Oras',falls:'💦 Nahulog sa tubig',goal:'🎯 Target 3★ / 2★',record:'🏆 Rekord',fartFor:'umutot {s}s',king:'👑 Hari ng Utot',lazy:'😴 Pinakatamad',soloKing:'👑 Umutot si {n} nang {s} segundo!',
+lv:[['Kanal ng Nayon','Madali – matutong umutot'],['Agos ng Kawayan','Katamtaman – bato, troso, kawayan'],['Multong Ipu-ipo','Mahirap – nilalamon ng ipu-ipo ang balsa']],
+desc:['Batang tusok-tusok ang buhok, kidlat ang utot','Lolang tindera ng malagkit na may salakot, "pet pet"','Malaking tiyan, malalim na utot parang tambol','Batang babaeng may dalawang tirintas, matinis ang utot'],
+tips:['Pindutin nang matagal ang UTOT 💨 – pupunta ang balsa kung saan nakaharap ang karakter!','Humarap sa tamang direksyon. Kapag hindi sabay, iikot ang balsa!','Kumain ng 🍠 KAMOTE para mapuno ang hangin + SUPER UTOT!','Iwasan ang water hyacinth – sobrang babagal ka 🐌','Ingat sa MATULIS NA KAWAYAN – dumikit ka lang, hulog ka!','Pabalik-balik ang troso – hintayin ang tamang tiyempo bago umutot!','IPU-IPO: kapag nahila sa gitna, lulubog ka! Umutot nang malakas para makatakas!'],
+cp:'🚩 Na-save ang bandila! Dito ka babalik',backCp:'Balik sa huling bandila 🚩',backSuffix:'→ Balik sa bandila 🚩',whirl:'Nilamon ng IPU-IPO! 🌀',chong:'Bumangga sa MATULIS NA KAWAYAN! 🎋',level:'Level',gas:'HANGIN 💨',sup:'SUPER UTOT!',empty:'UBOS NA',noGas:'Ubos na ang hangin!',fallBig:'SPLASH! NAHULOG SA TUBIG! 💦',go:'UTOT!!! 💨',potato:'KAMOTE',start:'PANIMULANG DAUNGAN',arch:'TAPOS 🏁',cpWord:'BANDILA!',splash:'SPLASH!',quack:'KWAK!',touch:'I-drag ang joystick',need34:'Kailangan ng keyboard sa 3–4 na manlalaro.',joy:'Pindutin at i-drag para umikot + umutot',landscape:'📱 Ipatagilid ang phone para mas madali ang 2 manlalaro',lang:'Wika',full:'Full screen',words:['UTOT!','PRRT!','PUT!','PROOT!']},
+
+hi:{name:'हिन्दी',title:'FART RAFT',tag:'साथ में पादो – वरना नाव नहीं चलेगी! 💨 1–4 खिलाड़ी को-ऑप',players:'खिलाड़ी',pn:'{n} खिलाड़ी',chars:'किरदार चुनें',levels:'लेवल चुनें',play:'पादो! ▶',howto:'📖 कैसे खेलें',
+how:['हर खिलाड़ी बेड़े के एक कोने पर खड़ा है। <b>मुड़ो</b> और <b>पाद बटन दबाए रखो</b>: गैस पीछे निकलती है और बेड़ा उसी दिशा में जाता है जिधर किरदार देख रहा है।','किनारे से बेमेल पादने पर बेड़ा <b>गोल-गोल घूमता</b> है। गिनती करके साथ पादो!','गैस खत्म? भरने का इंतज़ार करो। <b>🍠 शकरकंद</b> खाओ, सबकी गैस भर जाएगी और कुछ सेकंड <b>सुपर पाद</b> मिलेगा।','पत्थर, बहते लट्ठे और बत्तखों से बचो। <b>बांस के नुकीले खूंटे</b> छुए या <b>भंवर</b> में फंसे तो पानी में गिरोगे और आखिरी झंडे पर लौटोगे।','कुंजियाँ: P1 <b>A D + W</b> · P2 <b>← → + ↑</b> · P3 <b>J L + I</b> · P4 <b>Num 4 6 + 8</b> · <b>R</b> आखिरी झंडा · <b>Esc</b> रोकें। फ़ोन: <b>जॉयस्टिक खींचें</b> (1–2 खिलाड़ी)।'],
+paused:'रुका हुआ',resume:'जारी रखें ▶',restart:'🔄 लेवल फिर से',menu:'🏠 मेनू',finish:'फिनिश! 🎉',retry:'🔄 फिर खेलें',next:'अगला लेवल ▶',time:'⏱ समय',falls:'💦 पानी में गिरे',goal:'🎯 लक्ष्य 3★ / 2★',record:'🏆 रिकॉर्ड',fartFor:'{s} सेकंड पादा',king:'👑 पाद सम्राट',lazy:'😴 सबसे आलसी',soloKing:'👑 {n} ने कुल {s} सेकंड पादा!',
+lv:[['गाँव की नहर','आसान – पादना सीखो'],['बांस की धारा','मध्यम – पत्थर, लट्ठे, खूंटे'],['भूतिया भंवर','कठिन – भंवर बेड़ा निगल जाता है']],
+desc:['खड़े बालों वाला लड़का, बिजली-सा तेज़ पाद','शंकु टोपी वाली चावल बेचने वाली दादी, "पट पट"','बड़ा पेट, ढोल जैसा भारी पाद','दो चोटी वाली लड़की, पतली आवाज़ का पाद'],
+tips:['पाद बटन दबाए रखो 💨 – बेड़ा किरदार की दिशा में जाएगा!','सही दिशा में मुड़ो। बेमेल पाद से बेड़ा घूमता है!','🍠 शकरकंद खाओ – पूरी गैस + सुपर पाद!','जलकुंभी से बचो – फंसे तो बहुत धीमे 🐌','बांस के खूंटों से सावधान – छूते ही पानी में!','लट्ठे इधर-उधर बहते हैं – सही समय देखकर पादो!','भंवर: बीच में खिंचे तो डूबोगे! ज़ोर से पादकर निकलो!'],
+cp:'🚩 झंडा सेव! गिरने पर यहीं से',backCp:'आखिरी झंडे पर लौटें 🚩',backSuffix:'→ झंडे पर वापस 🚩',whirl:'भंवर ने निगल लिया! 🌀',chong:'बांस के खूंटों से टकराए! 🎋',level:'लेवल',gas:'गैस 💨',sup:'सुपर पाद!',empty:'गैस खत्म',noGas:'गैस खत्म!',fallBig:'छपाक! पानी में गिरे! 💦',go:'पादो!!! 💨',potato:'शकरकंद',start:'शुरुआती घाट',arch:'फिनिश 🏁',cpWord:'झंडा!',splash:'छपाक!',quack:'क्वैक!',touch:'जॉयस्टिक खींचें',need34:'3–4 खिलाड़ी मोड के लिए कीबोर्ड चाहिए।',joy:'छूकर खींचें – मुड़ें + पादें',landscape:'📱 दो खिलाड़ियों के लिए फ़ोन आड़ा करें',lang:'भाषा',full:'फ़ुल स्क्रीन',words:['पूँ!','धुस्स!','फुर्र!','पर्र!']},
+
+ar:{name:'العربية',title:'FART RAFT',tag:'أطلقوا الغازات معًا وإلا لن يتحرك الطوف! 💨 لعب تعاوني من 1 إلى 4 لاعبين',players:'عدد اللاعبين',pn:'{n} لاعب',chars:'اختر الشخصيات',levels:'اختر المرحلة',play:'هيا! ▶',howto:'📖 طريقة اللعب',
+how:['يقف كل لاعب في زاوية من الطوف. <b>استدر</b> ثم <b>اضغط مطولًا زر الغازات</b>: يندفع الغاز للخلف فيدفع الطوف نحو الاتجاه الذي تنظر إليه الشخصية.','إطلاق الغازات بشكل غير متزامن بعيدًا عن المركز يجعل الطوف <b>يدور بلا توقف</b>. نسّقوا معًا!','نفد الغاز؟ انتظر حتى يمتلئ. كُل <b>🍠 البطاطا الحلوة</b> لملء غاز الجميع والحصول على <b>دفعة خارقة</b> لبضع ثوانٍ.','تجنب الصخور وجذوع الأشجار والبط. إن لمست <b>أوتاد الخيزران</b> أو سحبتك <b>الدوامة</b> ستسقط في الماء وتعود إلى آخر علم.','المفاتيح: ل1 <b>A D + W</b> · ل2 <b>← → + ↑</b> · ل3 <b>J L + I</b> · ل4 <b>Num 4 6 + 8</b> · <b>R</b> آخر علم · <b>Esc</b> إيقاف مؤقت. الهاتف: <b>اسحب عصا التحكم</b> (1–2 لاعب).'],
+paused:'إيقاف مؤقت',resume:'متابعة ▶',restart:'🔄 إعادة المرحلة',menu:'🏠 القائمة',finish:'وصلنا! 🎉',retry:'🔄 إعادة',next:'المرحلة التالية ▶',time:'⏱ الوقت',falls:'💦 مرات السقوط',goal:'🎯 الهدف 3★ / 2★',record:'🏆 أفضل رقم',fartFor:'{s} ث من الغازات',king:'👑 ملك الغازات',lazy:'😴 الأكثر كسلًا',soloKing:'👑 أطلق {n} الغازات لمدة {s} ثانية!',
+lv:[['قناة القرية','سهل – تعلّم الدفع'],['منحدرات الخيزران','متوسط – صخور، جذوع، أوتاد'],['دوامة الأشباح','صعب – الدوامات تبتلع الطوف']],
+desc:['فتى بشعر منكوش، سريع كالبرق','بائعة أرز بقبعة مخروطية، صوتها "بت بت"','كرش كبير، صوت عميق كالطبل','فتاة بضفيرتين، صوت رفيع'],
+tips:['اضغط مطولًا زر الغازات 💨 – يتحرك الطوف نحو اتجاه نظر الشخصية!','استدر للاتجاه الصحيح. عدم التزامن يجعل الطوف يدور!','كُل 🍠 البطاطا الحلوة لملء الغاز + دفعة خارقة!','تجنب ورد النيل – يبطئك كثيرًا 🐌','احذر أوتاد الخيزران – لمسة واحدة وتسقط!','الجذوع تتحرك ذهابًا وإيابًا – انتظر اللحظة المناسبة!','الدوامة: إن سُحبت للمركز تغرق! ادفع بقوة للهروب!'],
+cp:'🚩 تم حفظ العلم! ستعود هنا إن سقطت',backCp:'العودة لآخر علم 🚩',backSuffix:'← العودة للعلم 🚩',whirl:'ابتلعتك الدوامة! 🌀',chong:'اصطدمت بأوتاد الخيزران! 🎋',level:'المرحلة',gas:'الغاز 💨',sup:'دفعة خارقة!',empty:'لا غاز',noGas:'نفد الغاز!',fallBig:'طرطش! سقطت في الماء! 💦',go:'انطلق!!! 💨',potato:'بطاطا حلوة',start:'رصيف البداية',arch:'النهاية 🏁',cpWord:'علم!',splash:'طرطش!',quack:'كواك!',touch:'اسحب عصا التحكم',need34:'وضع 3–4 لاعبين يحتاج لوحة مفاتيح.',joy:'المس واسحب للاستدارة + الدفع',landscape:'📱 أدر الهاتف أفقيًا للعب الثنائي بسهولة',lang:'اللغة',full:'ملء الشاشة',words:['بووم!','فسسس!','بررت!','بوف!']}
+};
+const I18N_ADD={
+vi:{lv:[['Rạch Lục Bình','Vừa+ – bèo dày, gỗ trôi'],['Guồng Gỗ Xoay','Khó – khúc gỗ quay vòng'],['Thác Ghềnh Dữ','Khó – nước xiết đẩy ngang'],['Dòng Nước Ngược','Rất khó – nước ngược + xoáy'],['Hẻm Đá Hẹp','Rất khó – lòng sông siêu hẹp'],['Bão Lốc Sông Ma','Cực khó – đủ mọi bẫy'],['Vua Xì Hơi','Địa ngục – ít khoai, hao hơi nhanh']],tips:['Khúc gỗ XOAY VÒNG – đợi nó quay dọc theo dòng rồi lách qua!','NƯỚC XIẾT đẩy bè sang ngang – xì ngược lại để giữ hướng!','NƯỚC NGƯỢC đẩy lùi bè – giữ hơi rồi xì một mạch qua!'],locked:'🔒 Qua màn trước để mở khóa'},
+en:{lv:[['Hyacinth Creek','Medium+ – thick weeds, drifting logs'],['Spinning Logs','Hard – logs that spin around'],['Wild Rapids','Hard – fast currents push you sideways'],['Upstream Struggle','Very hard – reverse currents + whirlpools'],['Narrow Gorge','Very hard – super narrow river'],['Ghost River Storm','Extreme – every trap at once'],['King of Farts','Insane – few potatoes, gas drains fast']],tips:['SPINNING LOG – wait until it lines up with the river, then slip past!','FAST CURRENT pushes the raft sideways – fart the other way!','REVERSE CURRENT pushes you back – save gas and fart nonstop to get through!'],locked:'🔒 Beat the previous level to unlock'},
+pt:{lv:[['Igarapé do Aguapé','Médio+ – muito aguapé, troncos'],['Troncos Giratórios','Difícil – troncos que giram'],['Corredeira Brava','Difícil – a correnteza empurra de lado'],['Contra a Correnteza','Muito difícil – correnteza ao contrário + redemoinhos'],['Desfiladeiro Estreito','Muito difícil – rio estreitíssimo'],['Tempestade no Rio Fantasma','Extremo – todas as armadilhas'],['Rei do Pum','Insano – pouca batata, gás acaba rápido']],tips:['TRONCO GIRATÓRIO – espere ele ficar na direção do rio e passe!','CORRENTEZA FORTE empurra a balsa de lado – peide para o outro lado!','CORRENTEZA AO CONTRÁRIO – guarde gás e peide sem parar para passar!'],locked:'🔒 Termine a fase anterior para desbloquear'},
+es:{lv:[['Arroyo del Jacinto','Medio+ – mucho jacinto, troncos'],['Troncos Giratorios','Difícil – troncos que giran'],['Rápidos Salvajes','Difícil – la corriente empuja de lado'],['Contracorriente','Muy difícil – corriente inversa + remolinos'],['Desfiladero Estrecho','Muy difícil – río estrechísimo'],['Tormenta del Río Fantasma','Extremo – todas las trampas'],['Rey del Pedo','Locura – pocos camotes, el gas se acaba rápido']],tips:['¡TRONCO GIRATORIO – espera a que quede a lo largo del río y pasa!','¡La CORRIENTE FUERTE empuja de lado – pedo hacia el otro lado!','¡CONTRACORRIENTE – guarda gas y pedorrea sin parar para pasar!'],locked:'🔒 Completa el nivel anterior para desbloquear'},
+id:{lv:[['Sungai Eceng Gondok','Sedang+ – eceng gondok lebat, kayu hanyut'],['Kayu Berputar','Sulit – kayu yang berputar'],['Arus Deras','Sulit – arus mendorong ke samping'],['Melawan Arus','Sangat sulit – arus balik + pusaran'],['Ngarai Sempit','Sangat sulit – sungai super sempit'],['Badai Sungai Hantu','Ekstrem – semua jebakan'],['Raja Kentut','Gila – sedikit ubi, gas cepat habis']],tips:['KAYU BERPUTAR – tunggu sampai sejajar arus, lalu lewati!','ARUS DERAS mendorong rakit ke samping – kentut ke arah sebaliknya!','ARUS BALIK mendorong mundur – simpan gas lalu kentut terus sampai lewat!'],locked:'🔒 Selesaikan level sebelumnya untuk membuka'},
+ms:{lv:[['Anak Sungai Keladi Bunting','Sederhana+ – banyak keladi bunting, kayu'],['Kayu Berpusing','Sukar – kayu yang berpusing'],['Jeram Ganas','Sukar – arus menolak ke tepi'],['Melawan Arus','Sangat sukar – arus songsang + pusaran'],['Gaung Sempit','Sangat sukar – sungai sangat sempit'],['Ribut Sungai Hantu','Ekstrem – semua perangkap'],['Raja Kentut','Gila – kurang ubi, gas cepat habis']],tips:['KAYU BERPUSING – tunggu ia selari dengan arus, kemudian lalu!','ARUS DERAS menolak rakit ke tepi – kentut ke arah bertentangan!','ARUS SONGSANG menolak ke belakang – simpan gas dan kentut terus!'],locked:'🔒 Tamatkan peringkat sebelumnya untuk membuka'},
+th:{lv:[['ลำธารผักตบ','กลาง+ – ผักตบหนา ขอนไม้'],['ขอนไม้หมุน','ยาก – ขอนไม้หมุนวน'],['แก่งน้ำเชี่ยว','ยาก – กระแสน้ำผลักไปด้านข้าง'],['ทวนน้ำ','ยากมาก – น้ำไหลย้อน + น้ำวน'],['ช่องเขาแคบ','ยากมาก – แม่น้ำแคบสุดๆ'],['พายุแม่น้ำผีสิง','สุดขีด – กับดักครบทุกแบบ'],['ราชาแห่งตด','นรก – มันเทศน้อย ลมหมดไว']],tips:['ขอนไม้หมุน – รอให้หมุนขนานกับสายน้ำแล้วค่อยผ่าน!','น้ำเชี่ยวผลักแพไปด้านข้าง – ตดสวนทางไว้!','น้ำไหลย้อนดันแพถอยหลัง – เก็บลมไว้แล้วตดยาวๆ ผ่านไป!'],locked:'🔒 ผ่านด่านก่อนหน้าเพื่อปลดล็อก'},
+fil:{lv:[['Sapa ng Water Hyacinth','Katamtaman+ – makapal na halaman, troso'],['Umiikot na Troso','Mahirap – trosong umiikot'],['Mabangis na Agos','Mahirap – itinutulak ka ng agos patagilid'],['Salungat sa Agos','Napakahirap – baligtad na agos + ipu-ipo'],['Makitid na Bangin','Napakahirap – sobrang kitid na ilog'],['Bagyo sa Ilog ng Multo','Matindi – lahat ng bitag'],['Hari ng Utot','Baliw – kaunting kamote, mabilis maubos ang hangin']],tips:['UMIIKOT NA TROSO – hintaying humanay sa agos bago dumaan!','MALAKAS NA AGOS – umutot sa kabilang direksyon para hindi matangay!','SALUNGAT NA AGOS – mag-ipon ng hangin at umutot nang tuloy-tuloy!'],locked:'🔒 Tapusin ang naunang level para mabuksan'},
+zh:{lv:[['水葫芦小溪','中等+ – 水葫芦密布、漂木'],['旋转木头','困难 – 会旋转的木头'],['狂野急流','困难 – 急流把你推向侧边'],['逆流而上','很难 – 逆流 + 漩涡'],['狭窄峡谷','很难 – 超窄河道'],['幽灵河风暴','极难 – 所有陷阱齐上'],['屁王之路','地狱 – 红薯少、气耗得快']],tips:['旋转木头 – 等它转到顺着水流方向再钻过去！','急流会把木筏推向侧边 – 朝反方向放屁！','逆流会把木筏往后推 – 攒好气一口气放过去！'],locked:'🔒 通关上一关即可解锁'},
+ja:{lv:[['ホテイアオイの小川','ふつう+ – 水草だらけ・流木'],['回転丸太','むずかしい – ぐるぐる回る丸太'],['激流','むずかしい – 流れが横に押し流す'],['逆流','とてもむずかしい – 逆流＋渦潮'],['狭い渓谷','とてもむずかしい – 超せまい川'],['お化け川の嵐','超むずかしい – 全部のワナ'],['おなら王への道','地獄 – さつまいも少なめ・ガス消費大']],tips:['回転丸太 – 流れと平行になった瞬間にすり抜けよう！','激流がイカダを横に押す – 反対方向へおなら！','逆流でイカダが押し戻される – ガスをためて一気におなら！'],locked:'🔒 前のステージをクリアで解放'},
+ko:{lv:[['부레옥잠 시냇물','보통+ – 빽빽한 수초, 통나무'],['회전 통나무','어려움 – 빙글빙글 도는 통나무'],['거친 급류','어려움 – 물살이 옆으로 밀어요'],['역류','매우 어려움 – 거꾸로 흐르는 물 + 소용돌이'],['좁은 협곡','매우 어려움 – 아주 좁은 강'],['유령강 폭풍','극한 – 모든 함정'],['방귀왕의 길','지옥 – 고구마 적음, 가스 빨리 닳음']],tips:['회전 통나무 – 물길과 나란해질 때 빠져나가세요!','급류가 뗏목을 옆으로 밀어요 – 반대 방향으로 뀌세요!','역류가 뗏목을 뒤로 밀어요 – 가스를 모아서 쭉 뀌세요!'],locked:'🔒 이전 스테이지를 깨면 열려요'},
+hi:{lv:[['जलकुंभी की धारा','मध्यम+ – घनी जलकुंभी, लट्ठे'],['घूमते लट्ठे','कठिन – गोल घूमते लट्ठे'],['तेज़ धारा','कठिन – धारा बगल में धकेलती है'],['उल्टी धारा','बहुत कठिन – उल्टा बहाव + भंवर'],['संकरी घाटी','बहुत कठिन – बेहद संकरी नदी'],['भूतिया नदी का तूफ़ान','चरम – हर जाल एक साथ'],['पाद सम्राट','पागलपन – कम शकरकंद, गैस जल्दी खत्म']],tips:['घूमता लट्ठा – धारा की दिशा में आने तक रुको, फिर निकलो!','तेज़ धारा बेड़े को बगल में धकेलती है – उल्टी दिशा में पादो!','उल्टी धारा पीछे धकेलती है – गैस बचाकर लगातार पादो!'],locked:'🔒 खोलने के लिए पिछला लेवल पूरा करें'},
+ar:{lv:[['جدول ورد النيل','متوسط+ – نباتات كثيفة وجذوع'],['جذوع دوّارة','صعب – جذوع تدور'],['منحدرات هائجة','صعب – التيار يدفعك جانبًا'],['عكس التيار','صعب جدًا – تيار معاكس + دوامات'],['الوادي الضيق','صعب جدًا – نهر ضيق جدًا'],['عاصفة نهر الأشباح','شديد الصعوبة – كل الفخاخ'],['ملك الغازات','جنوني – بطاطا قليلة والغاز ينفد بسرعة']],tips:['جذع دوّار – انتظر حتى يتجه مع التيار ثم مُرّ!','التيار القوي يدفع الطوف جانبًا – ادفع بالاتجاه المعاكس!','التيار المعاكس يدفعك للخلف – وفّر الغاز وادفع بلا توقف!'],locked:'🔒 أنهِ المرحلة السابقة لفتحها'},
+tr:{lv:[['Su Sümbülü Deresi','Orta+ – sık su bitkisi, kütükler'],['Dönen Kütükler','Zor – dönen kütükler'],['Azgın Akıntı','Zor – akıntı yana iter'],['Akıntıya Karşı','Çok zor – ters akıntı + girdap'],['Dar Kanyon','Çok zor – çok dar nehir'],['Hayalet Nehir Fırtınası','Aşırı zor – tüm tuzaklar'],['Osuruk Kralı','Çılgın – az patates, gaz hızlı biter']],tips:['DÖNEN KÜTÜK – akıntıyla aynı yöne gelince geç!','GÜÇLÜ AKINTI salı yana iter – ters yöne osur!','TERS AKINTI geri iter – gazı biriktir, durmadan osur!'],locked:'🔒 Açmak için önceki bölümü bitir'},
+ru:{lv:[['Ручей гиацинтов','Средне+ – густые заросли, брёвна'],['Крутящиеся брёвна','Сложно – брёвна вращаются'],['Бурные пороги','Сложно – течение сносит вбок'],['Против течения','Очень сложно – обратное течение + водовороты'],['Узкое ущелье','Очень сложно – очень узкая река'],['Буря на Призрачной реке','Экстрим – все ловушки сразу'],['Король пуков','Безумие – мало батата, газ тает быстро']],tips:['КРУТЯЩЕЕСЯ БРЕВНО – дождись, когда оно встанет вдоль течения, и проскочи!','БЫСТРОЕ ТЕЧЕНИЕ сносит плот вбок – пукай в обратную сторону!','ОБРАТНОЕ ТЕЧЕНИЕ толкает назад – накопи газ и пукай без остановки!'],locked:'🔒 Пройди предыдущий уровень, чтобы открыть'},
+fr:{lv:[['Ruisseau des Jacinthes','Moyen+ – plantes épaisses, troncs'],['Troncs Tournants','Difficile – des troncs qui tournent'],['Rapides Sauvages','Difficile – le courant pousse sur le côté'],['À Contre-Courant','Très difficile – courant inverse + tourbillons'],['Gorge Étroite','Très difficile – rivière ultra étroite'],['Tempête sur la Rivière Fantôme','Extrême – tous les pièges'],['Roi du Prout','Infernal – peu de patates, le gaz part vite']],tips:['TRONC TOURNANT – attends qu\'il soit dans le sens du courant et passe !','Le COURANT FORT pousse le radeau sur le côté – pète dans l\'autre sens !','CONTRE-COURANT – garde du gaz et pète sans t\'arrêter pour passer !'],locked:'🔒 Termine le niveau précédent pour débloquer'},
+de:{lv:[['Hyazinthenbach','Mittel+ – dichte Pflanzen, Treibholz'],['Drehende Stämme','Schwer – Stämme, die sich drehen'],['Wilde Stromschnellen','Schwer – Strömung drückt zur Seite'],['Gegen den Strom','Sehr schwer – Gegenströmung + Strudel'],['Enge Schlucht','Sehr schwer – superschmaler Fluss'],['Sturm am Geisterfluss','Extrem – alle Fallen'],['Pups-König','Wahnsinn – wenig Kartoffeln, Gas schnell leer']],tips:['DREHENDER STAMM – warte, bis er längs zur Strömung steht, dann durch!','STARKE STRÖMUNG drückt das Floß zur Seite – in die Gegenrichtung pupsen!','GEGENSTRÖMUNG schiebt zurück – Gas sparen und durchgehend pupsen!'],locked:'🔒 Schließe das vorige Level ab, um es freizuschalten'},
+it:{lv:[['Ruscello dei Giacinti','Medio+ – piante fitte, tronchi'],['Tronchi Rotanti','Difficile – tronchi che girano'],['Rapide Selvagge','Difficile – la corrente spinge di lato'],['Controcorrente','Molto difficile – corrente inversa + vortici'],['Gola Stretta','Molto difficile – fiume strettissimo'],['Tempesta sul Fiume Fantasma','Estremo – tutte le trappole'],['Re del Peto','Folle – poche patate, il gas finisce presto']],tips:['TRONCO ROTANTE – aspetta che sia allineato alla corrente e passa!','La CORRENTE FORTE spinge la zattera di lato – peta nella direzione opposta!','CONTROCORRENTE – risparmia gas e peta senza sosta per passare!'],locked:'🔒 Completa il livello precedente per sbloccarlo'}
+};
+for(const k in I18N_ADD){const a=I18N_ADD[k],L=I18N[k];L.lv=L.lv.concat(a.lv);L.tips=L.tips.concat(a.tips);L.locked=a.locked;}
+</script>
+<script>
+'use strict';
+/* =========================================================
+   FART RAFT HiHi – original co-op physics raft game
+   All art drawn in code, all sounds synthesized. No external assets.
+   ========================================================= */
+const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+let W=0,H=0,DPR=1;const SAFE={t:0,b:0,l:0,r:0};
+function resize(){DPR=Math.min(window.devicePixelRatio||1,IS_TOUCH?1.5:2);W=innerWidth;H=innerHeight;cv.width=(W*DPR)|0;cv.height=(H*DPR)|0;cv.style.width=W+'px';cv.style.height=H+'px';
+  try{const cs=getComputedStyle(document.getElementById('safe'));SAFE.t=parseFloat(cs.paddingTop)||0;SAFE.b=parseFloat(cs.paddingBottom)||0;SAFE.l=parseFloat(cs.paddingLeft)||0;SAFE.r=parseFloat(cs.paddingRight)||0;}catch(e){}}
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,250));resize();
+const FONT='"Trebuchet MS","Segoe UI",system-ui,sans-serif';
+const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t, TAU=Math.PI*2;
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let LANG='en';
+function t(k){const L=I18N[LANG]||I18N.en;return L[k]!==undefined?L[k]:I18N.en[k];}
+function tf(k,o){let x=t(k);for(const p in o)x=x.split('{'+p+'}').join(o[p]);return x;}
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem('bexihoi_'+k));localStorage.setItem('bexihoi_'+k,JSON.stringify(v));}catch(e){return null;}}
+
+/* ================= AUDIO ================= */
+let AC=null, master, sfxGain, musGain, noiseBuf, sfxOn=store('sfx')!==false, musOn=store('mus')!==false;
+function initAudio(){
+  if(AC){if(AC.state==='suspended')AC.resume();return;}
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
+  const comp=AC.createDynamicsCompressor();comp.connect(AC.destination);
+  master=AC.createGain();master.gain.value=0.9;master.connect(comp);
+  sfxGain=AC.createGain();sfxGain.gain.value=sfxOn?1:0;sfxGain.connect(master);
+  musGain=AC.createGain();musGain.gain.value=musOn?0.22:0;musGain.connect(master);
+  noiseBuf=AC.createBuffer(1,AC.sampleRate*1,AC.sampleRate);
+  const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  startMusic();
+}
+function env(g,t,a,peak,dec){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+dec);}
+function tone(type,f0,f1,dur,vol,dest,delay){
+  if(!AC)return;const t=AC.currentTime+(delay||0);const o=AC.createOscillator();o.type=type;o.frequency.setValueAtTime(f0,t);
+  if(f1)o.frequency.exponentialRampToValueAtTime(f1,t+dur);const g=AC.createGain();env(g,t,0.01,vol,dur);o.connect(g);g.connect(dest||sfxGain);o.start(t);o.stop(t+dur+0.05);
+}
+function noise(dur,f0,f1,vol,type,delay){
+  if(!AC)return;const t=AC.currentTime+(delay||0);const s=AC.createBufferSource();s.buffer=noiseBuf;
+  const f=AC.createBiquadFilter();f.type=type||'lowpass';f.frequency.setValueAtTime(f0,t);if(f1)f.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  const g=AC.createGain();env(g,t,0.01,vol,dur);s.connect(f);f.connect(g);g.connect(sfxGain);s.start(t);s.stop(t+dur+0.05);
+}
+const SND={
+  splash(v=1){noise(0.6,2500,250,0.5*v);noise(0.25,900,300,0.3*v,'bandpass',0.05);},
+  bonk(v=1){tone('sine',220,70,0.18,0.5*v);noise(0.05,3000,800,0.25*v,'highpass');},
+  quack(){[0,0.12].forEach(d=>{if(!AC)return;const t=AC.currentTime+d;const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(620,t);o.frequency.exponentialRampToValueAtTime(380,t+0.09);const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=1300;f.Q.value=4;const g=AC.createGain();env(g,t,0.005,0.35,0.09);o.connect(f);f.connect(g);g.connect(sfxGain);o.start(t);o.stop(t+0.15);});},
+  pickup(){[523,659,784,1046].forEach((f,i)=>tone('triangle',f,0,0.12,0.3,null,i*0.06));},
+  cp(){tone('sine',880,0,0.7,0.3);tone('sine',1320,0,0.7,0.2,null,0.08);tone('sine',1760,0,0.6,0.12,null,0.16);},
+  fall(){tone('sine',900,180,0.5,0.3);setTimeout(()=>SND.splash(1.3),350);},
+  win(){[523,659,784,659,784,1046].forEach((f,i)=>tone('square',f,0,0.16,0.14,null,i*0.13));tone('triangle',1046,0,0.9,0.25,null,0.8);},
+  click(){tone('triangle',700,500,0.06,0.2);},
+  empty(){tone('square',140,90,0.15,0.15);}
+};
+/* continuous fart voice per player */
+function fartStart(pl){
+  if(!AC||!sfxOn)return;const t=AC.currentTime,base=pl.ch.pitch;
+  const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=base;
+  const o2=AC.createOscillator();o2.type='square';o2.frequency.value=base*0.5;
+  const nz=AC.createBufferSource();nz.buffer=noiseBuf;nz.loop=true;
+  const nf=AC.createBiquadFilter();nf.type='bandpass';nf.frequency.value=320;nf.Q.value=0.9;
+  const ng=AC.createGain();ng.gain.value=0.5;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=650;lp.Q.value=7;
+  const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.32,t+0.03);
+  const lfo=AC.createOscillator();lfo.type='square';lfo.frequency.value=28;const lg=AC.createGain();lg.gain.value=0.2;lfo.connect(lg);lg.connect(g.gain);
+  const o2g=AC.createGain();o2g.gain.value=0.5;
+  o.connect(lp);o2.connect(o2g);o2g.connect(lp);nz.connect(nf);nf.connect(ng);ng.connect(lp);lp.connect(g);g.connect(sfxGain);
+  o.start(t);o2.start(t);nz.start(t,Math.random()*0.5);lfo.start(t);
+  pl.voice={o,o2,nz,lp,g,lfo,base};
+}
+function fartTick(pl){
+  const v=pl.voice;if(!v)return;const t=AC.currentTime;const b=v.base*(pl.super?1.25:1);
+  v.o.frequency.setTargetAtTime(b*(0.7+Math.random()*0.6),t,0.02);
+  v.o2.frequency.setTargetAtTime(b*0.5*(0.8+Math.random()*0.4),t,0.03);
+  v.lfo.frequency.setTargetAtTime(16+Math.random()*30,t,0.04);
+  v.lp.frequency.setTargetAtTime(420+Math.random()*700,t,0.03);
+}
+function fartStop(pl){
+  const v=pl.voice;if(!v)return;pl.voice=null;const t=AC.currentTime;
+  v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(v.g.gain.value,t);v.g.gain.linearRampToValueAtTime(0,t+0.12);
+  v.o.frequency.setTargetAtTime(v.base*0.6,t,0.05);
+  [v.o,v.o2,v.nz,v.lfo].forEach(n=>{try{n.stop(t+0.15);}catch(e){}});
+}
+/* background music: cheerful pentatonic loop */
+let musTimer=null,musStep=0,musNext=0;
+const MEL=[72,74,76,79,76,74,72,69, 72,74,76,79,81,79,76,74, 76,79,81,84,81,79,76,74, 72,76,74,69,72,0,72,0];
+const BAS=[48,0,55,0,57,0,55,0, 48,0,55,0,53,0,55,0];
+function mtof(m){return 440*Math.pow(2,(m-69)/12);}
+function startMusic(){
+  if(musTimer)return;musNext=AC.currentTime+0.1;
+  musTimer=setInterval(()=>{
+    if(!AC)return;const spb=60/118/2;
+    while(musNext<AC.currentTime+0.25){
+      const m=MEL[musStep%MEL.length];if(m){const o=AC.createOscillator();o.type='triangle';o.frequency.value=mtof(m);const g=AC.createGain();env(g,musNext,0.01,0.35,spb*1.6);o.connect(g);g.connect(musGain);o.start(musNext);o.stop(musNext+spb*2);}
+      const b=BAS[musStep%BAS.length];if(b){const o=AC.createOscillator();o.type='sine';o.frequency.value=mtof(b);const g=AC.createGain();env(g,musNext,0.01,0.5,spb*1.8);o.connect(g);g.connect(musGain);o.start(musNext);o.stop(musNext+spb*2);}
+      if(musStep%2===0){const s=AC.createBufferSource();s.buffer=noiseBuf;const f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=6000;const g=AC.createGain();env(g,musNext,0.002,musStep%4===0?0.18:0.08,0.04);s.connect(f);f.connect(g);g.connect(musGain);s.start(musNext,Math.random()*0.5);s.stop(musNext+0.06);}
+      musNext+=spb;musStep++;
+    }
+  },60);
+}
+
+/* ================= DATA ================= */
+const CHARS=[
+  {id:'teo',name:'Tèo',desc:'Cậu nhóc tóc chổm, xì nhanh như chớp',shirt:'#2f9be0',shirt2:'#1f78b4',pants:'#24406b',skin:'#f6c9a0',hair:'#2b1b12',style:'spiky',gas:'#a6e05a',pitch:125},
+  {id:'batu',name:'Bà Tư',desc:'Bà bán xôi đội nón lá, xì kêu “pẹt pẹt”',shirt:'#9b5de5',shirt2:'#7440b8',pants:'#3b2a55',skin:'#eebf98',hair:'#e8e8e8',style:'nonla',gas:'#cfe36a',pitch:98},
+  {id:'chuba',name:'Chú Ba Béo',desc:'Bụng bự, xì trầm như trống trận',shirt:'#e63946',shirt2:'#b52530',pants:'#264653',skin:'#e9b48a',hair:'#1a1a1a',style:'bald',gas:'#9cc94a',pitch:58,belly:true},
+  {id:'bena',name:'Bé Na',desc:'Cô bé hai bím tóc, xì the thé',shirt:'#ffc93c',shirt2:'#e0a800',pants:'#e76f51',skin:'#f8d3b0',hair:'#3a2214',style:'pigtails',gas:'#b9f27c',pitch:165}
+];
+const PCOL=['#ff4d4d','#3d9bff','#2fbf4f','#ffb000'];
+const KEYSETS=[
+  {l:['KeyA'],r:['KeyD'],f:['KeyW'],label:'A D + W'},
+  {l:['ArrowLeft'],r:['ArrowRight'],f:['ArrowUp'],label:'← → + ↑'},
+  {l:['KeyJ'],r:['KeyL'],f:['KeyI'],label:'J L + I'},
+  {l:['Numpad4'],r:['Numpad6'],f:['Numpad8'],label:'Num 4 6 + 8'}
+];
+const SLOTS={1:[[0,4]],2:[[-36,4],[36,4]],3:[[-36,-14],[36,-14],[0,26]],4:[[-36,-22],[36,-22],[-36,24],[36,24]]};
+const LEVELS=[
+  {seed:11,current:42,gateW:250,stars:[60,100],cpEvery:1700,kEvery:1100,gap:[300,460],
+   segs:[[400,0,540],[900,35,520],[800,-55,500],[700,25,480],[900,40,470],[800,-45,490],[900,30,470],[800,-30,500],[500,0,540]],
+   pool:['rock1','rock1','rocks2','rocks2','ducks','beo','gate','rock1','slalom'],
+   tips:[[120,0],[650,1],[1300,2],[2100,3]]},
+  {seed:23,current:52,gateW:225,stars:[110,170],cpEvery:1600,kEvery:1000,gap:[260,400],
+   segs:[[400,0,470],[800,-40,440],[700,55,410],[700,-30,390],[800,45,430],[700,-60,390],[800,35,370],[800,-25,410],[900,50,390],[800,-45,430],[600,0,470]],
+   pool:['rock1','rocks2','gate','gate','slalom','log','log','chong','chong','ducks','beo','log2'],
+   tips:[[150,4],[900,5]]},
+  {seed:37,current:62,gateW:210,stars:[140,220],cpEvery:1500,kEvery:950,gap:[250,380],
+   segs:[[400,0,450],[800,50,410],[800,-70,370],[700,40,350],[900,-40,430],[700,60,340],[800,-55,370],[900,30,450],[700,-45,350],[800,55,390],[800,-40,360],[900,20,430],[500,0,470]],
+   pool:['gate','gate','slalom','slalom','log','log','log2','chong','chong','chongMid','whirl','whirl','whirl','ducks','beo'],
+   tips:[[150,6]]},
+  {seed:41,current:55,gateW:220,stars:[90,140],cpEvery:1600,kEvery:1000,gap:[260,380],
+   segs:[[400,0,460],[800,45,420],[700,-60,400],[800,30,380],[900,-40,440],[700,55,390],[800,-35,400],[900,40,420],[800,-50,380],[700,20,440],[500,0,470]],
+   pool:['beo','beo','beo','log','log','log2','ducks','ducks','gate','gate','rocks2','slalom','chong'],tips:[]},
+  {seed:53,current:58,gateW:215,stars:[150,230],cpEvery:1500,kEvery:1000,gap:[260,380],
+   segs:[[400,0,460],[800,-50,420],[800,60,400],[700,-35,380],[900,45,420],[800,-55,390],[800,40,400],[900,-30,430],[800,50,390],[800,-40,410],[600,0,460]],
+   pool:['spin','spin','spin','spin','log','gate','gate','slalom','chong','rocks2','whirl'],tips:[[150,7]]},
+  {seed:67,current:66,gateW:210,stars:[140,220],cpEvery:1500,kEvery:1000,gap:[250,370],
+   segs:[[400,0,450],[900,40,410],[800,-65,380],[700,45,360],[900,-35,420],[800,55,370],[800,-50,390],[900,35,420],[700,-45,370],[900,40,400],[800,-30,380],[500,0,460]],
+   pool:['rapid','rapid','rapid','rapid','gate','gate','log','log','chong','chong','slalom','spin','ducks'],tips:[[150,8]]},
+  {seed:79,current:60,gasMul:1.1,gateW:205,stars:[170,260],cpEvery:1500,kEvery:1000,gap:[250,370],
+   segs:[[400,0,460],[800,55,420],[900,-70,390],[800,40,370],[900,-35,430],[700,60,380],[900,-55,400],[800,30,440],[900,-45,380],[800,50,410],[900,-35,390],[800,25,430],[500,0,470]],
+   pool:['counter','counter','counter','counter','whirl','whirl','whirl','gate','gate','log','spin','chong','rapid'],tips:[[150,9]]},
+  {seed:89,current:68,gasMul:1.1,gateW:195,stars:[190,290],cpEvery:1500,kEvery:1050,gap:[240,360],
+   segs:[[400,0,420],[800,-45,340],[800,60,310],[700,-40,300],[900,35,340],[800,-55,300],[800,45,320],[900,-30,350],[800,50,300],[800,-45,320],[900,30,340],[800,-20,300],[500,0,420]],
+   pool:['gate','gate','gate','slalom','slalom','log','log','chong','chong','rapid','counter','rock1'],tips:[]},
+  {seed:97,current:72,gasMul:1.15,gateW:200,stars:[230,340],cpEvery:1500,kEvery:1050,gap:[230,350],
+   segs:[[400,0,460],[900,50,400],[800,-70,370],[900,45,350],[800,-40,420],[900,60,360],[800,-60,380],[900,35,430],[800,-50,350],[900,55,400],[800,-45,370],[900,30,420],[800,-35,360],[500,0,470]],
+   pool:['gate','slalom','spin','spin','log2','rapid','rapid','counter','whirl','whirl','chong','chong','chongMid','log'],tips:[]},
+  {seed:113,current:76,gasMul:1.3,regen:0.85,gateW:195,stars:[240,370],cpEvery:1600,kEvery:1500,gap:[220,340],
+   segs:[[400,0,460],[900,-55,390],[900,70,360],[800,-45,340],[900,40,410],[800,-60,350],[900,55,370],[900,-35,420],[800,50,340],[900,-55,390],[900,40,360],[800,-30,410],[900,45,350],[800,-40,380],[500,0,470]],
+   pool:['gate','gate','slalom','spin','spin','log2','log','rapid','rapid','counter','counter','whirl','whirl','chong','chong','chongMid'],tips:[]}
+];
+
+/* ================= COURSE ================= */
+const STEP=12;
+let zones=[],course=[],paths=null,decor=[],ripples=[],obs=[],cps=[],tips=[],finishIdx=0,lvl=null,lvlIndex=0;
+function buildCourse(segs){
+  const pts=[];let x=0,y=0,h=-Math.PI/2,w=segs[0][2];pts.push({x,y,w,h});
+  for(const [len,turn,wid] of segs){
+    const n=Math.max(1,Math.round(len/STEP)),w0=w,tr=turn*Math.PI/180;
+    for(let k=1;k<=n;k++){
+      h+=tr*(Math.PI/2)*Math.sin(Math.PI*(k-0.5)/n)/n;
+      w=w0+(wid-w0)*(0.5-0.5*Math.cos(Math.PI*k/n));
+      x+=Math.cos(h)*STEP;y+=Math.sin(h)*STEP;pts.push({x,y,w,h});
+    }
+  }
+  for(const p of pts){p.tx=Math.cos(p.h);p.ty=Math.sin(p.h);p.nx=-p.ty;p.ny=p.tx;}
+  return pts;
+}
+const idxS=s=>clamp(Math.round(s/STEP),0,course.length-1);
+function at(i,u){const p=course[i];return{x:p.x+p.nx*u,y:p.y+p.ny*u};}
+function nearest(x,y,guess,win){
+  let best=guess,bd=1e18;const a=Math.max(0,guess-win),b=Math.min(course.length-1,guess+win);
+  for(let i=a;i<=b;i++){const p=course[i],dx=x-p.x,dy=y-p.y,d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}}
+  return best;
+}
+function ribbon(scale,extra){
+  const P=new Path2D();const n=course.length;
+  for(let i=0;i<n;i++){const p=course[i],h=p.w/2*scale+extra;const x=p.x-p.nx*h,y=p.y-p.ny*h;i?P.lineTo(x,y):P.moveTo(x,y);}
+  for(let i=n-1;i>=0;i--){const p=course[i],h=p.w/2*scale+extra;P.lineTo(p.x+p.nx*h,p.y+p.ny*h);}
+  P.closePath();return P;
+}
+function distToCourse(x,y,gi){const j=nearest(x,y,gi,90);const p=course[j];return{d:Math.hypot(x-p.x,y-p.y)-p.w/2,j};}
+
+function buildLevel(li){
+  lvlIndex=li;lvl=LEVELS[li];course=buildCourse(lvl.segs);
+  paths={bank:ribbon(1,26),sand:ribbon(1,14),water:ribbon(1,0),deep:ribbon(0.55,0)};
+  finishIdx=course.length-1-Math.round(260/STEP);
+  const R=mulberry(lvl.seed*7+3);
+  // land decor
+  decor=[];
+  for(let i=0;i<course.length;i+=4){
+    for(const side of [-1,1]){
+      if(R()<0.35)continue;
+      const p=course[i],off=p.w/2+45+R()*320;
+      const x=p.x+p.nx*off*side+(R()-0.5)*40,y=p.y+p.ny*off*side+(R()-0.5)*40;
+      const dc=distToCourse(x,y,i);
+      let r=R(),type;
+      if(r<0.32)type='tree';else if(r<0.5)type='bamboo';else if(r<0.64)type='palm';else if(r<0.8)type='bush';else if(r<0.88&&dc.d>150)type='house';else if(r<0.96&&dc.d>170)type='rice';else type='flower';
+      const need=type==='house'?110:type==='rice'?130:type==='bush'||type==='flower'?30:55;
+      if(dc.d<need)continue;
+      decor.push({type,x,y,s:0.8+R()*0.6,c:R(),rot:R()*TAU});
+    }
+  }
+  // grass tufts
+  for(let i=0;i<course.length;i+=2){
+    const p=course[i];for(const side of [-1,1]){if(R()<0.5)continue;const off=p.w/2+30+R()*520;const x=p.x+p.nx*off*side,y=p.y+p.ny*off*side;if(distToCourse(x,y,i).d<24)continue;decor.push({type:'tuft',x,y,s:0.7+R()*0.6,c:R()});}
+  }
+  decor.sort((a,b)=>a.y-b.y);
+  // ripples & lilies
+  ripples=[];for(let i=0;i<course.length;i+=3){ripples.push({i,u:(R()*2-1)*0.8,ph:R()*10,len:10+R()*16});if(R()<0.12){const side=R()<0.5?-1:1;ripples.push({i,u:side*(0.82+R()*0.12),lily:true,ph:R()*TAU,len:12+R()*8});}}
+  genObstacles(R);
+  tips=(lvl.tips||[]).map(([s,k])=>({i:idxS(s),k,shown:false}));
+}
+function genObstacles(R){
+  obs=[];cps=[];zones=[];const startS=150;
+  let s=startS+600,lastCp=startS,lastK=startS+250;let safeNext=false;
+  const endS=finishIdx*STEP-380;
+  const add=o=>{o.i=o.i!==undefined?o.i:nearest(o.x,o.y,idxS(o.s||0),40);obs.push(o);return o;};
+  const rock=(s,u,r)=>{const i=idxS(s),q=at(i,u);add({t:'rock',x:q.x,y:q.y,r,i,seed:R()*100});};
+  // first khoai near start for tutorial
+  {const i=idxS(startS+1150),q=at(i,0);add({t:'khoai',x:q.x,y:q.y,r:26,i,ph:R()*TAU});lastK=startS+1150;}
+  while(s<endS){
+    const i=idxS(s),p=course[i],hf=p.w/2-24;let extra=0,gapAdd=0;
+    let pat=lvl.pool[(R()*lvl.pool.length)|0];
+    if(safeNext&&/chong|whirl|rapid|counter/.test(pat))pat='rock1';safeNext=false;
+    if(pat==='chongMid'&&hf<190)pat='rock1';
+    if(s<startS+900&&(pat==='chong'||pat==='whirl'||pat==='chongMid'||pat==='rapid'))pat='rock1';
+    switch(pat){
+      case 'rock1':{const r=34+R()*20;rock(s,(R()*2-1)*(hf-r)*0.7,r);break;}
+      case 'rocks2':{const sd=R()<0.5?-1:1,r1=36+R()*14,r2=36+R()*14;rock(s,sd*(hf-r1)*(0.55+R()*0.4),r1);rock(s+130,-sd*(hf-r2)*(0.55+R()*0.4),r2);extra=130;break;}
+      case 'gate':{const GW=lvl.gateW,g=(R()*2-1)*hf*0.3,r=44;let uL=g-GW/2-r,c=0;while(uL+r>-hf-20&&c<6){rock(s,uL,r);uL-=r*1.8;c++;}let uR=g+GW/2+r;c=0;while(uR-r<hf+20&&c<6){rock(s,uR,r);uR+=r*1.8;c++;}break;}
+      case 'slalom':{const sd=R()<0.5?-1:1;for(let k=0;k<3;k++){const r=40+R()*8;rock(s+k*190,(k%2?-sd:sd)*(hf-r)*0.85,r);}extra=380;break;}
+      case 'log':case 'log2':{const mk=(ii,ph)=>{const w=course[ii].w,hl=Math.max(50,Math.min(82,(w-260)/2)),amp=Math.max(0,w/2-hl-8);add({t:'log',i:ii,hl,amp,spd,ph,x:course[ii].x,y:course[ii].y,parts:[]});};
+        const spd=0.5+R()*0.4,ph=R()*TAU;mk(i,ph);if(pat==='log2'){mk(idxS(s+240),ph+Math.PI/2);extra=240;}break;}
+      case 'ducks':{const n=2+((R()*2)|0);for(let k=0;k<n;k++){const ii=idxS(s+k*70);add({t:'duck',i:ii,u0:(R()*2-1)*hf*0.6,amp:40+R()*50,spd:0.6+R()*0.8,ph:R()*TAU,x:0,y:0,fly:0,vx:0,vy:0});}extra=(n-1)*70;break;}
+      case 'beo':{const r=90+R()*40,sd=R()<0.5?-1:1,q=at(i,sd*(hf-r*0.45));add({t:'beo',x:q.x,y:q.y,r,i,seed:R()*1000});break;}
+      case 'chong':{const sd=R()<0.5?-1:1;for(let k=0;k<3;k++){const ii=idxS(s+k*75),h2=course[ii].w/2-24,q=at(ii,sd*(h2-18-R()*14));add({t:'chong',x:q.x,y:q.y,r:30,i:ii,seed:R()*1000});}
+        if(p.w>420&&R()<0.6){const r=38;rock(s+90,-sd*(hf-r+10),r);}extra=150;break;}
+      case 'chongMid':{const q=at(i,(R()*2-1)*20);add({t:'chong',x:q.x,y:q.y,r:42,i,seed:R()*1000,big:true});break;}
+      case 'spin':{if(hf<150){const r=38+R()*12;rock(s,(R()*2-1)*(hf-r)*0.6,r);break;}
+        add({t:'log',spin:true,i,u0:0,hl:hf-14,spd:(0.55+R()*0.35)*(R()<0.5?-1:1)*(lvl.current>65?1.15:1),ph:R()*TAU,x:p.x,y:p.y,parts:[]});break;}
+      case 'rapid':{const sd=R()<0.5?-1:1,len=360+R()*140,F=75+R()*30+(lvl.current>70?10:0),i0=idxS(s),i1=idxS(s+len),im=idxS(s+len/2);
+        zones.push({t:'rapid',i0,i1,i:im,sd,F,x:course[im].x,y:course[im].y});
+        for(let k=0;k<3;k++){const ii=idxS(s+len*(0.35+k*0.28)),h2=course[ii].w/2-24,q=at(ii,sd*(h2-16));add({t:'chong',x:q.x,y:q.y,r:30,i:ii,seed:R()*1000});}
+        extra=len;break;}
+      case 'counter':{const len=280+R()*120,F=lvl.current*0.5+55+R()*25,i0=idxS(s),i1=idxS(s+len),im=idxS(s+len/2);
+        zones.push({t:'counter',i0,i1,i:im,F,x:course[im].x,y:course[im].y});{const ki=idxS(s+len+90),q=at(ki,0);add({t:'khoai',x:q.x,y:q.y,r:26,i:ki,ph:R()*TAU});}extra=len+90;gapAdd=150;safeNext=true;break;}
+      case 'whirl':{const ii=idxS(s+150),q=at(ii,(R()*2-1)*course[ii].w*0.12);add({t:'whirl',x:q.x,y:q.y,R:155,core:30,i:ii,ph:R()*TAU});extra=300;gapAdd=120;break;}
+    }
+    const gap=lvl.gap[0]+R()*(lvl.gap[1]-lvl.gap[0])+gapAdd;
+    const mS=s+extra+gap/2;
+    if(mS<endS){
+      if(mS-lastCp>=lvl.cpEvery){cps.push({i:idxS(mS),on:false});lastCp=mS;}
+      else if(mS-lastK>=lvl.kEvery){const mi=idxS(mS),q=at(mi,(R()*2-1)*course[mi].w*0.2);add({t:'khoai',x:q.x,y:q.y,r:26,i:mi,ph:R()*TAU});lastK=mS;}
+    }
+    s+=extra+gap;
+  }
+}
+
+/* ================= GAME STATE ================= */
+const M=1,I=2600,HW=64,HH=50;
+let state='menu',raft=null,players=[],parts=[],texts=[],T=0,playTime=0,falls=0,cpIdx=0,toast=null,cam={x:0,y:0,z:1},fallT=0,fallMsg='',shake=0,winT=0;
+let numPlayers=store('np')||2;let chosen=store('chars')||[0,2,1,3];let selLevel=store('sel')||0;
+const keys={},vkeys={};
+function down(codes){for(const c of codes)if(keys[c]||vkeys[c])return true;return false;}
+
+function startLevel(li){
+  buildLevel(li);
+  raft={x:0,y:0,a:0,vx:0,vy:0,w:0,idx:0,hw:HW,hh:HH,bob:0};
+  players=[];const sl=SLOTS[numPlayers];
+  for(let k=0;k<numPlayers;k++){
+    const ks=numPlayers===1?{l:[...KEYSETS[0].l,...KEYSETS[1].l],r:[...KEYSETS[0].r,...KEYSETS[1].r],f:[...KEYSETS[0].f,...KEYSETS[1].f,'Space'],label:'A D + W  /  ← → + ↑'}:KEYSETS[k];
+    players.push({ch:CHARS[chosen[k]],keys:ks,slot:{x:sl[k][0],y:sl[k][1]},f:0,gas:100,farting:false,empty:false,voice:null,fartTime:0,col:PCOL[k],super:0,regenWait:0,puffT:0,txtT:0,strain:0,idx:k});
+  }
+  cpIdx=idxS(150);respawn(cpIdx);
+  parts=[];texts=[];playTime=0;falls=0;winT=0;state='play';toast=null;
+  cam.x=raft.x;cam.y=raft.y-60;
+  for(const tp of tips)tp.shown=false;
+  showUI('play');
+}
+function respawn(i){
+  const p=course[i];raft.x=p.x;raft.y=p.y;raft.a=Math.atan2(p.tx,-p.ty);raft.vx=raft.vy=raft.w=0;raft.idx=i;raft.coreT=0;
+  for(const pl of players){pl.f=0;pl.gas=Math.max(pl.gas,70);pl.empty=false;}
+}
+function fall(msg){
+  if(state!=='play')return;state='fall';fallT=0;fallMsg=msg;falls++;
+  for(const pl of players){if(pl.farting){pl.farting=false;fartStop(pl);}}
+  SND.fall();shake=12;
+  for(let k=0;k<40;k++){const a=Math.random()*TAU,sp=60+Math.random()*220;parts.push({x:raft.x,y:raft.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:0,max:0.6+Math.random()*0.6,r:4+Math.random()*6,col:'#ffffff',type:'drop'});}
+  addText(raft.x,raft.y-70,t('splash'),'#fff',46);
+}
+function addText(x,y,t,col,size){texts.push({x,y,t,col,size:size||26,life:0,max:1.1,vy:-50});}
+function showToast(t,dur){toast={t,life:0,max:dur||4};}
+
+/* ================= INPUT ================= */
+addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
+  keys[e.code]=true;initAudio();
+  if(e.code==='Escape'||e.code==='KeyP'){if(state==='play'||state==='fall')pauseGame();else if(state==='pause')resumeGame();}
+  if(e.code==='KeyR'&&state==='play'){respawn(cpIdx);showToast(t('backCp'),1.5);}
+});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
+addEventListener('pointerdown',initAudio);
+
+/* ================= PHYSICS ================= */
+const SAMPLES=[[-HW,-HH],[HW,-HH],[HW,HH],[-HW,HH],[0,-HH],[0,HH],[-HW,0],[HW,0]];
+function hit(px,py,nx,ny,ovx,ovy,e,pen){
+  const r=raft;r.x+=nx*pen*0.9;r.y+=ny*pen*0.9;
+  const rx=px-r.x,ry=py-r.y;const vpx=r.vx-r.w*ry,vpy=r.vy+r.w*rx;
+  const vrx=vpx-ovx,vry=vpy-ovy,vn=vrx*nx+vry*ny;if(vn>=0)return 0;
+  const rn=rx*ny-ry*nx,j=-(1+e)*vn/(1/M+rn*rn/I);
+  r.vx+=j*nx/M;r.vy+=j*ny/M;r.w+=rn*j/I;
+  const tx=-ny,ty=nx,vt=vrx*tx+vry*ty,rt=rx*ty-ry*tx,jt=-vt/(1/M+rt*rt/I)*0.2;
+  r.vx+=jt*tx/M;r.vy+=jt*ty/M;r.w+=rt*jt/I;
+  return -vn;
+}
+function obbCircle(cx,cy,cr){
+  const r=raft,sa=Math.sin(r.a),ca=Math.cos(r.a),dx=cx-r.x,dy=cy-r.y;
+  const lx=dx*ca+dy*sa,ly=-dx*sa+dy*ca;const qx=clamp(lx,-HW,HW),qy=clamp(ly,-HH,HH);
+  const ddx=lx-qx,ddy=ly-qy,d=Math.hypot(ddx,ddy);if(d>=cr)return null;
+  let nlx,nly,pen;
+  if(d>1e-4){nlx=ddx/d;nly=ddy/d;pen=cr-d;}
+  else{const ox=HW-Math.abs(lx),oy=HH-Math.abs(ly);if(ox<oy){nlx=Math.sign(lx)||1;nly=0;pen=ox+cr;}else{nlx=0;nly=Math.sign(ly)||1;pen=oy+cr;}}
+  return{px:qx*ca-qy*sa+r.x,py:qx*sa+qy*ca+r.y,nx:-(nlx*ca-nly*sa),ny:-(nlx*sa+nly*ca),pen};
+}
+let bonkCd=0;
+function bonk(v){if(v>55&&bonkCd<=0){SND.bonk(clamp(v/250,0.25,1));bonkCd=0.15;shake=Math.min(10,v/30);for(const pl of players)pl.strain=Math.max(pl.strain,0.5);}}
+function physStep(h){
+  const r=raft,sa=Math.sin(r.a),ca=Math.cos(r.a);let ax=0,ay=0,al=0;
+  const thrust=250/players.length;
+  for(const pl of players)if(pl.farting){
+    const fa=r.a+pl.f,fx=Math.sin(fa),fy=-Math.cos(fa),F=thrust*(pl.super>0?1.7:1);
+    const rx=pl.slot.x*ca-pl.slot.y*sa,ry=pl.slot.x*sa+pl.slot.y*ca;
+    ax+=fx*F;ay+=fy*F;al+=(rx*fy-ry*fx)*F/I;
+  }
+  // water current & drag
+  const p=course[r.idx],lat=(r.x-p.x)*p.nx+(r.y-p.y)*p.ny,hf=p.w/2;
+  let cur=lvl.current*(1-0.6*Math.min(1,(lat/hf)**2)),k=1.1,ka=1.8;
+  for(const o of obs){if(Math.abs(o.i-r.idx)>25)continue;
+    if(o.t==='beo'){const d=Math.hypot(r.x-o.x,r.y-o.y);if(d<o.r+40){k=3.4;cur*=0.2;ka=3;}}
+    else if(o.t==='whirl'){const dx=o.x-r.x,dy=o.y-r.y,d=Math.hypot(dx,dy)||1;if(d<o.R){const f=1-d/o.R;ax+=dx/d*f*150+(-dy/d)*f*190;ay+=dy/d*f*150+(dx/d)*f*190;al+=f*1.8;if(d<o.core+22)r.coreT+=h;}}
+  }
+  for(const z of zones){if(r.idx<z.i0||r.idx>z.i1)continue;const e=Math.min(1,(r.idx-z.i0)/6,(z.i1-r.idx)/6);
+    if(z.t==='rapid'){ax+=p.nx*z.sd*z.F*e;ay+=p.ny*z.sd*z.F*e;}else{ax-=p.tx*z.F*e;ay-=p.ty*z.F*e;}}
+  ax+=k*(p.tx*cur-r.vx);ay+=k*(p.ty*cur-r.vy);al+=-ka*r.w;
+  r.vx+=ax*h;r.vy+=ay*h;r.w+=al*h;r.x+=r.vx*h;r.y+=r.vy*h;r.a+=r.w*h;
+  r.coreT=Math.max(0,(r.coreT||0)-h*0.35);
+  if(r.coreT>1.1){fall('whirl');return;}
+  r.idx=nearest(r.x,r.y,r.idx,30);
+  // banks
+  const sa2=Math.sin(r.a),ca2=Math.cos(r.a);let maxV=0;
+  for(const [lx,ly] of SAMPLES){
+    const px=r.x+lx*ca2-ly*sa2,py=r.y+lx*sa2+ly*ca2;const j=nearest(px,py,r.idx,18),c=course[j];
+    const lt=(px-c.x)*c.nx+(py-c.y)*c.ny,half=c.w/2-6;
+    if(lt>half)maxV=Math.max(maxV,hit(px,py,-c.nx,-c.ny,0,0,0.35,lt-half));
+    else if(lt<-half)maxV=Math.max(maxV,hit(px,py,c.nx,c.ny,0,0,0.35,-half-lt));
+    if(j<=2){const c0=course[0],al2=(px-c0.x)*c0.tx+(py-c0.y)*c0.ty;if(al2<0)maxV=Math.max(maxV,hit(px,py,c0.tx,c0.ty,0,0,0.3,-al2));}
+  }
+  // obstacles
+  for(const o of obs){
+    if(Math.abs(o.i-r.idx)>22)continue;
+    if(o.t==='rock'){const c=obbCircle(o.x,o.y,o.r);if(c)maxV=Math.max(maxV,hit(c.px,c.py,c.nx,c.ny,0,0,0.45,c.pen));}
+    else if(o.t==='log'){for(const q of o.parts){const c=obbCircle(q.x,q.y,22);if(c)maxV=Math.max(maxV,hit(c.px,c.py,c.nx,c.ny,q.vx,q.vy,0.4,c.pen));}}
+    else if(o.t==='chong'){const c=obbCircle(o.x,o.y,o.r-6);if(c){fall('chong');return;}}
+    else if(o.t==='duck'&&!o.fly){const c=obbCircle(o.x,o.y,16);if(c){o.fly=0.001;const d=Math.hypot(o.x-r.x,o.y-r.y)||1;o.vx=(o.x-r.x)/d*260;o.vy=(o.y-r.y)/d*260-80;SND.quack();addText(o.x,o.y-30,t('quack'),'#fff3b0',24);r.vx*=0.85;r.vy*=0.85;}}
+    else if(o.t==='khoai'&&!o.got){const c=obbCircle(o.x,o.y,o.r);if(c){o.got=true;SND.pickup();for(const pl of players){pl.gas=100;pl.empty=false;pl.super=4;}addText(o.x,o.y-40,t('sup'),'#ffd166',34);
+        for(let k=0;k<24;k++){const a=Math.random()*TAU;parts.push({x:o.x,y:o.y,vx:Math.cos(a)*150,vy:Math.sin(a)*150,life:0,max:0.7,r:4,col:'#ffd166',type:'spark'});}}}
+  }
+  bonk(maxV);
+}
+
+/* ================= UPDATE ================= */
+function update(dt){
+  T+=dt;bonkCd-=dt;shake=Math.max(0,shake-dt*30);
+  if(state==='menu'){menuCam(dt);updateParticles(dt);return;}
+  if(state==='pause')return;
+  // kinematic obstacles
+  for(const o of obs){
+    if(o.t==='log')updLog(o);
+    else if(o.t==='duck'){if(!o.fly){const p=course[o.i],u=o.u0+o.amp*Math.sin(T*o.spd+o.ph);o.x=p.x+p.nx*u;o.y=p.y+p.ny*u;o.dir=Math.cos(T*o.spd+o.ph)*p.nx>0?1:-1;}else{o.fly+=dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.vy-=120*dt;}}
+  }
+  if(state==='play'){
+    playTime+=dt;
+    for(const pl of players){
+      if(down(pl.keys.l))pl.f-=3.3*dt;
+      if(down(pl.keys.r))pl.f+=3.3*dt;
+      let joyF=false;
+      if(IS_TOUCH&&pl.idx<2){const j=getJoy(pl.idx);if(j&&j.mag>12){const ta=Math.atan2(j.dx,-j.dy);let d=ta-raft.a-pl.f;d=Math.atan2(Math.sin(d),Math.cos(d));pl.f+=clamp(d,-7*dt,7*dt);joyF=j.mag>26;}}
+      const want=down(pl.keys.f)||joyF;
+      if(pl.super>0)pl.super-=dt;
+      if(pl.empty&&pl.gas>=25)pl.empty=false;
+      const can=want&&!pl.empty;
+      if(can&&!pl.farting){pl.farting=true;fartStart(pl);pl.txtT=0;if(Math.random()<0.75)comic(pl);}
+      if(!can&&pl.farting){pl.farting=false;fartStop(pl);pl.regenWait=0.5;}
+      if(want&&pl.empty&&!pl.warned){pl.warned=true;SND.empty();addText(...charPos(pl,-60),t('noGas'),'#ffb3b3',20);}
+      if(!want)pl.warned=false;
+      if(pl.farting){
+        if(pl.super<=0)pl.gas-=28*(lvl.gasMul||1)*dt;pl.fartTime+=dt;pl.txtT+=dt;if(pl.txtT>1.3){pl.txtT=0;if(Math.random()<0.5)comic(pl);}
+        if(pl.gas<=0){pl.gas=0;pl.empty=true;pl.farting=false;fartStop(pl);pl.regenWait=0.8;SND.empty();}
+        fartTick(pl);pl.puffT-=dt;if(pl.puffT<=0){pl.puffT=IS_TOUCH?0.06:0.035;emitPuff(pl);}
+        pl.strain=Math.min(1,pl.strain+dt*6);
+      }else{
+        pl.regenWait-=dt;if(pl.regenWait<=0)pl.gas=Math.min(100,pl.gas+15*(lvl.regen||1)*dt);
+        pl.strain=Math.max(0,pl.strain-dt*3);
+      }
+    }
+    const sub=4,h=dt/sub;for(let k=0;k<sub&&state==='play';k++)physStep(h);
+    // checkpoints & tips
+    for(const c of cps){if(!c.on&&raft.idx>=c.i){c.on=true;cpIdx=c.i;SND.cp();showToast(t('cp'),2.2);const p=course[c.i];addText(p.x,p.y-60,t('cpWord'),'#9cff9c',30);}}
+    for(const tp of tips){if(!tp.shown&&raft.idx>=tp.i){tp.shown=true;showToast(t('tips')[tp.k],4.5);}}
+    if(raft.idx>=finishIdx)win();
+    // wake
+    const sp=Math.hypot(raft.vx,raft.vy);if(sp>60&&Math.random()<sp/400){const a=raft.a+Math.PI+(Math.random()-0.5)*1.2;parts.push({x:raft.x+Math.sin(a)*60,y:raft.y-Math.cos(a)*60,vx:(Math.random()-0.5)*30,vy:(Math.random()-0.5)*30,life:0,max:1.2,r:5+Math.random()*6,col:'#ffffff',type:'foam'});}
+  }else if(state==='fall'){
+    fallT+=dt;if(fallT>1.5){respawn(cpIdx);state='play';showToast(t(fallMsg)+'  '+t('backSuffix'),2.5);}
+  }else if(state==='win'){
+    winT+=dt;raft.vx*=0.97;raft.vy*=0.97;raft.x+=raft.vx*dt;raft.y+=raft.vy*dt;
+    if(Math.random()<0.4){const p=course[finishIdx];parts.push({x:p.x+(Math.random()-0.5)*p.w,y:p.y-80,vx:(Math.random()-0.5)*80,vy:-60-Math.random()*90,life:0,max:2,r:5,col:['#ff4d4d','#ffd166','#3d9bff','#2fbf4f','#ff9f43'][(Math.random()*5)|0],type:'confetti',rot:Math.random()*TAU});}
+  }
+  raft.bob+=dt;
+  updateParticles(dt);
+  if(toast){toast.life+=dt;if(toast.life>toast.max)toast=null;}
+  // camera
+  const portrait=H>W,tz=IS_TOUCH?clamp((portrait?W:H)/560,0.5,1.3):clamp(Math.min(W,H)/720,0.45,1.3);
+  const pc=course[raft.idx],look=(IS_TOUCH?(portrait?H*0.12:W*0.07):Math.min(W,H)*0.06)/tz;
+  const tx=raft.x+pc.tx*look+raft.vx*0.3,ty=raft.y+pc.ty*look+raft.vy*0.3;
+  const kk=1-Math.exp(-4*dt);cam.x=lerp(cam.x,tx,kk);cam.y=lerp(cam.y,ty,kk);cam.z=lerp(cam.z,tz,kk);
+}
+let menuS=200;
+function menuCam(dt){
+  menuS+=dt*70;if(menuS>course.length*STEP-300)menuS=200;const i=idxS(menuS),p=course[i];
+  cam.x=lerp(cam.x,p.x,0.05);cam.y=lerp(cam.y,p.y,0.05);cam.z=clamp(Math.min(W,H)/(IS_TOUCH?600:800),0.4,1.1);
+  for(const o of obs){if(o.t==='log')updLog(o);
+    else if(o.t==='duck'){const q=course[o.i],u=o.u0+o.amp*Math.sin(T*o.spd+o.ph);o.x=q.x+q.nx*u;o.y=q.y+q.ny*u;o.dir=Math.cos(T*o.spd+o.ph)*q.nx>0?1:-1;}}
+}
+function updLog(o){const p=course[o.i];let dx,dy;
+  if(o.spin){o.ang=o.ph+T*o.spd;dx=Math.cos(o.ang);dy=Math.sin(o.ang);o.x=p.x+p.nx*o.u0;o.y=p.y+p.ny*o.u0;o.vx=o.vy=0;}
+  else{const u=o.amp*Math.sin(T*o.spd+o.ph),du=o.amp*o.spd*Math.cos(T*o.spd+o.ph);o.x=p.x+p.nx*u;o.y=p.y+p.ny*u;o.vx=p.nx*du;o.vy=p.ny*du;dx=p.nx;dy=p.ny;o.ang=Math.atan2(dy,dx);}
+  o.parts.length=0;const n=Math.max(2,Math.round((2*o.hl-44)/40)+1);
+  for(let k=0;k<n;k++){const off=-o.hl+22+(2*o.hl-44)*k/(n-1),rx=dx*off,ry=dy*off;o.parts.push({x:o.x+rx,y:o.y+ry,vx:o.spin?-o.spd*ry:o.vx,vy:o.spin?o.spd*rx:o.vy});}}
+function charPos(pl,dy){const r=raft,sa=Math.sin(r.a),ca=Math.cos(r.a);return[r.x+pl.slot.x*ca-pl.slot.y*sa,r.y+pl.slot.x*sa+pl.slot.y*ca+(dy||0)];}
+function comic(pl){const[x,y]=charPos(pl,-70);const WORDS=t('words');addText(x+(Math.random()-0.5)*30,y,WORDS[(Math.random()*WORDS.length)|0],pl.ch.gas,24+Math.random()*10);}
+function emitPuff(pl){
+  const r=raft,fa=r.a+pl.f,fx=Math.sin(fa),fy=-Math.cos(fa);const[x,y]=charPos(pl,0);
+  const bx=x-fx*12,by=y-fy*12-14,sp=140+Math.random()*80,j=(Math.random()-0.5)*0.6;
+  const dx=-fx*Math.cos(j)+fy*Math.sin(j),dy=-fy*Math.cos(j)-fx*Math.sin(j);
+  parts.push({x:bx,y:by,vx:dx*sp+r.vx*0.4,vy:dy*sp+r.vy*0.4,life:0,max:0.9+Math.random()*0.5,r:5+Math.random()*4,grow:26,col:pl.super>0?'#ffd166':pl.ch.gas,type:'puff'});
+  if(Math.random()<0.4)parts.push({x:bx-fx*40,y:by-fy*40+14,vx:dx*60+(Math.random()-0.5)*60,vy:dy*60+(Math.random()-0.5)*60,life:0,max:0.5,r:3,col:'#fff',type:'drop'});
+}
+function updateParticles(dt){
+  for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.life+=dt;if(q.life>=q.max){parts.splice(i,1);continue;}q.x+=q.vx*dt;q.y+=q.vy*dt;const d=q.type==='puff'?1.8:q.type==='confetti'?0.3:2.5;q.vx*=Math.exp(-d*dt);q.vy*=Math.exp(-d*dt);if(q.type==='confetti'){q.vy+=60*dt;q.rot+=dt*6;}}
+  for(let i=texts.length-1;i>=0;i--){const q=texts[i];q.life+=dt;q.y+=q.vy*dt;q.vy*=Math.exp(-1.5*dt);if(q.life>q.max)texts.splice(i,1);}
+  const PMAX=IS_TOUCH?320:700;if(parts.length>PMAX)parts.splice(0,parts.length-PMAX);
+}
+function win(){
+  if(state!=='play')return;state='win';winT=0;
+  for(const pl of players){if(pl.farting){pl.farting=false;fartStop(pl);}}
+  SND.win();
+  const st=playTime<=lvl.stars[0]?3:playTime<=lvl.stars[1]?2:1;
+  const best=store('best')||{};const key='L'+lvlIndex;const prev=best[key];
+  if(!prev||st>prev.s||(st===prev.s&&playTime<prev.t))best[key]={s:st,t:playTime};store('best',best);
+  setTimeout(()=>showResult(st),1600);
+}
+
+/* ================= DRAWING ================= */
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function ell(x,y,rx,ry,col){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=col;ctx.fill();}
+function circ(x,y,r,col){ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fillStyle=col;ctx.fill();}
+
+/* chibi human. (x,y)=feet. dirx/diry = facing on screen. */
+function drawChar(c,ch,x,y,dirx,diry,strain,t,farting,col,label){
+  c.save();c.translate(x,y);
+  const view=diry<-0.55?'back':'front';const side=Math.abs(dirx)>0.45;const flip=dirx<0?-1:1;
+  const bob=farting?Math.sin(t*40)*1.2:Math.sin(t*3)*1;
+  // shadow
+  c.beginPath();c.ellipse(0,0,15,5,0,0,TAU);c.fillStyle='rgba(0,0,0,.22)';c.fill();
+  c.translate(0,bob);
+  const sq=farting?1-0.06*strain:1;c.scale(1/sq*0.98+0.02,sq);
+  // legs
+  const spread=farting?5:3;c.fillStyle=ch.pants;rrC(c,-8-spread/2,-14,7,14,3);rrC(c,1+spread/2,-14,7,14,3);
+  c.fillStyle='#3a2410';rrC(c,-9-spread/2,-3,9,4,2);rrC(c,spread/2,-3,9,4,2);
+  // body
+  const bw=ch.belly?30:24,bh=ch.belly?22:20;
+  c.fillStyle=ch.shirt;rrC(c,-bw/2,-14-bh,bw,bh+2,ch.belly?11:7);
+  if(ch.belly&&view==='front'){c.beginPath();c.ellipse(side?flip*4:0,-24,11,9,0,0,TAU);c.fillStyle=ch.skin;c.fill();c.beginPath();c.arc(side?flip*4:0,-23,1.5,0,TAU);c.fillStyle='#b5835f';c.fill();}
+  if(ch.style==='nonla'&&view==='front'){c.fillStyle=ch.shirt2;c.fillRect(-1,-14-bh,2,bh);[ -8,-2,4].forEach(yy=>{c.beginPath();c.arc(0,-14-bh+bh+yy-6,1.4,0,TAU);c.fillStyle='#fff';c.fill();});}
+  if(ch.style==='spiky'&&view==='front'){c.fillStyle='#fff';c.globalAlpha=.85;c.font='bold 9px sans-serif';c.textAlign='center';c.fillText('★',0,-22);c.globalAlpha=1;}
+  // arms
+  const armUp=farting?-8*strain:0;c.strokeStyle=ch.skin;c.lineWidth=5;c.lineCap='round';
+  c.beginPath();c.moveTo(-bw/2+1,-30);c.lineTo(-bw/2-6,-20+armUp+(farting?Math.sin(t*30)*2:0));c.stroke();
+  c.beginPath();c.moveTo(bw/2-1,-30);c.lineTo(bw/2+6,-20+armUp+(farting?Math.cos(t*30)*2:0));c.stroke();
+  // head
+  const hy=-14-bh-12,hr=13;
+  if(ch.style==='pigtails'){c.fillStyle=ch.hair;circC(c,-hr-1,hy+2,6);circC(c,hr+1,hy+2,6);c.fillStyle='#ff4d8d';circC(c,-hr+3,hy-2,2.5);circC(c,hr-3,hy-2,2.5);}
+  c.fillStyle=ch.skin;circC(c,0,hy,hr);
+  const fo=side?flip*4:0;
+  if(view==='back'){
+    if(ch.style!=='bald'){c.fillStyle=ch.hair;c.beginPath();c.arc(0,hy,hr+0.5,0,TAU);c.fill();}
+    else{c.fillStyle='rgba(255,255,255,.35)';circC(c,-4,hy-5,4);}
+    if(ch.style==='nonla')drawHat(c,hy,true);
+  }else{
+    // hair front
+    c.fillStyle=ch.hair;
+    if(ch.style==='spiky'){c.beginPath();c.arc(0,hy-1,hr+0.5,Math.PI*1.05,Math.PI*1.95);c.lineTo(hr-2,hy-6);c.closePath();c.fill();for(let k=-2;k<=2;k++){c.beginPath();c.moveTo(k*5-3,hy-hr+3);c.lineTo(k*5+fo*0.3,hy-hr-7);c.lineTo(k*5+3,hy-hr+3);c.fill();}}
+    else if(ch.style==='pigtails'){c.beginPath();c.arc(0,hy-1,hr+0.8,Math.PI*1.0,Math.PI*2.0);c.closePath();c.fill();c.fillRect(-hr,hy-3,4,6);c.fillRect(hr-4,hy-3,4,6);}
+    else if(ch.style==='bald'){c.fillStyle='rgba(255,255,255,.4)';circC(c,-4+fo,hy-7,3.5);c.fillStyle=ch.hair;c.fillRect(-hr,hy-2,3,6);c.fillRect(hr-3,hy-2,3,6);}
+    else if(ch.style==='nonla'){c.beginPath();c.arc(0,hy-1,hr+0.5,Math.PI*1.0,Math.PI*2.0);c.closePath();c.fill();}
+    // face
+    const ex=fo,ey=hy+1;
+    if(strain>0.35){
+      c.strokeStyle='#2a1a10';c.lineWidth=2;c.lineCap='round';
+      c.beginPath();c.moveTo(ex-7,ey-3);c.lineTo(ex-3,ey-1);c.lineTo(ex-7,ey+1);c.stroke();
+      c.beginPath();c.moveTo(ex+7,ey-3);c.lineTo(ex+3,ey-1);c.lineTo(ex+7,ey+1);c.stroke();
+      c.fillStyle='rgba(255,80,80,.55)';circC(c,ex-8,ey+5,3.2);circC(c,ex+8,ey+5,3.2);
+      c.beginPath();c.moveTo(ex-5,ey+7);for(let k=0;k<=4;k++)c.lineTo(ex-5+k*2.5,ey+7+(k%2?-1.5:1.5));c.stroke();
+      c.fillStyle='rgba(120,200,255,.9)';c.beginPath();c.ellipse(ex+hr*0.85,hy-6,1.8,3,0,0,TAU);c.fill();
+    }else{
+      c.fillStyle='#2a1a10';circC(c,ex-4.5,ey,2.2);circC(c,ex+4.5,ey,2.2);c.fillStyle='#fff';circC(c,ex-3.8,ey-0.8,0.8);circC(c,ex+5.2,ey-0.8,0.8);
+      c.fillStyle='rgba(255,120,120,.35)';circC(c,ex-8,ey+4,2.6);circC(c,ex+8,ey+4,2.6);
+      c.strokeStyle='#5a2a10';c.lineWidth=1.6;c.beginPath();c.arc(ex,ey+4,3.2,0.15*Math.PI,0.85*Math.PI);c.stroke();
+    }
+    if(ch.style==='bald'){c.fillStyle='#1a1a1a';c.beginPath();c.ellipse(ex-3,ey+5,3.5,1.4,-0.3,0,TAU);c.ellipse(ex+3,ey+5,3.5,1.4,0.3,0,TAU);c.fill();}
+    if(ch.style==='nonla')drawHat(c,hy,false);
+  }
+  c.restore();
+  if(label){c.save();c.font='bold 11px sans-serif';c.textAlign='center';const tw=c.measureText(label).width+8;c.fillStyle=col;rrC(c,x-tw/2,y-(ch.style==='nonla'?96:90),tw,14,5);c.fillStyle='#fff';c.fillText(label,x,y-(ch.style==='nonla'?85:79));c.restore();}
+}
+function drawHat(c,hy,back){
+  c.fillStyle='#e9cf7a';c.beginPath();c.ellipse(0,hy-4,22,6,0,0,TAU);c.fill();
+  c.strokeStyle='#b8963f';c.lineWidth=1;c.stroke();
+  c.beginPath();c.moveTo(-21,hy-5);c.lineTo(0,hy-24);c.lineTo(21,hy-5);c.closePath();c.fillStyle='#f3dc8e';c.fill();c.stroke();
+  c.strokeStyle='rgba(150,110,40,.5)';for(let k=1;k<4;k++){c.beginPath();c.moveTo(-21+k*5.2,hy-5-k*4.7);c.lineTo(21-k*5.2,hy-5-k*4.7);c.stroke();}
+  if(!back){c.strokeStyle='#c0392b';c.lineWidth=1.2;c.beginPath();c.moveTo(-10,hy-4);c.quadraticCurveTo(0,hy+18,10,hy-4);c.stroke();}
+}
+function rrC(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();c.fill();}
+function circC(c,x,y,r){c.beginPath();c.arc(x,y,r,0,TAU);c.fill();}
+
+function drawDecor(d){
+  const s=d.s;
+  switch(d.type){
+    case 'tuft':ctx.strokeStyle=d.c<0.5?'#5aa63f':'#86c95a';ctx.lineWidth=2;ctx.beginPath();for(let k=-1;k<=1;k++){ctx.moveTo(d.x+k*4*s,d.y);ctx.lineTo(d.x+k*6*s,d.y-9*s);}ctx.stroke();break;
+    case 'flower':ctx.fillStyle=['#ff6b6b','#ffd166','#fff','#c77dff'][(d.c*4)|0];for(let k=0;k<5;k++){const a=k/5*TAU;circ(d.x+Math.cos(a)*4*s,d.y+Math.sin(a)*4*s,3*s,ctx.fillStyle);}circ(d.x,d.y,2.5*s,'#ffb703');break;
+    case 'bush':ell(d.x+4,d.y+6,22*s,8*s,'rgba(0,0,0,.18)');circ(d.x-10*s,d.y,13*s,'#3f8f33');circ(d.x+9*s,d.y,14*s,'#4aa33b');circ(d.x,d.y-8*s,15*s,'#58b947');break;
+    case 'tree':ell(d.x+10,d.y+8,40*s,14*s,'rgba(0,0,0,.2)');ctx.fillStyle='#7a4a1d';ctx.fillRect(d.x-4*s,d.y-22*s,8*s,24*s);
+      circ(d.x-16*s,d.y-30*s,22*s,'#2f7d2f');circ(d.x+16*s,d.y-32*s,22*s,'#3a8f35');circ(d.x,d.y-48*s,26*s,'#47a33f');circ(d.x-6*s,d.y-56*s,12*s,'#5cbc4f');
+      if(d.c>0.6){circ(d.x+10*s,d.y-40*s,4*s,'#ff9f1c');circ(d.x-12*s,d.y-30*s,4*s,'#ff9f1c');}break;
+    case 'palm':ell(d.x+20,d.y+6,34*s,10*s,'rgba(0,0,0,.18)');ctx.strokeStyle='#9a6a33';ctx.lineWidth=7*s;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.quadraticCurveTo(d.x+14*s,d.y-40*s,d.x+6*s,d.y-80*s);ctx.stroke();
+      ctx.strokeStyle='#2e8b3e';ctx.lineWidth=6*s;for(let k=0;k<6;k++){const a=k/6*TAU+d.rot;ctx.beginPath();ctx.moveTo(d.x+6*s,d.y-80*s);ctx.quadraticCurveTo(d.x+6*s+Math.cos(a)*30*s,d.y-92*s+Math.sin(a)*14*s,d.x+6*s+Math.cos(a)*48*s,d.y-74*s+Math.sin(a)*22*s);ctx.stroke();}circ(d.x+6*s,d.y-78*s,5*s,'#6b4a1d');break;
+    case 'bamboo':ell(d.x+8,d.y+4,26*s,8*s,'rgba(0,0,0,.18)');for(let k=0;k<5;k++){const bx=d.x+(k-2)*7*s,hh=(60+((d.c*97+k*31)%30))*s;ctx.strokeStyle=k%2?'#7fb03a':'#93c24a';ctx.lineWidth=4*s;ctx.beginPath();ctx.moveTo(bx,d.y);ctx.lineTo(bx+(k-2)*2*s,d.y-hh);ctx.stroke();ctx.fillStyle='#5f9a2b';for(let j=1;j<4;j++){ctx.fillRect(bx-2.5*s+(k-2)*2*s*j/4,d.y-hh*j/4,5*s,1.5*s);}
+        ctx.fillStyle='#4f9a35';ctx.beginPath();ctx.ellipse(bx+(k-2)*2*s+6*s,d.y-hh+4*s,8*s,2.5*s,-0.5,0,TAU);ctx.fill();}break;
+    case 'house':{ell(d.x+6,d.y+6,52*s,14*s,'rgba(0,0,0,.2)');ctx.fillStyle='#f4e1c1';ctx.fillRect(d.x-34*s,d.y-34*s,68*s,34*s);ctx.fillStyle='#8a5a2a';ctx.fillRect(d.x-8*s,d.y-22*s,16*s,22*s);ctx.fillStyle='#7ec8e3';ctx.fillRect(d.x-26*s,d.y-26*s,12*s,10*s);ctx.fillRect(d.x+14*s,d.y-26*s,12*s,10*s);
+      ctx.fillStyle=d.c<0.5?'#c0392b':'#a0522d';ctx.beginPath();ctx.moveTo(d.x-42*s,d.y-32*s);ctx.lineTo(d.x,d.y-62*s);ctx.lineTo(d.x+42*s,d.y-32*s);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(0,0,0,.2)';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(d.x-42*s+k*8*s,d.y-32*s-k*6.5*s);ctx.lineTo(d.x+42*s-k*8*s,d.y-32*s-k*6.5*s);ctx.stroke();}break;}
+    case 'rice':{ctx.fillStyle='#9fd356';ctx.fillRect(d.x-60*s,d.y-34*s,120*s,68*s);ctx.strokeStyle='#7cb342';ctx.lineWidth=2;for(let k=-50;k<=50;k+=10){ctx.beginPath();ctx.moveTo(d.x+k*s,d.y-30*s);ctx.lineTo(d.x+k*s,d.y+30*s);ctx.stroke();}ctx.strokeStyle='#8d6e3f';ctx.lineWidth=3;ctx.strokeRect(d.x-60*s,d.y-34*s,120*s,68*s);break;}
+  }
+}
+function drawRock(o){
+  const w=Math.sin(T*2+o.seed)*2;ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(o.x,o.y+4,o.r+6+w,0,TAU);ctx.stroke();
+  ell(o.x,o.y+o.r*0.35,o.r,o.r*0.55,'#5f6670');circ(o.x,o.y,o.r,'#7d858f');
+  ctx.beginPath();ctx.arc(o.x-o.r*0.25,o.y-o.r*0.3,o.r*0.55,0,TAU);ctx.fillStyle='#9aa3ad';ctx.fill();circ(o.x-o.r*0.35,o.y-o.r*0.45,o.r*0.18,'#c4ccd4');
+  ctx.strokeStyle='#5a616b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(o.x+o.r*0.1,o.y-o.r*0.2);ctx.lineTo(o.x+o.r*0.4,o.y+o.r*0.2);ctx.stroke();
+}
+function drawZone(z){
+  const sp=z.t==='rapid'?90:70;ctx.strokeStyle=z.t==='rapid'?'rgba(255,255,255,.55)':'rgba(255,140,60,.6)';ctx.lineWidth=z.t==='rapid'?4:5;ctx.lineCap='round';
+  for(let i=z.i0+2;i<=z.i1-2;i+=5){const p=course[i];const hf=p.w/2-20;
+    for(let u=-hf+20;u<=hf-20;u+=55){let dx,dy,ox=0,oy=0;
+      if(z.t==='rapid'){dx=p.nx*z.sd;dy=p.ny*z.sd;const sh=((T*sp+u*3+i*7)%55);ox=dx*sh;oy=dy*sh;}else{dx=-p.tx;dy=-p.ty;const sh=((T*sp+i*13)%60);ox=dx*sh;oy=dy*sh;}
+      const x=p.x+p.nx*u+ox,y=p.y+p.ny*u+oy;ctx.beginPath();ctx.moveTo(x-dx*9-dy*9,y-dy*9+dx*9);ctx.lineTo(x,y);ctx.lineTo(x-dx*9+dy*9,y-dy*9-dx*9);ctx.stroke();}}
+}
+function drawLog(o){
+  if(o.spin){ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(o.x,o.y,o.hl+6,0,TAU);ctx.setLineDash([10,14]);ctx.stroke();ctx.setLineDash([]);}
+  if(!o.parts.length)return;ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.ang);
+  const hl=o.hl;ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=4;rr(-hl-4,-26,hl*2+8,52,26);ctx.stroke();
+  ctx.fillStyle='#8b5a2b';rr(-hl,-22,hl*2,44,22);ctx.fill();ctx.fillStyle='#a46b35';rr(-hl+4,-20,hl*2-8,18,9);ctx.fill();
+  ctx.strokeStyle='#6b4220';ctx.lineWidth=2;for(let k=-hl+30;k<=hl-40;k+=30){ctx.beginPath();ctx.moveTo(k,-16);ctx.lineTo(k+14,-4);ctx.stroke();}
+  ell(hl-8,0,10,20,'#d9a86c');ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(hl-8,0,5,11,0,0,TAU);ctx.stroke();
+  ctx.fillStyle='#3e8e3e';ctx.beginPath();ctx.ellipse(-hl*0.4,-20,9,4,0.4,0,TAU);ctx.fill();
+  ctx.restore();
+}
+function drawChong(o){
+  const n=o.big?7:4,R=mulberry(o.seed|0);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(o.x,o.y+4,o.r+2,0,TAU);ctx.stroke();
+  ell(o.x,o.y+4,o.r*0.9,o.r*0.4,'rgba(40,60,30,.35)');
+  const st=[];for(let k=0;k<n;k++){const a=R()*TAU,d=R()*o.r*0.65;st.push([o.x+Math.cos(a)*d,o.y+Math.sin(a)*d*0.6,34+R()*20]);}
+  st.sort((a,b)=>a[1]-b[1]);
+  for(const [x,y,h] of st){ctx.fillStyle='#c8a24a';ctx.fillRect(x-4,y-h,8,h);ctx.fillStyle='#a8822e';ctx.fillRect(x-4,y-h*0.55,8,2);ctx.fillRect(x-4,y-h*0.2,8,2);
+    ctx.beginPath();ctx.moveTo(x-4,y-h);ctx.lineTo(x,y-h-12);ctx.lineTo(x+4,y-h);ctx.closePath();ctx.fillStyle='#e8cf7c';ctx.fill();ctx.beginPath();ctx.moveTo(x-1.5,y-h-6);ctx.lineTo(x,y-h-12);ctx.lineTo(x+1.5,y-h-6);ctx.fillStyle='#d62828';ctx.fill();}
+}
+function drawWhirl(o){
+  ctx.save();ctx.translate(o.x,o.y);
+  const g=ctx.createRadialGradient(0,0,4,0,0,o.R);g.addColorStop(0,'rgba(10,40,90,.85)');g.addColorStop(0.35,'rgba(20,80,150,.5)');g.addColorStop(1,'rgba(40,120,190,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,o.R,0,TAU);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=3;for(let k=0;k<4;k++){ctx.beginPath();const a0=T*-2.5+k*TAU/4+o.ph;for(let j=0;j<=30;j++){const tt=j/30,rad=10+tt*(o.R-20),a=a0+tt*4;j?ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad*0.8):ctx.moveTo(Math.cos(a)*rad,Math.sin(a)*rad*0.8);}ctx.stroke();}
+  circ(0,0,o.core*0.7,'rgba(5,20,50,.8)');ctx.restore();
+}
+function drawBeo(o){
+  const R=mulberry(o.seed|0);
+  for(let k=0;k<26;k++){const a=R()*TAU,d=Math.sqrt(R())*o.r,x=o.x+Math.cos(a)*d,y=o.y+Math.sin(a)*d*0.8+Math.sin(T+k)*1.2,r=10+R()*8;
+    circ(x+2,y+3,r,'#2f6b2a');circ(x,y,r,k%3?'#4ea842':'#5fbf4f');ctx.strokeStyle='#2f6b2a';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+r*0.7,y-r*0.3);ctx.stroke();
+    if(R()<0.25){circ(x,y-4,4,'#c77dff');circ(x,y-4,1.6,'#ffd166');}}
+}
+function drawKhoai(o){
+  if(o.got)return;const b=Math.sin(T*3+o.ph)*4;ctx.save();ctx.translate(o.x,o.y+b);
+  const g=ctx.createRadialGradient(0,0,4,0,0,46);g.addColorStop(0,'rgba(255,230,120,.7)');g.addColorStop(1,'rgba(255,230,120,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,46,0,TAU);ctx.fill();
+  ctx.rotate(-0.4+Math.sin(T*2+o.ph)*0.15);ctx.fillStyle='#a33a5c';ctx.beginPath();ctx.ellipse(0,0,24,13,0,0,TAU);ctx.fill();ctx.fillStyle='#c45277';ctx.beginPath();ctx.ellipse(-4,-4,16,6,0,0,TAU);ctx.fill();
+  ctx.fillStyle='#6e2340';circ(8,3,1.6,'#6e2340');circ(-10,4,1.4,'#6e2340');circ(2,-6,1.2,'#6e2340');
+  ctx.fillStyle='#4caf50';ctx.beginPath();ctx.ellipse(26,-6,8,3.5,-0.6,0,TAU);ctx.fill();ctx.beginPath();ctx.ellipse(27,2,7,3,0.5,0,TAU);ctx.fill();
+  ctx.restore();ctx.save();ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.strokeStyle='#7a4a1d';ctx.lineWidth=3;ctx.strokeText(t('potato'),o.x,o.y+b-24);ctx.fillText(t('potato'),o.x,o.y+b-24);ctx.restore();
+}
+function drawDuck(o){
+  if(o.fly>1.6)return;ctx.save();ctx.translate(o.x,o.y);ctx.globalAlpha=o.fly?Math.max(0,1-o.fly/1.6):1;const d=o.dir||1;ctx.scale(d,1);
+  if(!o.fly){ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,4,18,6,0,0,TAU);ctx.stroke();}
+  ell(0,0,15,10,'#fafafa');ell(-12,-4,6,6,'#fafafa');circ(9,-10,7,'#fafafa');ctx.fillStyle='#ff9f1c';ctx.beginPath();ctx.moveTo(15,-11);ctx.lineTo(23,-9);ctx.lineTo(15,-7);ctx.fill();circ(11,-12,1.5,'#222');
+  ctx.fillStyle='#e0e0e0';ctx.beginPath();ctx.ellipse(-2,-2,8,4,0.2,0,TAU);ctx.fill();
+  if(o.fly){ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(-2,-10,12,4,-0.8+Math.sin(T*30)*0.6,0,TAU);ctx.fill();}
+  ctx.restore();
+}
+function drawCheckpoint(c){
+  const p=course[c.i],h=p.w/2+18;const L={x:p.x-p.nx*h,y:p.y-p.ny*h},Rr={x:p.x+p.nx*h,y:p.y+p.ny*h};
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.setLineDash([14,10]);ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(L.x,L.y);ctx.lineTo(Rr.x,Rr.y);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#5a3412';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(L.x,L.y-70);ctx.quadraticCurveTo(p.x,p.y-40,Rr.x,Rr.y-70);ctx.stroke();
+  const cols=c.on?['#2fbf4f','#7ee27e']:['#ff4d4d','#ffd166','#3d9bff','#ff9f43'];
+  for(let k=1;k<12;k++){const tt=k/12,x=lerp(L.x,Rr.x,tt),y=lerp(L.y-70,Rr.y-70,tt)+Math.sin(tt*Math.PI)*15;ctx.fillStyle=cols[k%cols.length];ctx.beginPath();ctx.moveTo(x-6,y);ctx.lineTo(x+6,y);ctx.lineTo(x,y+12+Math.sin(T*4+k)*2);ctx.fill();}
+  for(const q of [L,Rr]){ctx.fillStyle='#7a4a1d';ctx.fillRect(q.x-3,q.y-74,6,74);circ(q.x,q.y-76,5,c.on?'#2fbf4f':'#ff4d4d');}
+}
+function drawFinish(){
+  const p=course[finishIdx],h=p.w/2+24;const L={x:p.x-p.nx*h,y:p.y-p.ny*h},Rr={x:p.x+p.nx*h,y:p.y+p.ny*h};
+  const n=Math.round(p.w/24);for(let k=0;k<n;k++)for(let j=0;j<2;j++){const tt=k/n,tt2=(k+1)/n;const off=(j-1)*12;ctx.fillStyle=(k+j)%2?'#fff':'#222';ctx.globalAlpha=0.75;ctx.beginPath();
+    const a={x:lerp(L.x,Rr.x,tt)+p.tx*off,y:lerp(L.y,Rr.y,tt)+p.ty*off},b={x:lerp(L.x,Rr.x,tt2)+p.tx*off,y:lerp(L.y,Rr.y,tt2)+p.ty*off};ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(b.x+p.tx*12,b.y+p.ty*12);ctx.lineTo(a.x+p.tx*12,a.y+p.ty*12);ctx.fill();}
+  ctx.globalAlpha=1;
+}
+function drawFinishArch(){
+  const p=course[finishIdx],h=p.w/2+24;const L={x:p.x-p.nx*h,y:p.y-p.ny*h},Rr={x:p.x+p.nx*h,y:p.y+p.ny*h};
+  for(const q of [L,Rr]){ctx.fillStyle='#c0392b';ctx.fillRect(q.x-7,q.y-120,14,120);ctx.fillStyle='#ffd166';ctx.fillRect(q.x-7,q.y-120,14,8);}
+  ctx.save();ctx.translate((L.x+Rr.x)/2,(L.y+Rr.y)/2-120);const ang=Math.atan2(Rr.y-L.y,Rr.x-L.x);ctx.rotate(ang);const len=Math.hypot(Rr.x-L.x,Rr.y-L.y);
+  ctx.fillStyle='#e63946';rr(-len/2,-22,len,44,10);ctx.fill();ctx.strokeStyle='#ffd166';ctx.lineWidth=4;rr(-len/2,-22,len,44,10);ctx.stroke();
+  ctx.rotate(-ang);ctx.font='bold 30px "Trebuchet MS",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.strokeStyle='#7a1d1d';ctx.lineWidth=5;ctx.strokeText(t('arch'),0,2);ctx.fillText(t('arch'),0,2);ctx.restore();
+}
+function drawDock(){
+  const p=course[0];ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.atan2(p.tx,-p.ty));
+  ctx.fillStyle='#8b5a2b';ctx.fillRect(-p.w/2-30,0,p.w+60,70);ctx.fillStyle='#a46b35';for(let k=0;k<5;k++)ctx.fillRect(-p.w/2-30,4+k*13,p.w+60,9);
+  ctx.fillStyle='#6b4220';for(let x=-p.w/2-20;x<p.w/2+30;x+=60){ctx.fillRect(x,-6,10,14);}
+  ctx.font='bold 26px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.strokeStyle='#5a3412';ctx.lineWidth=4;ctx.strokeText(t('start'),0,44);ctx.fillText(t('start'),0,44);ctx.restore();
+}
+function drawRaft(){
+  const r=raft;ctx.save();ctx.translate(r.x,r.y);ctx.rotate(r.a);
+  let sc=1,al=1;if(state==='fall'){sc=1-Math.min(0.4,fallT*0.4);al=Math.max(0,1-fallT*0.8);}
+  ctx.globalAlpha=al;ctx.scale(sc,sc);
+  ctx.fillStyle='rgba(0,40,80,.25)';rr(-HW-4,-HH+4,HW*2+8,HH*2+8,14);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=3;rr(-HW-6,-HH-6,HW*2+12,HH*2+12,16);ctx.stroke();
+  const n=7,pw=HW*2/n;
+  for(let k=0;k<n;k++){const x=-HW+k*pw;ctx.fillStyle=k%2?'#d9b56a':'#e6c47a';rr(x+1,-HH-4,pw-2,HH*2+8,pw/2);ctx.fill();ctx.fillStyle='rgba(120,80,20,.35)';for(const y of [-HH*0.5,0,HH*0.5])ctx.fillRect(x+2,y-1,pw-4,2.5);ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(x+pw*0.25,-HH,2,HH*2);}
+  ctx.fillStyle='#8b5a2b';ctx.fillRect(-HW-2,-HH*0.72-4,HW*2+4,8);ctx.fillRect(-HW-2,HH*0.72-4,HW*2+4,8);
+  ctx.strokeStyle='#5a3412';ctx.lineWidth=1.2;for(let k=0;k<=n;k++){const x=-HW+k*pw;for(const y of [-HH*0.72,HH*0.72]){ctx.beginPath();ctx.moveTo(x-3,y-4);ctx.lineTo(x+3,y+4);ctx.stroke();}}
+  // front mark
+  ctx.fillStyle='rgba(255,255,255,.7)';ctx.beginPath();ctx.moveTo(-8,-HH+6);ctx.lineTo(0,-HH-2);ctx.lineTo(8,-HH+6);ctx.fill();
+  // facing arrows
+  for(const pl of players){ctx.save();ctx.translate(pl.slot.x,pl.slot.y);ctx.rotate(pl.f);ctx.globalAlpha=al*(pl.farting?0.95:0.6);ctx.fillStyle=pl.col;
+    ctx.beginPath();ctx.ellipse(0,0,17,17,0,0,TAU);ctx.strokeStyle=pl.col;ctx.lineWidth=3;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,-36);ctx.lineTo(10,-22);ctx.lineTo(4,-22);ctx.lineTo(4,-16);ctx.lineTo(-4,-16);ctx.lineTo(-4,-22);ctx.lineTo(-10,-22);ctx.closePath();ctx.fill();ctx.restore();}
+  ctx.restore();
+}
+function drawPlayers(){
+  if(state==='fall'&&fallT>0.5)return;
+  const list=players.map(pl=>{const[x,y]=charPos(pl,0);return{pl,x,y};}).sort((a,b)=>a.y-b.y);
+  for(const {pl,x,y} of list){const fa=raft.a+pl.f;const dx=Math.sin(fa),dy=-Math.cos(fa);
+    drawChar(ctx,pl.ch,x,y+6+(state==='fall'?fallT*30:0),dx,dy,pl.strain,T+pl.idx,pl.farting,pl.col,players.length>1?'P'+(pl.idx+1):'');
+    if(pl.super>0){ctx.strokeStyle='rgba(255,209,102,'+(0.5+0.4*Math.sin(T*12))+')';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y+6,22,8,0,0,TAU);ctx.stroke();}
+  }
+}
+function drawParticles(top){
+  for(const q of parts){const t=q.life/q.max;
+    if(top!==(q.type==='puff'||q.type==='confetti'||q.type==='spark'))continue;
+    if(q.type==='puff'){ctx.globalAlpha=(1-t)*0.6;circ(q.x,q.y,q.r+q.grow*t,q.col);ctx.globalAlpha=(1-t)*0.35;circ(q.x-3,q.y-3,(q.r+q.grow*t)*0.5,'#fff');}
+    else if(q.type==='confetti'){ctx.globalAlpha=1-t;ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.rot);ctx.fillStyle=q.col;ctx.fillRect(-4,-2,8,4);ctx.restore();}
+    else{ctx.globalAlpha=(1-t)*(q.type==='foam'?0.5:0.9);circ(q.x,q.y,q.r*(q.type==='foam'?1+t:1-t*0.5),q.col);}
+  }
+  ctx.globalAlpha=1;
+}
+function drawTexts(){
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(const q of texts){const t=q.life/q.max,s=t<0.15?0.5+t/0.15*0.7:1.2-t*0.2;ctx.save();ctx.translate(q.x,q.y);ctx.scale(s,s);ctx.rotate(Math.sin(q.life*8)*0.08);ctx.globalAlpha=t>0.7?(1-t)/0.3:1;
+    ctx.font='900 '+q.size+'px '+FONT;ctx.lineWidth=6;ctx.strokeStyle='#3a2410';ctx.strokeText(q.t,0,0);ctx.fillStyle=q.col;ctx.fillText(q.t,0,0);ctx.restore();}
+  ctx.globalAlpha=1;
+}
+
+function render(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#74bd52';ctx.fillRect(0,0,W,H);
+  if(!course.length)return;
+  const z=cam.z,sx=(Math.random()-0.5)*shake,sy=(Math.random()-0.5)*shake;
+  ctx.setTransform(DPR*z,0,0,DPR*z,DPR*(W/2-cam.x*z+sx),DPR*(H/2-cam.y*z+sy));
+  const vx0=cam.x-W/2/z-150,vx1=cam.x+W/2/z+150,vy0=cam.y-H/2/z-150,vy1=cam.y+H/2/z+200;
+  const inV=(x,y,m)=>x>vx0-m&&x<vx1+m&&y>vy0-m&&y<vy1+m;
+  ctx.fillStyle='#5d9e3e';ctx.fill(paths.bank);ctx.fillStyle='#e8d29a';ctx.fill(paths.sand);
+  const wg=ctx.createLinearGradient(0,vy0,0,vy1);wg.addColorStop(0,'#3fa7d6');wg.addColorStop(1,'#4fb8e0');ctx.fillStyle=wg;ctx.fill(paths.water);
+  ctx.fillStyle='rgba(20,90,160,.22)';ctx.fill(paths.deep);
+  // ripples
+  ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=2;ctx.lineCap='round';
+  const n=course.length;
+  for(const q of ripples){
+    if(q.lily){const p=course[q.i];const hf=p.w/2;const x=p.x+p.nx*q.u*hf,y=p.y+p.ny*q.u*hf;if(!inV(x,y,30))continue;ctx.fillStyle='#3e9e3e';ctx.beginPath();ctx.arc(x,y,q.len,q.ph,q.ph+TAU*0.88);ctx.lineTo(x,y);ctx.fill();if(q.len>16)circ(x+3,y-3,4,'#ff8fab');continue;}
+    const fi=(q.i+((T*lvl.current*0.8+q.ph*40)/STEP))%n,i=fi|0,p=course[i];const hf=p.w/2;const x=p.x+p.nx*q.u*hf,y=p.y+p.ny*q.u*hf;if(!inV(x,y,20))continue;
+    ctx.globalAlpha=0.3+0.3*Math.sin(T*2+q.ph);ctx.beginPath();ctx.moveTo(x-p.nx*q.len*0.5,y-p.ny*q.len*0.5);ctx.quadraticCurveTo(x+p.tx*5,y+p.ty*5,x+p.nx*q.len*0.5,y+p.ny*q.len*0.5);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  drawDock();
+  for(const o of obs){if(!inV(o.x,o.y,200))continue;if(o.t==='whirl')drawWhirl(o);else if(o.t==='beo')drawBeo(o);}
+  for(const c of cps){const p=course[c.i];if(inV(p.x,p.y,p.w))drawCheckpoint(c);}
+  {const p=course[finishIdx];if(inV(p.x,p.y,p.w))drawFinish();}
+  for(const z of zones){if(inV(z.x,z.y,400))drawZone(z);}
+  for(const o of obs){if(!inV(o.x,o.y,o.spin?o.hl+100:150))continue;if(o.t==='rock')drawRock(o);else if(o.t==='log'){drawLog(o);if(o.spin){circ(o.x,o.y,20,'#6b7480');circ(o.x-5,o.y-5,8,'#9aa3ad');}}else if(o.t==='khoai')drawKhoai(o);}
+  drawParticles(false);
+  if(state!=='menu')drawRaft();
+  // y-sorted uprights: chong, ducks, players
+  const ups=[];for(const o of obs){if((o.t==='chong'||o.t==='duck')&&inV(o.x,o.y,100))ups.push(o);}
+  ups.sort((a,b)=>a.y-b.y);
+  const ry=state==='menu'?1e9:raft.y;let drawnP=false;
+  for(const o of ups){if(!drawnP&&o.y>ry){drawPlayers();drawnP=true;}if(o.t==='chong')drawChong(o);else drawDuck(o);}
+  if(!drawnP&&state!=='menu')drawPlayers();
+  for(const d of decor){if(d.y<vy0-20)continue;if(d.y>vy1+100)break;if(d.x<vx0-80||d.x>vx1+80)continue;drawDecor(d);}
+  {const p=course[finishIdx];if(inV(p.x,p.y,p.w))drawFinishArch();}
+  drawParticles(true);drawTexts();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(state!=='menu')drawHUD();
+}
+function drawHUD(){
+  const compact=W<720||IS_TOUCH,sT=SAFE.t,sL=SAFE.l;
+  // level / time box
+  const bxW=compact?Math.min(190,W-215-sL):Math.min(280,W-200),bxH=compact?42:54,bx=8+sL,by=8+sT;
+  hudBox(bx,by,bxW,bxH);ctx.save();ctx.beginPath();ctx.rect(bx,by,bxW-4,bxH);ctx.clip();
+  ctx.textAlign='left';ctx.textBaseline='top';ctx.font='900 '+(compact?13:18)+'px '+FONT;ctx.fillStyle='#7a4a1d';ctx.fillText(t('level')+' '+(lvlIndex+1)+': '+t('lv')[lvlIndex][0],bx+9,by+(compact?5:6));
+  const tm=playTime,mm=Math.floor(tm/60),ss=(tm%60).toFixed(1).padStart(4,'0');ctx.font='900 '+(compact?13:16)+'px '+FONT;ctx.fillStyle='#e85d04';ctx.fillText('⏱ '+mm+':'+ss+'   💦 '+falls,bx+9,by+(compact?23:30));ctx.restore();
+  // progress
+  let pw,px,py;
+  const short=compact&&H<500;
+  if(short){px=bx+bxW+12;pw=Math.max(80,W-SAFE.r-215-px);py=by+15;}else if(compact){px=8+sL;pw=W-16-sL-SAFE.r;py=by+bxH+10;}else{pw=Math.min(340,W-40);px=(W-pw)/2;py=W<1000?by+bxH+12:18;}
+  ctx.fillStyle='rgba(255,248,230,.9)';rr(px-4,py-5,pw+8,22,11);ctx.fill();ctx.strokeStyle='#7a4a1d';ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle='#4fb8e0';rr(px,py,pw,12,6);ctx.fill();const prog=clamp(raft.idx/finishIdx,0,1);ctx.fillStyle='#38b000';rr(px,py,Math.max(12,pw*prog),12,6);ctx.fill();
+  for(const c of cps){const x=px+pw*c.i/finishIdx;ctx.fillStyle=c.on?'#2fbf4f':'#ff4d4d';ctx.fillRect(x-1.5,py-4,3,20);}
+  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🛶',px+pw*prog,py+5);ctx.fillText('🏁',px+pw-2,py+5);
+  // player cards
+  const n=players.length;let cw,chh,cy,x0;
+  if(compact){chh=36;cy=short?by+bxH+6:py+20;cw=(W-16-sL-SAFE.r-(n-1)*6)/n;x0=8+sL;}
+  else{chh=58;cw=Math.min(172,(W-20)/n-8);cy=H-chh-12;x0=(W-(n*(cw+8)-8))/2;}
+  for(const pl of players){
+    hudBox(x0,cy,cw,chh);ctx.fillStyle=pl.col;rr(x0,cy,7,chh,4);ctx.fill();
+    ctx.save();ctx.beginPath();ctx.rect(x0,cy,cw-2,chh);ctx.clip();
+    ctx.textAlign='left';ctx.textBaseline='top';ctx.font='900 '+(compact?12:14)+'px '+FONT;ctx.fillStyle='#3a2410';ctx.fillText((n>1?'P'+(pl.idx+1)+' ':'')+pl.ch.name,x0+12,cy+(compact?4:6));
+    const lbl=pl.super>0?t('sup'):pl.empty?t('empty'):t('gas');
+    if(!compact){ctx.font='bold 11px sans-serif';ctx.fillStyle='#8a5a2a';ctx.fillText(pl.keys.label,x0+12,cy+24);ctx.font='bold 10px '+FONT;ctx.fillStyle='#3a2410';ctx.textAlign='right';ctx.fillText(lbl,x0+cw-8,cy+26);}
+    ctx.restore();
+    const bw=cw-20,gy=compact?cy+21:cy+40,gh=compact?9:11;ctx.fillStyle='#e7d7b5';rr(x0+12,gy,bw,gh,5);ctx.fill();
+    const gc=pl.super>0?'#ffd166':pl.empty?'#ff6b6b':pl.gas<30?'#ffa94d':'#7bd34a';ctx.fillStyle=gc;rr(x0+12,gy,Math.max(6,bw*pl.gas/100),gh,5);ctx.fill();
+    if(compact&&(pl.super>0||pl.empty)){ctx.font='900 9px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#3a2410';ctx.fillText(lbl,x0+12+bw/2,gy+gh/2+0.5);}
+    x0+=cw+(compact?6:8);
+  }
+  // toast
+  if(toast){const tt=toast.life,a=tt<0.25?tt/0.25:tt>toast.max-0.4?(toast.max-tt)/0.4:1;ctx.globalAlpha=clamp(a,0,1);const fs=compact?14:19;ctx.font='900 '+fs+'px '+FONT;const bw=Math.min(600,W-20),lines=wrap(toast.t,bw-24);const lh=fs+5,bh=lines.length*lh+14,bx2=(W-bw)/2,byy=compact?cy+chh+10:(W<1000?py+26:58);
+    ctx.fillStyle='rgba(58,36,16,.85)';rr(bx2,byy,bw,bh,14);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='top';lines.forEach((l,i)=>ctx.fillText(l,W/2,byy+7+i*lh));ctx.globalAlpha=1;}
+  drawJoys();
+  if(state==='fall'){ctx.fillStyle='rgba(30,90,160,'+Math.min(0.45,fallT*0.6)+')';ctx.fillRect(0,0,W,H);const fs=Math.min(46,W/14);ctx.font='900 '+fs+'px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=7;ctx.strokeStyle='#123';ctx.strokeText(t('fallBig'),W/2,H/2-30);ctx.fillStyle='#fff';ctx.fillText(t('fallBig'),W/2,H/2-30);
+    ctx.font='bold '+(compact?15:17)+'px '+FONT;ctx.lineWidth=4;const fm=wrap(t(fallMsg),W-30);fm.forEach((l,i)=>{ctx.strokeText(l,W/2,H/2+14+i*20);ctx.fillText(l,W/2,H/2+14+i*20);});}
+  if(playTime<3&&state==='play'){ctx.globalAlpha=clamp(3-playTime,0,1);const fs=Math.min(56,W/9);ctx.font='900 '+fs+'px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=8;ctx.strokeStyle='#7a4a1d';const gy=compact?H*0.55:H*0.42;ctx.strokeText(t('go'),W/2,gy);ctx.fillStyle='#ffd166';ctx.fillText(t('go'),W/2,gy);ctx.globalAlpha=1;}
+}
+function wrap(txt,maxW){const cj=/^(zh|ja|th)$/.test(LANG);const toks=cj?Array.from(txt):txt.split(' '),sep=cj?'':' ',out=[];let line='';
+  for(const x of toks){const tst=line?line+sep+x:x;if(ctx.measureText(tst).width>maxW&&line){out.push(line);line=x;}else line=tst;}if(line)out.push(line);return out;}
+function hudBox(x,y,w,h){ctx.fillStyle='rgba(255,248,230,.92)';rr(x,y,w,h,12);ctx.fill();ctx.strokeStyle='#7a4a1d';ctx.lineWidth=3;ctx.stroke();}
+
+/* ================= LOOP ================= */
+let last=performance.now();
+function loop(now){const dt=Math.min(0.05,(now-last)/1000);last=now;try{update(dt);render();}catch(e){console.error(e);}requestAnimationFrame(loop);}
+
+/* ================= TOUCH JOYSTICK ================= */
+const jt={};// touchId -> {p,ox,oy,x,y}
+const JR=58;
+function joyZone(x){return numPlayers===1?0:(x<W/2?0:1);}
+function getJoy(p){for(const id in jt){const j=jt[id];if(j.p===p){const dx=j.x-j.ox,dy=j.y-j.oy;return{dx,dy,mag:Math.hypot(dx,dy)};}}return null;}
+const tl=document.getElementById('touch');
+tl.addEventListener('touchstart',e=>{e.preventDefault();initAudio();for(const tc of e.changedTouches){const p=joyZone(tc.clientX);if(p>=players.length)continue;let busy=false;for(const id in jt)if(jt[id].p===p)busy=true;if(busy)continue;jt[tc.identifier]={p,ox:tc.clientX,oy:tc.clientY,x:tc.clientX,y:tc.clientY};}},{passive:false});
+tl.addEventListener('touchmove',e=>{e.preventDefault();for(const tc of e.changedTouches){const j=jt[tc.identifier];if(!j)continue;j.x=tc.clientX;j.y=tc.clientY;const dx=j.x-j.ox,dy=j.y-j.oy,d=Math.hypot(dx,dy);if(d>JR*1.25){j.ox=j.x-dx/d*JR*1.25;j.oy=j.y-dy/d*JR*1.25;}}},{passive:false});
+const jEnd=e=>{e.preventDefault();for(const tc of e.changedTouches)delete jt[tc.identifier];};
+tl.addEventListener('touchend',jEnd,{passive:false});tl.addEventListener('touchcancel',jEnd,{passive:false});
+function clearJoys(){for(const id in jt)delete jt[id];}
+function drawJoys(){
+  if(!IS_TOUCH||state!=='play'&&state!=='fall')return;
+  const np=Math.min(players.length,2);
+  for(let p=0;p<np;p++){
+    let j=null;for(const id in jt)if(jt[id].p===p)j=jt[id];
+    const col=players[p].col;
+    if(j){const dx=j.x-j.ox,dy=j.y-j.oy,d=Math.hypot(dx,dy),k=d>JR?JR/d:1;
+      ctx.globalAlpha=0.35;circ(j.ox,j.oy,JR+6,'#000');ctx.globalAlpha=0.9;ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(j.ox,j.oy,JR+6,0,TAU);ctx.stroke();
+      ctx.beginPath();ctx.arc(j.ox,j.oy,26,0,TAU);ctx.setLineDash([4,5]);ctx.stroke();ctx.setLineDash([]);
+      const fart=d>26;circ(j.ox+dx*k,j.oy+dy*k,30,fart?col:'rgba(255,255,255,.85)');ctx.font='26px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(fart?'💨':'↻',j.ox+dx*k,j.oy+dy*k+1);ctx.globalAlpha=1;}
+    else{const cx=np===1?W/2:(p===0?W*0.22:W*0.78),cy=H-SAFE.b-Math.min(110,H*0.2);const a=0.35+0.15*Math.sin(T*3);
+      ctx.globalAlpha=a;ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.setLineDash([8,7]);ctx.beginPath();ctx.arc(cx,cy,JR,0,TAU);ctx.stroke();ctx.setLineDash([]);circ(cx,cy,24,col);
+      ctx.globalAlpha=Math.min(1,a+0.35);ctx.font='900 12px '+FONT;ctx.textAlign='center';ctx.textBaseline='top';ctx.lineWidth=4;ctx.strokeStyle='#3a2410';const tx=(np>1?'P'+(p+1)+' · ':'')+t('joy');const ls=wrap(tx,Math.min(220,W/np-20));const ty0=cy-JR-12-ls.length*15;ls.forEach((l,i)=>{ctx.strokeText(l,cx,ty0+i*15);ctx.fillStyle='#fff';ctx.fillText(l,cx,ty0+i*15);});ctx.globalAlpha=1;}
+  }
+}
+
+/* ================= UI ================= */
+const $=id=>document.getElementById(id);
+function showUI(s){
+  $('menu').classList.toggle('hide',s!=='menu');$('pause').classList.toggle('hide',s!=='pause');$('result').classList.toggle('hide',s!=='result');
+  $('topbtns').classList.toggle('hide',s==='menu');
+  $('touch').classList.toggle('hide',!(IS_TOUCH&&s==='play'));
+  clearJoys();
+}
+function pauseGame(){if(state!=='play'&&state!=='fall')return;state='pause';for(const pl of players){if(pl.farting){pl.farting=false;fartStop(pl);}}showUI('pause');}
+function resumeGame(){state='play';last=performance.now();showUI('play');}
+function toMenu(){for(const pl of players){if(pl.farting){pl.farting=false;fartStop(pl);}}players=[];state='menu';buildLevel(selLevel);menuS=200;showUI('menu');renderMenu();}
+$('bPause').onclick=()=>{SND.click();pauseGame();};
+$('pResume').onclick=()=>{SND.click();resumeGame();};
+$('pRestart').onclick=()=>{SND.click();startLevel(lvlIndex);};
+$('pMenu').onclick=()=>{SND.click();toMenu();};
+$('rRetry').onclick=()=>{SND.click();startLevel(lvlIndex);};
+$('rMenu').onclick=()=>{SND.click();toMenu();};
+$('rNext').onclick=()=>{SND.click();startLevel(Math.min(LEVELS.length-1,lvlIndex+1));};
+function updAudioBtns(){$('bMusic').style.opacity=musOn?1:0.4;$('bSfx').textContent=sfxOn?'🔊':'🔇';}
+$('bMusic').onclick=()=>{initAudio();musOn=!musOn;store('mus',musOn);if(musGain)musGain.gain.value=musOn?0.22:0;updAudioBtns();};
+$('bSfx').onclick=()=>{initAudio();sfxOn=!sfxOn;store('sfx',sfxOn);if(sfxGain)sfxGain.gain.value=sfxOn?1:0;updAudioBtns();};
+updAudioBtns();
+/* fullscreen */
+const de=document.documentElement,canFS=!!(de.requestFullscreen||de.webkitRequestFullscreen);
+function toggleFS(){initAudio();try{if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{const p=(de.requestFullscreen||de.webkitRequestFullscreen).call(de,{navigationUI:'hide'});if(p&&p.catch)p.catch(()=>{});}}catch(e){}setTimeout(resize,300);}
+if(!canFS){$('bFull').classList.add('hide');$('mFull').classList.add('hide');}
+$('bFull').onclick=toggleFS;$('mFull').onclick=toggleFS;
+/* auto pause when app goes to background */
+document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();if(AC&&AC.state==='running')AC.suspend();}else if(AC)AC.resume();});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>e.preventDefault());
+
+function showResult(st){
+  state='result';showUI('result');
+  $('rStars').textContent='★'.repeat(st)+'☆'.repeat(3-st);
+  const mm=Math.floor(playTime/60),ss=(playTime%60).toFixed(1).padStart(4,'0');
+  const best=(store('best')||{})['L'+lvlIndex];
+  let rows=`<tr><td>${t('time')}</td><td>${mm}:${ss}</td></tr><tr><td>${t('falls')}</td><td>${falls}</td></tr>`;
+  rows+=`<tr><td>${t('goal')}</td><td>${lvl.stars[0]}s / ${lvl.stars[1]}s</td></tr>`;
+  if(best)rows+=`<tr><td>${t('record')}</td><td>${Math.floor(best.t/60)}:${(best.t%60).toFixed(1).padStart(4,'0')}</td></tr>`;
+  for(const pl of players)rows+=`<tr><td style="color:${pl.col}">${pl.ch.name}</td><td>${tf('fartFor',{s:pl.fartTime.toFixed(1)})}</td></tr>`;
+  $('rTable').innerHTML=rows;
+  let king=players[0];for(const pl of players)if(pl.fartTime>king.fartTime)king=pl;
+  const lazy=players.reduce((a,b)=>b.fartTime<a.fartTime?b:a,players[0]);
+  $('rAward').innerHTML=players.length>1?`${t('king')}: <span style="color:${king.col}">${king.ch.name}</span> &nbsp;·&nbsp; ${t('lazy')}: <span style="color:${lazy.col}">${lazy.ch.name}</span>`:tf('soloKing',{n:king.ch.name,s:king.fartTime.toFixed(1)});
+  $('rNext').style.display=lvlIndex<LEVELS.length-1?'':'none';
+}
+
+function unlocked(i){if(i===0)return true;const b=store('best')||{};return !!b['L'+(i-1)];}
+function renderMenu(){
+  const pc=$('pcount');pc.innerHTML='';
+  for(let k=1;k<=4;k++){const b=document.createElement('button');b.className='btn'+(k===numPlayers?' on':'');b.textContent=tf('pn',{n:k});b.onclick=()=>{SND.click();numPlayers=k;store('np',k);renderMenu();};pc.appendChild(b);}
+  const sl=$('slots');sl.innerHTML='';
+  for(let k=0;k<numPlayers;k++){
+    const ch=CHARS[chosen[k]];const d=document.createElement('div');d.className='slot';
+    const keyLbl=IS_TOUCH&&k<2?'👆 '+t('touch'):(numPlayers===1?'A D + W · ← → + ↑':KEYSETS[k].label);
+    d.innerHTML=`<span class="pt" style="background:${PCOL[k]}">P${k+1}</span><div class="ar"><button data-d="-1">‹</button><canvas width="180" height="200"></canvas><button data-d="1">›</button></div><div class="nm">${ch.name}</div><div class="ds">${t('desc')[chosen[k]]}</div><div class="ky">${keyLbl}</div>`;
+    d.querySelectorAll('button').forEach(b=>b.onclick=()=>{SND.click();chosen[k]=(chosen[k]+(+b.dataset.d)+CHARS.length)%CHARS.length;store('chars',chosen);renderMenu();});
+    sl.appendChild(d);
+    const c=d.querySelector('canvas').getContext('2d');c.scale(2.9,2.9);drawChar(c,ch,31,64,0,1,0,0,false,PCOL[k],'');
+  }
+  if(IS_TOUCH&&numPlayers>2){const w=document.createElement('div');w.style.cssText='font-size:12px;color:#c0392b;font-weight:bold;width:100%';w.textContent=t('need34');sl.appendChild(w);}
+  const lv=$('levels');lv.innerHTML='';const best=store('best')||{};
+  if(!unlocked(selLevel))selLevel=0;
+  LEVELS.forEach((L,i)=>{const b=document.createElement('button');const ok=unlocked(i);b.className='btn lv'+(i===selLevel?' on':'')+(ok?'':' locked');const bs=best['L'+i];b.innerHTML=ok?`${i+1}. ${t('lv')[i][0]}<small>${t('lv')[i][1]}</small><span class="stars">${bs?'★'.repeat(bs.s)+'☆'.repeat(3-bs.s):'☆☆☆'}</span>`:`🔒 ${i+1}. ${t('lv')[i][0]}<small>${t('locked')}</small>`;b.onclick=()=>{if(!ok){SND.empty();return;}SND.click();selLevel=i;store('sel',i);buildLevel(i);menuS=200;renderMenu();};lv.appendChild(b);});
+}
+$('play').onclick=()=>{initAudio();SND.click();startLevel(selLevel);if(IS_TOUCH&&numPlayers===2&&H>W)setTimeout(()=>showToast(t('landscape'),4),3200);};
+
+/* ================= LANGUAGE ================= */
+function detectLang(){
+  try{const q=new URLSearchParams(location.search).get('lang');if(q&&I18N[q])return q;}catch(e){}
+  const saved=store('lang');if(saved&&I18N[saved])return saved;
+  const list=navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||'en'];
+  for(const l of list){const c=(l||'').toLowerCase();if(c.startsWith('fil')||c.startsWith('tl'))return 'fil';const p=c.split('-')[0];if(p==='in')return 'id';if(I18N[p])return p;}
+  return 'en';
+}
+function applyLang(){
+  document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  document.title='Fart Raft HiHi';
+  $('logo').innerHTML=t('title')+' <span>HiHi</span>';$('tag').textContent=t('tag');
+  $('lblPlayers').textContent=t('players');$('lblChars').textContent=t('chars');$('lblLevels').textContent=t('levels');
+  $('play').textContent=t('play');$('howSum').textContent=t('howto');$('howList').innerHTML=t('how').map(x=>'<li>'+x+'</li>').join('');
+  $('pTitle').textContent=t('paused');$('pResume').textContent=t('resume');$('pRestart').textContent=t('restart');$('pMenu').textContent=t('menu');
+  $('rTitle').textContent=t('finish');$('rRetry').textContent=t('retry');$('rNext').textContent=t('next');$('rMenu').textContent=t('menu');
+  $('bFull').title=$('mFull').title=t('full');$('langSel').title=t('lang');$('langSel').value=LANG;
+  renderMenu();
+}
+const LANG_ORDER=['vi','id','en','pt','es','ms','th','fil','zh','ja','ko','hi','ar','tr','ru','fr','de','it'];
+const LANG_COUNTRY={vi:'Việt Nam',id:'Indonesia',en:'English',pt:'Brasil',es:'España / Latam',ms:'Malaysia',th:'Thailand',fil:'Philippines',zh:'China',ja:'Japan',ko:'Korea',hi:'India',ar:'Arabic',tr:'Türkiye',ru:'Russia',fr:'France',de:'Deutschland',it:'Italia'};
+(function(){const sel=$('langSel');for(const k of LANG_ORDER){if(!I18N[k])continue;const o=document.createElement('option');o.value=k;o.textContent=I18N[k].name+(k==='en'?'':' — '+LANG_COUNTRY[k]);sel.appendChild(o);}
+  sel.onchange=()=>{LANG=sel.value;store('lang',LANG);applyLang();SND.click();};})();
+LANG=detectLang();
+
+/* boot */
+buildLevel(0);{const p=course[idxS(200)];cam.x=p.x;cam.y=p.y;}
+if(selLevel&&LEVELS[selLevel])buildLevel(selLevel);
+applyLang();showUI('menu');requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
